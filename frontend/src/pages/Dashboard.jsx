@@ -10,6 +10,9 @@ const DashboardPage = () => {
   const [totalCotizaciones, setTotalCotizaciones] = useState(0);
   const [alertas, setAlertas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [totalRepuestos, setTotalRepuestos] = useState(0);
+  const [totalEntradas, setTotalEntradas] = useState(0);
+  const [totalSalidas, setTotalSalidas] = useState(0);
 
   const token = localStorage.getItem("token");
 
@@ -26,15 +29,25 @@ const DashboardPage = () => {
           },
         };
 
-        const [alertasRes, cotizacionesRes] = await Promise.all([
+        const [alertasRes, cotizacionesRes, repuestosRes, entradasRes, salidasRes] = await Promise.all([
           api.get("/alerts/products/:id", config), 
           api.get("/cotizaciones", config),
+          api.get("/repuestos", config),
+          api.get("/entradas", config),
+          api.get("/salidas", config),
+          api.get("/alerts", config)
         ]);
 
         const alertasActivas = alertasRes.data;
         const cotizaciones = cotizacionesRes.data;
+        const repuestos = repuestosRes.data;
+        const entradas = entradasRes.data;
+        const salidas = salidasRes.data;
 
         setTotalCotizaciones(cotizaciones.length);
+        setTotalRepuestos(repuestos.length);
+        setTotalEntradas(entradas.length);
+        setTotalSalidas(salidas.length);
         setAlertas(alertasActivas.slice(0, 5)); // últimas 5 alertas
       } catch (error) {
         console.error(

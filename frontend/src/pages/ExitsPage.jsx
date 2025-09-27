@@ -22,7 +22,6 @@ const EntryFormPage = () => {
     destino: "",
     factura: "",
     observacion: "",
-    fecha: "",
   });
 
   const toggleSidebar = () => {
