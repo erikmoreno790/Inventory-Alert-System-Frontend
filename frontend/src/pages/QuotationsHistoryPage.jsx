@@ -105,7 +105,7 @@ const QuotationsHistoryPage = () => {
       }
 
       if (end < totalPages - 1) {
-        pages.push("...");
+        pages.push("....");
       }
 
       pages.push(totalPages);
