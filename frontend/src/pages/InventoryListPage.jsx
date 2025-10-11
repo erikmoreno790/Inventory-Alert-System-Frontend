@@ -61,6 +61,68 @@ const InventoryListPage = () => {
     });
   };
 
+  // 🔹 Paginación
+  const totalPages = Math.ceil(filteredQuotations.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentQuotations = filteredQuotations.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
+
+  // 🔹 Función para renderizar paginación truncada sin duplicados
+  const renderPagination = () => {
+    const pages = [];
+    const maxVisible = 5;
+
+    if (totalPages <= maxVisible + 2) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1);
+
+      let start = Math.max(2, currentPage - 2);
+      let end = Math.min(totalPages - 1, currentPage + 2);
+
+      if (start > 2) {
+        pages.push("...");
+      }
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (end < totalPages - 1) {
+        pages.push("....");
+      }
+
+      pages.push(totalPages);
+    }
+
+    // ✅ Quitar duplicados usando filter
+    const uniquePages = pages.filter(
+      (p, index) => pages.indexOf(p) === index
+    );
+
+    return uniquePages.map((p, idx) =>
+      p === "..." ? (
+        <span key={`dots-${idx}`} className="px-3 py-1">
+          ...
+        </span>
+      ) : (
+        <button
+          key={`page-${p}`}
+          onClick={() => setCurrentPage(p)}
+          className={`px-3 py-1 border rounded ${
+            currentPage === p ? "bg-blue-500 text-white" : "bg-white"
+          }`}
+        >
+          {p}
+        </button>
+      )
+    );
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -183,6 +245,28 @@ const InventoryListPage = () => {
               </div>
             )}
           </div>
+          {/* Paginación truncada */}
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-4 gap-2">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(currentPage - 1)}
+                className="px-3 py-1 border rounded disabled:opacity-50"
+              >
+                Anterior
+              </button>
+
+              {renderPagination()}
+
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(currentPage + 1)}
+                className="px-3 py-1 border rounded disabled:opacity-50"
+              >
+                Siguiente
+              </button>
+            </div>
+          )}
         </main>
       </div>
     </div>
