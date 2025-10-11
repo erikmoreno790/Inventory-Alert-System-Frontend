@@ -10,18 +10,18 @@ const InventoryListPage = () => {
   const [inventario, setInventario] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Filtros individuales
+  // Filtros
   const [filtroCategoria, setFiltroCategoria] = useState("");
   const [filtroNombre, setFiltroNombre] = useState("");
   const [filtroReferencia, setFiltroReferencia] = useState("");
+
+  // Paginación
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 10;
 
   const token = localStorage.getItem("token");
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   useEffect(() => {
     const fetchInventario = async () => {
@@ -42,36 +42,34 @@ const InventoryListPage = () => {
     fetchInventario();
   }, [token]);
 
-  // 🔍 Función de filtrado
-  const handleFiltrado = () => {
-    return inventario.filter((item) => {
-      const categoriaMatch = item.categoria
-        .toLowerCase()
-        .includes(filtroCategoria.toLowerCase());
-      const nombreMatch = item.nombre
-        .toLowerCase()
-        .includes(filtroNombre.toLowerCase());
-      const referenciaMatch = item.referencia
-        ? item.referencia.toLowerCase().includes(filtroReferencia.toLowerCase())
-        : false;
+  // 🔍 Filtrado
+  const filteredRepuestos = inventario.filter((item) => {
+    const categoriaMatch = item.categoria
+      .toLowerCase()
+      .includes(filtroCategoria.toLowerCase());
+    const nombreMatch = item.nombre
+      .toLowerCase()
+      .includes(filtroNombre.toLowerCase());
+    const referenciaMatch = item.referencia
+      ? item.referencia.toLowerCase().includes(filtroReferencia.toLowerCase())
+      : false;
 
-      return (
-        (!filtroCategoria || categoriaMatch) &&
-        (!filtroNombre || nombreMatch) &&
-        (!filtroReferencia || referenciaMatch)
-      );
-    });
-  };
+    return (
+      (!filtroCategoria || categoriaMatch) &&
+      (!filtroNombre || nombreMatch) &&
+      (!filtroReferencia || referenciaMatch)
+    );
+  });
 
   // 🔹 Paginación
-  const totalPages = Math.ceil(filteredQuotations.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredRepuestos.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentQuotations = filteredQuotations.slice(
+  const currentRepuestos = filteredRepuestos.slice(
     startIndex,
     startIndex + itemsPerPage
   );
 
-  // 🔹 Función para renderizar paginación truncada sin duplicados
+  // 🔹 Renderizado truncado
   const renderPagination = () => {
     const pages = [];
     const maxVisible = 5;
@@ -95,16 +93,14 @@ const InventoryListPage = () => {
       }
 
       if (end < totalPages - 1) {
-        pages.push("....");
+        pages.push("...");
       }
 
       pages.push(totalPages);
     }
 
-    // ✅ Quitar duplicados usando filter
-    const uniquePages = pages.filter(
-      (p, index) => pages.indexOf(p) === index
-    );
+    // Quitar duplicados
+    const uniquePages = pages.filter((p, index) => pages.indexOf(p) === index);
 
     return uniquePages.map((p, idx) =>
       p === "..." ? (
@@ -155,7 +151,10 @@ const InventoryListPage = () => {
                   type="text"
                   placeholder="Filtrar por categoría..."
                   value={filtroCategoria}
-                  onChange={(e) => setFiltroCategoria(e.target.value)}
+                  onChange={(e) => {
+                    setFiltroCategoria(e.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="w-full pl-10 pr-4 py-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -165,7 +164,10 @@ const InventoryListPage = () => {
                   type="text"
                   placeholder="Filtrar por nombre..."
                   value={filtroNombre}
-                  onChange={(e) => setFiltroNombre(e.target.value)}
+                  onChange={(e) => {
+                    setFiltroNombre(e.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="w-full pl-10 pr-4 py-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -175,7 +177,10 @@ const InventoryListPage = () => {
                   type="text"
                   placeholder="Filtrar por referencia..."
                   value={filtroReferencia}
-                  onChange={(e) => setFiltroReferencia(e.target.value)}
+                  onChange={(e) => {
+                    setFiltroReferencia(e.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="w-full pl-10 pr-4 py-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -198,7 +203,7 @@ const InventoryListPage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {handleFiltrado().map((item) => (
+                    {currentRepuestos.map((item) => (
                       <tr key={item.id} className="border-t hover:bg-gray-50">
                         <td className="px-4 py-2">{item.nombre}</td>
                         <td className="px-4 py-2">{item.categoria}</td>
@@ -232,7 +237,7 @@ const InventoryListPage = () => {
                         </td>
                       </tr>
                     ))}
-                    {handleFiltrado().length === 0 && (
+                    {currentRepuestos.length === 0 && (
                       <tr>
                         <td
                           colSpan="6"
@@ -244,31 +249,32 @@ const InventoryListPage = () => {
                     )}
                   </tbody>
                 </table>
+
+                {/* 🔹 Paginación truncada */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center mt-4 gap-2">
+                    <button
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                      className="px-3 py-1 border rounded disabled:opacity-50"
+                    >
+                      Anterior
+                    </button>
+
+                    {renderPagination()}
+
+                    <button
+                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                      className="px-3 py-1 border rounded disabled:opacity-50"
+                    >
+                      Siguiente
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
-          {/* Paginación truncada */}
-          {totalPages > 1 && (
-            <div className="flex justify-center mt-4 gap-2">
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(currentPage - 1)}
-                className="px-3 py-1 border rounded disabled:opacity-50"
-              >
-                Anterior
-              </button>
-
-              {renderPagination()}
-
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(currentPage + 1)}
-                className="px-3 py-1 border rounded disabled:opacity-50"
-              >
-                Siguiente
-              </button>
-            </div>
-          )}
         </main>
       </div>
     </div>
