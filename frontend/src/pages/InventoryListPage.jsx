@@ -8,8 +8,12 @@ import TopNavbar from "../components/TopNavbar";
 const InventoryListPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [inventario, setInventario] = useState([]);
-  const [busqueda, setBusqueda] = useState("");
   const [loading, setLoading] = useState(true);
+
+  // Filtros individuales
+  const [filtroCategoria, setFiltroCategoria] = useState("");
+  const [filtroNombre, setFiltroNombre] = useState("");
+  const [filtroReferencia, setFiltroReferencia] = useState("");
 
   const token = localStorage.getItem("token");
 
@@ -21,12 +25,9 @@ const InventoryListPage = () => {
     const fetchInventario = async () => {
       try {
         const response = await api.get("/repuestos", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-        console.log(response.data);
-        setInventario(response.data); // Ajusta si tu backend devuelve { data: [] } u otro formato
+        setInventario(response.data);
       } catch (error) {
         console.error(
           "Error al obtener los productos:",
@@ -36,16 +37,28 @@ const InventoryListPage = () => {
         setLoading(false);
       }
     };
-
     fetchInventario();
   }, [token]);
 
+  // 🔍 Función de filtrado
   const handleFiltrado = () => {
-    return inventario.filter(
-      (item) =>
-        item.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-        item.categoria.toLowerCase().includes(busqueda.toLowerCase())
-    );
+    return inventario.filter((item) => {
+      const categoriaMatch = item.categoria
+        .toLowerCase()
+        .includes(filtroCategoria.toLowerCase());
+      const nombreMatch = item.nombre
+        .toLowerCase()
+        .includes(filtroNombre.toLowerCase());
+      const referenciaMatch = item.referencia
+        ? item.referencia.toLowerCase().includes(filtroReferencia.toLowerCase())
+        : false;
+
+      return (
+        (!filtroCategoria || categoriaMatch) &&
+        (!filtroNombre || nombreMatch) &&
+        (!filtroReferencia || referenciaMatch)
+      );
+    });
   };
 
   return (
@@ -69,16 +82,42 @@ const InventoryListPage = () => {
                 + Nuevo Repuesto
               </Link>
             </div>
-            <div className="relative mb-4 max-w-md">
-              <Search className="absolute left-3 top-2.5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Buscar por nombre o categoría..."
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+
+            {/* --- Filtros --- */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="relative">
+                <Search className="absolute left-3 top-2.5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Filtrar por categoría..."
+                  value={filtroCategoria}
+                  onChange={(e) => setFiltroCategoria(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="relative">
+                <Search className="absolute left-3 top-2.5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Filtrar por nombre..."
+                  value={filtroNombre}
+                  onChange={(e) => setFiltroNombre(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="relative">
+                <Search className="absolute left-3 top-2.5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Filtrar por referencia..."
+                  value={filtroReferencia}
+                  onChange={(e) => setFiltroReferencia(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
+
+            {/* --- Tabla --- */}
             {loading ? (
               <div className="text-center text-gray-600">Cargando...</div>
             ) : (
@@ -88,6 +127,7 @@ const InventoryListPage = () => {
                     <tr>
                       <th className="text-left px-4 py-2">Nombre</th>
                       <th className="text-left px-4 py-2">Categoría</th>
+                      <th className="text-left px-4 py-2">Referencia</th>
                       <th className="text-center px-4 py-2">Cantidad Actual</th>
                       <th className="text-center px-4 py-2">Cantidad Mínima</th>
                       <th className="text-center px-4 py-2">Acciones</th>
@@ -98,6 +138,7 @@ const InventoryListPage = () => {
                       <tr key={item.id} className="border-t hover:bg-gray-50">
                         <td className="px-4 py-2">{item.nombre}</td>
                         <td className="px-4 py-2">{item.categoria}</td>
+                        <td className="px-4 py-2">{item.referencia}</td>
                         <td
                           className={`px-4 py-2 text-center ${
                             item.stock < item.stock_minimo
@@ -130,7 +171,7 @@ const InventoryListPage = () => {
                     {handleFiltrado().length === 0 && (
                       <tr>
                         <td
-                          colSpan="5"
+                          colSpan="6"
                           className="text-center py-4 text-gray-500"
                         >
                           No se encontraron repuestos.
