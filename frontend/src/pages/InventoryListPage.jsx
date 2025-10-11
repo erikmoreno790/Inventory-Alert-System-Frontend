@@ -14,6 +14,8 @@ const InventoryListPage = () => {
   const [filtroCategoria, setFiltroCategoria] = useState("");
   const [filtroNombre, setFiltroNombre] = useState("");
   const [filtroReferencia, setFiltroReferencia] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
 
   const token = localStorage.getItem("token");
 
