@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import TopNavbar from "../components/TopNavbar";
-import api from "../api"; // Cliente API ya configurado
+import api from "../api";
+import AlertMessage from "../components/AlertMessage";
 
 const NuevaCotizacionPage = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [alert, setAlert] = useState({ type: "", message: "", show: false });
 
   const token = localStorage.getItem("token");
 
@@ -129,52 +131,66 @@ const NuevaCotizacionPage = () => {
   };
 
   // 🔹 Al enviar, limpiar el borrador
-const handleSubmit = async () => {
-  if (!cotizacion.nombre_cliente.trim() || !cotizacion.placa.trim()) {
-    alert("El nombre del cliente y la placa son obligatorios.");
-    return;
-  }
+  const handleSubmit = async () => {
+    if (!cotizacion.nombre_cliente.trim() || !cotizacion.placa.trim()) {
+      setAlert({
+        type: "error",
+        message: "Por favor completa los campos obligatorios",
+        show: true,
+      });
+      return;
+    }
 
-  try {
-    // 👉 Recalcular totales antes de enviar
-    const { items, subtotal, descuento, total } = calcularTotales();
+    try {
+      // 👉 Recalcular totales antes de enviar
+      const { items, subtotal, descuento, total } = calcularTotales();
 
-    // 👉 Crear un objeto con los totales incluidos
-    const cotizacionConTotales = {
-      ...cotizacion,
-      items,       // items con sub_total
-      subtotal,
-      descuento,
-      total,
-    };
+      // 👉 Crear un objeto con los totales incluidos
+      const cotizacionConTotales = {
+        ...cotizacion,
+        items, // items con sub_total
+        subtotal,
+        descuento,
+        total,
+      };
 
-    const formData = new FormData();
-    Object.entries(cotizacionConTotales).forEach(([key, value]) => {
-      if (key === "items") {
-        formData.append("items", JSON.stringify(value));
-      } else {
-        formData.append(key, value);
-      }
-    });
+      const formData = new FormData();
+      Object.entries(cotizacionConTotales).forEach(([key, value]) => {
+        if (key === "items") {
+          formData.append("items", JSON.stringify(value));
+        } else {
+          formData.append(key, value);
+        }
+      });
 
-    imagenes.forEach((img) => formData.append("imagenes", img));
+      imagenes.forEach((img) => formData.append("imagenes", img));
 
-    await api.post("/cotizaciones", formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      },
-    });
+      await api.post("/cotizaciones", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-    alert("¡Cotización creada exitosamente!");
-    localStorage.removeItem("draftCotizacion"); // ✅ limpiar
-    navigate("/historial-cotizaciones");
-  } catch (error) {
-    console.error(error);
-    alert("Error al guardar la cotización.");
-  }
-};
-
+      setAlert({
+        type: "success",
+        message: "Cotización guardada exitosamente",
+        show: true,
+      });
+      // 👉 Limpiar formulario
+      setCotizacion(initialCotizacion);
+      setImagenes([]);
+      localStorage.removeItem("draftCotizacion"); // ✅ limpiar
+      navigate("/historial-cotizaciones");
+    } catch (error) {
+      console.error(error);
+      setAlert({
+        type: "error",
+        message: "Error al guardar la cotización",
+        show: true,
+      });
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -485,6 +501,13 @@ const handleSubmit = async () => {
           </div>
         </main>
       </div>
+      {alert.show && (
+        <AlertMessage
+          type={alert.type}
+          message={alert.message}
+          onClose={() => setAlert({ ...alert, show: false })}
+        />
+      )}
     </div>
   );
 };

@@ -3,12 +3,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import TopNavbar from "../components/TopNavbar";
 import api from "../api";
+import AlertMessage from "../components/AlertMessage";
 
-const InventoryFormPage = () => {
+const EditRepuestoPage = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { id } = useParams();
   const token = localStorage.getItem("token");
+  const [alert, setAlert] = useState({ show: false, type: "", message: "" });
 
   const [form, setForm] = useState({
     nombre: "",
@@ -19,109 +21,84 @@ const InventoryFormPage = () => {
     stock: "",
     stock_minimo: "",
     precio_unitario: "",
-    unidad_medida: "unidad",
-    estado: "disponible",
+    unidad_medida: "",
+    estado: "",
     referencia: "",
     ubicacion: "",
   });
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
-  const categorias = [
-    "Amortiguador",
-    "Disco",
-    "Campana",
-    "Bomba de Freno",
-    "Correa",
-    "Pastilla de Freno",
-    "Manguera de Freno",
-    "Bujía",
-    "Retenedor",
-    "Banda de Freno",
-    "Guardapolvo",
-    "Punta de eje",
-    "Cilindro",
-    "Booster",
-    "Guaya",
-  ];
-
-  // 🔹 Si hay ID, cargar datos del producto para edición
+  // 🔹 Cargar datos del repuesto existente
   useEffect(() => {
     if (!id) return;
 
-    const fetchProducto = async () => {
+    const fetchRepuesto = async () => {
       try {
         const config = { headers: { Authorization: `Bearer ${token}` } };
-        const res = await api.get(`repuestos/${id}`, config);
-        setForm({
-          nombre: res.data.nombre || "",
-          descripcion: res.data.descripcion || "",
-          categoria: res.data.categoria || "",
-          marca: res.data.marca || "",
-          compatibilidad: res.data.compatibilidad || "",
-          proveedor: res.data.proveedor || "",
-          stock: res.data.stock || "",
-          stock_minimo: res.data.stock_minimo || "",
-          precio_unitario: res.data.precio_unitario || "",
-          unidad_medida: res.data.unidad_medida || "unidad",
-          estado: res.data.estado || "disponible",
-          referencia: res.data.referencia || "",
-          ubicacion: res.data.ubicacion || "",
-        });
+        const res = await api.get(`/repuestos/${id}`, config);
+        setForm(res.data);
       } catch (err) {
-        console.error("Error cargando producto:", err);
+        console.error("Error cargando repuesto:", err);
       }
     };
 
-    fetchProducto();
+    fetchRepuesto();
   }, [id, token]);
 
+  // 🔹 Manejar cambios
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // 🔹 Actualizar repuesto
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    };
-
     try {
-      if (id) {
-        await api.put(`/repuestos/${id}`, form, config);
-      } else {
-        await api.post("/repuestos", form, config);
-      }
-      navigate("/inventario");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      };
+      //Salida por consola para ver datos json que se envian
+      console.log("Datos enviados:", form);
+
+      await api.put(`/repuestos/${id}`, form, config);
+      setAlert({
+        show: true,
+        type: "success",
+        message: "Repuesto actualizado correctamente",
+      });
+      setTimeout(() => navigate("/inventario"), 2000);
     } catch (err) {
       console.error(
-        "Error al guardar el repuesto:",
+        "Error actualizando repuesto:",
         err.response?.data || err.message
       );
+      setAlert({
+        show: true,
+        type: "error",
+        message: "Error al actualizar el repuesto",
+      });
     }
   };
+
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   return (
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div
-        className={`flex-1 ${
+        className={`flex-1 transition-all duration-300 ${
           sidebarOpen ? "ml-64" : ""
-        } transition-all duration-300`}
+        }`}
       >
         <TopNavbar onToggleSidebar={toggleSidebar} />
-        <main className="p-6 max-w-5xl mx-auto">
+        <main className="p-6 max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold text-gray-800">
-              {id ? "Editar Repuesto" : "Nuevo Repuesto"}
+              Editar Repuesto
             </h2>
             <button
               onClick={() => navigate(-1)}
@@ -169,20 +146,14 @@ const InventoryFormPage = () => {
               <label className="block text-gray-700 mb-2 font-medium">
                 Categoría *
               </label>
-              <select
+              <input
+                type="text"
                 name="categoria"
                 value={form.categoria}
                 onChange={handleChange}
                 required
                 className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Seleccione una categoría</option>
-                {categorias.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
 
             {/* Marca */}
@@ -231,67 +202,32 @@ const InventoryFormPage = () => {
             {/* Stock */}
             <div>
               <label className="block text-gray-700 mb-2 font-medium">
-                Stock actual *
+                Stock actual
               </label>
               <input
                 type="number"
                 name="stock"
                 value={form.stock}
                 onChange={handleChange}
-                required
                 min={0}
                 className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
-            {/* Stock mínimo */}
+            {/* Precio */}
             <div>
               <label className="block text-gray-700 mb-2 font-medium">
-                Stock mínimo
-              </label>
-              <input
-                type="number"
-                name="stock_minimo"
-                value={form.stock_minimo}
-                onChange={handleChange}
-                min={0}
-                className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Precio unitario */}
-            <div>
-              <label className="block text-gray-700 mb-2 font-medium">
-                Precio unitario *
+                Precio unitario
               </label>
               <input
                 type="number"
                 name="precio_unitario"
                 value={form.precio_unitario}
                 onChange={handleChange}
-                required
                 min={0}
                 step="0.01"
                 className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
               />
-            </div>
-
-            {/* Unidad de medida */}
-            <div>
-              <label className="block text-gray-700 mb-2 font-medium">
-                Unidad de medida
-              </label>
-              <select
-                name="unidad_medida"
-                value={form.unidad_medida}
-                onChange={handleChange}
-                className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="unidad">Unidad</option>
-                <option value="par">Par</option>
-                <option value="juego">Juego</option>
-                <option value="kit">Kit</option>
-              </select>
             </div>
 
             {/* Estado */}
@@ -326,20 +262,28 @@ const InventoryFormPage = () => {
               />
             </div>
 
-            {/* Botón */}
+            {/* Botón Guardar */}
             <div className="md:col-span-2 flex justify-end">
               <button
                 type="submit"
                 className="bg-blue-600 text-white px-6 py-2 rounded-lg shadow hover:bg-blue-700 transition"
               >
-                {id ? "Actualizar" : "Guardar"}
+                Guardar Cambios
               </button>
             </div>
           </form>
         </main>
       </div>
+      {/*Div centrado en la parte superior */}
+      {alert.show && (
+        <AlertMessage
+          type={alert.type}
+          message={alert.message}
+          onClose={() => setAlert({ show: false })}
+        />
+      )}
     </div>
   );
 };
 
-export default InventoryFormPage;
+export default EditRepuestoPage;

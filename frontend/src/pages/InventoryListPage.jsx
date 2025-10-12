@@ -199,7 +199,6 @@ const InventoryListPage = () => {
                       <th className="text-left px-4 py-2">Categoría</th>
                       <th className="text-left px-4 py-2">Referencia</th>
                       <th className="text-center px-4 py-2">Cantidad Actual</th>
-                      <th className="text-center px-4 py-2">Cantidad Mínima</th>
                       <th className="text-center px-4 py-2">Acciones</th>
                     </tr>
                   </thead>
@@ -221,26 +220,28 @@ const InventoryListPage = () => {
                         >
                           {item.stock}
                         </td>
+
                         <td className="px-4 py-2 text-center">
-                          {item.stock_minimo}
-                        </td>
-                        <td className="px-4 py-2 text-center">
-                          <button
-                            onClick={() =>
-                              navigate(`/inventario/${item.repuesto_id}`)
-                            }
-                            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-200"
-                          >
-                            Ver
-                          </button>
-                          <button
-                            onClick={() =>
-                              navigate(`/inventario/editar/${item.repuesto_id}`)
-                            }
-                            className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition duration-200 ml-2"
-                          >
-                            Editar
-                          </button>
+                          <div className="flex justify-center gap-2">
+                            <button
+                              onClick={() =>
+                                navigate(`/inventario/${item.repuesto_id}`)
+                              }
+                              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-200"
+                            >
+                              Ver
+                            </button>
+                            <button
+                              onClick={() =>
+                                navigate(
+                                  `/inventario/editar/${item.repuesto_id}`
+                                )
+                              }
+                              className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition duration-200 ml-2"
+                            >
+                              Editar
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
