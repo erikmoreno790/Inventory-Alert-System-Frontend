@@ -33,9 +33,9 @@ const RepuestoDetailPage = () => {
       try {
         const config = { headers: { Authorization: `Bearer ${token}` } };
         const [prodRes, movRes, alertasRes] = await Promise.all([
-          api.get(`/products/${id}`, config),
-          api.get(`/products/movimientos/${id}`, config),
-          api.get(`/alerts/product/${id}`, config),
+          api.get(`/repuestos/${id}`, config),
+          //api.get(`/repuestos/movimientos/${id}`, config),
+          // api.get(`/alerts/product/${id}`, config),
         ]);
         setProducto(prodRes.data);
         setMovimientos(movRes.data);
@@ -80,7 +80,9 @@ const RepuestoDetailPage = () => {
       {/* Sidebar y Navbar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div
-        className={`flex-1 ${sidebarOpen ? "ml-64" : ""} transition-all duration-300`}
+        className={`flex-1 ${
+          sidebarOpen ? "ml-64" : ""
+        } transition-all duration-300`}
       >
         <TopNavbar onToggleSidebar={toggleSidebar} />
         <main>
@@ -130,7 +132,7 @@ const RepuestoDetailPage = () => {
                 <strong>Categoría:</strong> {producto.categoria}
               </p>
               <p>
-                <strong>Proveedor:</strong> {producto.proveedor || "No especificado"}
+                <strong>Marca:</strong> {producto.marca || "No especificado"}
               </p>
               <p>
                 <strong>Stock actual:</strong>{" "}
@@ -148,14 +150,23 @@ const RepuestoDetailPage = () => {
                 <strong>Stock mínimo:</strong> {producto.stock_minimo}
               </p>
               <p>
-                <strong>Ubicación:</strong> {producto.ubicacion || "No asignada"}
+                <strong>Ubicación:</strong>{" "}
+                {producto.ubicacion || "No asignada"}
               </p>
               <p>
-                <strong>Código:</strong> {producto.codigo || "N/A"}
+                <strong>Precio:</strong>{" "}
+                {/* Formatear precio_unitario a estilo con punto de mil ej: $ 128.500 sin decimales*/}
+                {parseFloat(producto.precio_unitario)
+                  .toFixed(0)
+                  .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                  ? `$ ${parseFloat(producto.precio_unitario)
+                      .toFixed(0)
+                      .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`
+                  : "No especificado"}
               </p>
               <p className="md:col-span-2">
-                <strong>Descripción:</strong>{" "}
-                {producto.descripcion || "Sin descripción disponible"}
+                <strong>Referencia:</strong>{" "}
+                {producto.referencia || "Sin referencia disponible"}
               </p>
             </div>
 
@@ -208,7 +219,9 @@ const RepuestoDetailPage = () => {
                             {new Date(mov.fecha).toLocaleDateString()}
                           </td>
                           <td className="px-4 py-2">{mov.usuario || "N/A"}</td>
-                          <td className="px-4 py-2">{mov.observacion || "—"}</td>
+                          <td className="px-4 py-2">
+                            {mov.observacion || "—"}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
