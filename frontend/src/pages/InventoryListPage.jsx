@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import api from "../api";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import TopNavbar from "../components/TopNavbar";
@@ -9,6 +9,7 @@ const InventoryListPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [inventario, setInventario] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   // Filtros
   const [filtroCategoria, setFiltroCategoria] = useState("");
@@ -135,12 +136,12 @@ const InventoryListPage = () => {
           <div className="p-6">
             <div className="flex justify-between items-center mb-4">
               <h1 className="text-2xl font-bold">Inventario de Repuestos</h1>
-              <Link
-                to="/inventario/nuevo"
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+              <button
+                onClick={() => navigate("/inventario/nuevo")}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
               >
-                + Nuevo Repuesto
-              </Link>
+                Agregar Repuesto
+              </button>
             </div>
 
             {/* --- Filtros --- */}
@@ -198,13 +199,15 @@ const InventoryListPage = () => {
                       <th className="text-left px-4 py-2">Categoría</th>
                       <th className="text-left px-4 py-2">Referencia</th>
                       <th className="text-center px-4 py-2">Cantidad Actual</th>
-                      <th className="text-center px-4 py-2">Cantidad Mínima</th>
                       <th className="text-center px-4 py-2">Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
                     {currentRepuestos.map((item) => (
-                      <tr key={item.repuesto_id} className="border-t hover:bg-gray-50">
+                      <tr
+                        key={item.repuesto_id}
+                        className="border-t hover:bg-gray-50"
+                      >
                         <td className="px-4 py-2">{item.nombre}</td>
                         <td className="px-4 py-2">{item.categoria}</td>
                         <td className="px-4 py-2">{item.referencia}</td>
@@ -217,23 +220,28 @@ const InventoryListPage = () => {
                         >
                           {item.stock}
                         </td>
+
                         <td className="px-4 py-2 text-center">
-                          {item.stock_minimo}
-                        </td>
-                        <td className="px-4 py-2 text-center">
-                          <Link
-                            to={`/inventario/${item.repuesto_id}`}
-                            className="text-blue-600 hover:underline text-sm"
-                          >
-                            Ver
-                          </Link>{" "}
-                          |{" "}
-                          <Link
-                            to={`/inventario/editar/${item.repuesto_id}`}
-                            className="text-green-600 hover:underline text-sm"
-                          >
-                            Editar
-                          </Link>
+                          <div className="flex justify-center gap-2">
+                            <button
+                              onClick={() =>
+                                navigate(`/inventario/${item.repuesto_id}`)
+                              }
+                              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-200"
+                            >
+                              Ver
+                            </button>
+                            <button
+                              onClick={() =>
+                                navigate(
+                                  `/inventario/editar/${item.repuesto_id}`
+                                )
+                              }
+                              className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition duration-200 ml-2"
+                            >
+                              Editar
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

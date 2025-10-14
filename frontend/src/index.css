@@ -1,3 +1,22 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
 @import "tailwindcss";
+@theme{
+    --font-sans: 'Arimo', sans-serif;
+    --font-heading: 'Montserrat', sans-serif;
+}
+
+body {
+    font-family: var(--font-sans);
+}
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+}
+
+
+
+
 
 

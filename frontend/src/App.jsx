@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import InventoryListPage from "./pages/InventoryListPage";
 import InventoryForm from "./pages/InventoryFormPage";
 import InventoryDetailPage from "./pages/InventoryDetailPage";
+import EditItemPage from "./pages/EditItemPage";
 import EntriesPage from "./pages/EntriesPage";
 import ExitsPage from "./pages/ExitsPage";
 import MovementsHistoryPage from "./pages/MovementsHistoryPage";
@@ -55,6 +56,14 @@ function App() {
           element={
             <PrivateRoute>
               <InventoryForm />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/inventario/editar/:id"
+          element={
+            <PrivateRoute>
+              <EditItemPage />
             </PrivateRoute>
           }
         />
