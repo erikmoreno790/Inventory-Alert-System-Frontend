@@ -260,7 +260,7 @@ const InventoryListPage = () => {
                           {item.stock}
                         </td>
                         <td className="px-4 py-2 text-center">
-                          ${item.precio_unitario.toFixed(2)}
+                          ${item.precio_unitario}
                         </td>
                         <td className="px-4 py-2 text-center">
                           <div className="flex justify-center gap-2">
