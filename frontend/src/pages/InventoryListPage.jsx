@@ -204,7 +204,7 @@ const InventoryListPage = () => {
                   </thead>
                   <tbody>
                     {currentRepuestos.map((item) => (
-                      <tr key={item.id} className="border-t hover:bg-gray-50">
+                      <tr key={item.repuesto_id} className="border-t hover:bg-gray-50">
                         <td className="px-4 py-2">{item.nombre}</td>
                         <td className="px-4 py-2">{item.categoria}</td>
                         <td className="px-4 py-2">{item.referencia}</td>
@@ -222,14 +222,14 @@ const InventoryListPage = () => {
                         </td>
                         <td className="px-4 py-2 text-center">
                           <Link
-                            to={`/inventario/${item.id}`}
+                            to={`/inventario/${item.repuesto_id}`}
                             className="text-blue-600 hover:underline text-sm"
                           >
                             Ver
                           </Link>{" "}
                           |{" "}
                           <Link
-                            to={`/inventario/editar/${item.id}`}
+                            to={`/inventario/editar/${item.repuesto_id}`}
                             className="text-green-600 hover:underline text-sm"
                           >
                             Editar
