@@ -11,19 +11,36 @@ const InventoryListPage = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Filtros
-  const [filtroCategoria, setFiltroCategoria] = useState("");
-  const [filtroNombre, setFiltroNombre] = useState("");
-  const [filtroReferencia, setFiltroReferencia] = useState("");
+  const token = localStorage.getItem("token");
 
-  // Paginación
-  const [currentPage, setCurrentPage] = useState(1);
+  // 🔹 Filtros persistentes
+  const [filtroCategoria, setFiltroCategoria] = useState(
+    sessionStorage.getItem("filtroCategoria") || ""
+  );
+  const [filtroNombre, setFiltroNombre] = useState(
+    sessionStorage.getItem("filtroNombre") || ""
+  );
+  const [filtroReferencia, setFiltroReferencia] = useState(
+    sessionStorage.getItem("filtroReferencia") || ""
+  );
+
+  // 🔹 Paginación persistente
+  const [currentPage, setCurrentPage] = useState(
+    Number(sessionStorage.getItem("currentPage")) || 1
+  );
   const itemsPerPage = 10;
 
-  const token = localStorage.getItem("token");
+  // 🔹 Guardar filtros y página en sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem("filtroCategoria", filtroCategoria);
+    sessionStorage.setItem("filtroNombre", filtroNombre);
+    sessionStorage.setItem("filtroReferencia", filtroReferencia);
+    sessionStorage.setItem("currentPage", currentPage);
+  }, [filtroCategoria, filtroNombre, filtroReferencia, currentPage]);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
+  // 🔹 Cargar inventario
   useEffect(() => {
     const fetchInventario = async () => {
       try {
@@ -62,7 +79,7 @@ const InventoryListPage = () => {
     );
   });
 
-  // 🔹 Paginación
+  // 🔹 Paginación truncada
   const totalPages = Math.ceil(filteredRepuestos.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentRepuestos = filteredRepuestos.slice(
@@ -70,7 +87,6 @@ const InventoryListPage = () => {
     startIndex + itemsPerPage
   );
 
-  // 🔹 Renderizado truncado
   const renderPagination = () => {
     const pages = [];
     const maxVisible = 5;
@@ -122,6 +138,18 @@ const InventoryListPage = () => {
     );
   };
 
+  // 🔹 Limpiar filtros
+  const limpiarFiltros = () => {
+    setFiltroCategoria("");
+    setFiltroNombre("");
+    setFiltroReferencia("");
+    setCurrentPage(1);
+    sessionStorage.removeItem("filtroCategoria");
+    sessionStorage.removeItem("filtroNombre");
+    sessionStorage.removeItem("filtroReferencia");
+    sessionStorage.removeItem("currentPage");
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -136,12 +164,20 @@ const InventoryListPage = () => {
           <div className="p-6">
             <div className="flex justify-between items-center mb-4">
               <h1 className="text-2xl font-bold">Inventario de Repuestos</h1>
-              <button
-                onClick={() => navigate("/inventario/nuevo")}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-              >
-                Agregar Repuesto
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => navigate("/inventario/nuevo")}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                >
+                  Agregar Repuesto
+                </button>
+                <button
+                  onClick={limpiarFiltros}
+                  className="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400 transition"
+                >
+                  Limpiar Filtros
+                </button>
+              </div>
             </div>
 
             {/* --- Filtros --- */}
@@ -198,7 +234,9 @@ const InventoryListPage = () => {
                       <th className="text-left px-4 py-2">Nombre</th>
                       <th className="text-left px-4 py-2">Categoría</th>
                       <th className="text-left px-4 py-2">Referencia</th>
-                      <th className="text-center px-4 py-2">Cantidad Actual</th>
+                      <th className="text-center px-4 py-2">
+                        Cantidad Actual
+                      </th>
                       <th className="text-center px-4 py-2">Acciones</th>
                     </tr>
                   </thead>
@@ -220,7 +258,6 @@ const InventoryListPage = () => {
                         >
                           {item.stock}
                         </td>
-
                         <td className="px-4 py-2 text-center">
                           <div className="flex justify-center gap-2">
                             <button
