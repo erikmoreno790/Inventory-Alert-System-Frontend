@@ -14,13 +14,9 @@ const EditarCotizacionPage = () => {
 
   const token = localStorage.getItem("token");
   const config = { headers: { Authorization: `Bearer ${token}` } };
-  const today = new Date();
-const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000)
-  .toISOString()
-  .split("T")[0];
 
   const [cotizacion, setCotizacion] = useState({
-    fecha: localDate,
+    fecha: "",
     nombre_cliente: "",
     nit_cc: "",
     telefono: "",
@@ -35,6 +31,15 @@ const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000)
     items: [{ descripcion: "", cantidad: 1, precio_unitario: 0, sub_total: 0 }],
     imagenes: [],
   });
+
+  useEffect(() => {
+  const today = new Date();
+  const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000)
+    .toISOString()
+    .split("T")[0];
+
+  setCotizacion(prev => ({ ...prev, fecha: localDate }));
+}, []);
 
   // 🔹 Traer cotización existente
   useEffect(() => {
