@@ -13,7 +13,9 @@ const NuevaCotizacionPage = () => {
   const token = localStorage.getItem("token");
 
   const initialCotizacion = {
-    fecha: new Date().toISOString().split("T")[0],
+    fecha: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+      .toISOString()
+      .split("T")[0], // Formato YYYY-MM-DD (local)
     nombre_cliente: "",
     nit_cc: "",
     telefono: "",
