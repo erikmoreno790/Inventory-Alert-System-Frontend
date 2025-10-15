@@ -8,6 +8,8 @@ import api from "../api";
 const DashboardPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [totalCotizaciones, setTotalCotizaciones] = useState(0);
+  const [totalRepuestos, setTotalRepuestos] = useState(0);
+  const [cantidadRepuestos, setCantidadRepuestos] = useState(0);
   const [alertas, setAlertas] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -26,15 +28,25 @@ const DashboardPage = () => {
           },
         };
 
-        const [alertasRes, cotizacionesRes] = await Promise.all([
-          api.get("/alerts/products/:id", config), 
+        const [alertasRes, cotizacionesRes, repuestosRes] = await Promise.all([
+          api.get("/alerts/products/:id", config),
           api.get("/cotizaciones", config),
+          api.get("/repuestos", config),
         ]);
 
         const alertasActivas = alertasRes.data;
         const cotizaciones = cotizacionesRes.data;
+        const repuestos = repuestosRes.data;
 
         setTotalCotizaciones(cotizaciones.length);
+        setTotalRepuestos(repuestos.length);
+        setCantidadRepuestos(
+          // Sumar el campo "cantidad" de todos los repuestos
+          repuestos.reduce(
+            (total, repuesto) => total + (repuesto.stock || 0),
+            0
+          )
+        );
         setAlertas(alertasActivas.slice(0, 5)); // últimas 5 alertas
       } catch (error) {
         console.error(
@@ -54,7 +66,9 @@ const DashboardPage = () => {
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div
-        className={`flex-1 ${sidebarOpen ? "ml-64" : ""} transition-all duration-300`}
+        className={`flex-1 ${
+          sidebarOpen ? "ml-64" : ""
+        } transition-all duration-300`}
       >
         <TopNavbar onToggleSidebar={toggleSidebar} />
 
@@ -65,6 +79,7 @@ const DashboardPage = () => {
             <>
               {/* KPIs */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                {/* Total Cotizaciones */}
                 <div className="bg-white p-4 rounded-lg shadow flex items-center gap-4">
                   <PlusCircle className="text-green-600" />
                   <div>
@@ -73,6 +88,25 @@ const DashboardPage = () => {
                   </div>
                 </div>
 
+                {/* Total Repuestos */}
+                <div className="bg-white p-4 rounded-lg shadow flex items-center gap-4">
+                  <Boxes className="text-blue-600" />
+                  <div>
+                    <p className="text-gray-600 text-sm">Total Repuestos</p>
+                    <p className="text-xl font-bold">{totalRepuestos}</p>
+                  </div>
+                </div>
+                {/* Cantidad de Repuestos */}
+                <div className="bg-white p-4 rounded-lg shadow flex items-center gap-4">
+                  <Boxes className="text-purple-600" />
+                  <div>
+                    <p className="text-gray-600 text-sm">
+                      Cantidad de Repuestos
+                    </p>
+                    <p className="text-xl font-bold">{cantidadRepuestos}</p>
+                  </div>
+                </div>
+                {/* Alertas Activas */}
                 <div className="bg-white p-4 rounded-lg shadow flex items-center gap-4">
                   <Bell className="text-red-600" />
                   <div>
@@ -92,28 +126,39 @@ const DashboardPage = () => {
                         key={index}
                         className="flex items-start gap-3 border-b pb-2 last:border-none"
                       >
-                        <AlertTriangle className="text-yellow-600 mt-1" size={18} />
+                        <AlertTriangle
+                          className="text-yellow-600 mt-1"
+                          size={18}
+                        />
                         <div>
                           <p className="text-sm font-medium text-gray-800">
-                            {alerta.repuesto_nombre || "Repuesto no identificado"}
+                            {alerta.repuesto_nombre ||
+                              "Repuesto no identificado"}
                           </p>
                           <p className="text-sm text-gray-600">
-                            {alerta.mensaje || alerta.descripcion || "Alerta sin mensaje"}
+                            {alerta.mensaje ||
+                              alerta.descripcion ||
+                              "Alerta sin mensaje"}
                           </p>
                           <p className="text-xs text-gray-400 flex items-center gap-1 mt-1">
                             <Clock size={12} />{" "}
-                            {new Date(alerta.fecha).toLocaleDateString("es-CO", {
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric",
-                            })}
+                            {new Date(alerta.fecha).toLocaleDateString(
+                              "es-CO",
+                              {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                              }
+                            )}
                           </p>
                         </div>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-sm text-gray-500">No hay alertas recientes.</p>
+                  <p className="text-sm text-gray-500">
+                    No hay alertas recientes.
+                  </p>
                 )}
               </div>
 
