@@ -97,6 +97,7 @@ const InventoryFormPage = () => {
       if (id) {
         await api.put(`/repuestos/${id}`, form, config);
       } else {
+        console.log(form); // Verificar datos del formulario
         await api.post("/repuestos", form, config);
       }
       navigate("/inventario");
