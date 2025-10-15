@@ -6,14 +6,15 @@ import api from "../api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const EntryFormPage = () => {
+const EntriesPage = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const [repuestos, setRepuestos] = useState([]);
+  const [filteredRepuestos, setFilteredRepuestos] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [searchRef, setSearchRef] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const [form, setForm] = useState({
     repuesto_id: "",
@@ -26,9 +27,11 @@ const EntryFormPage = () => {
     fecha: "",
   });
 
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
 
-  // 🔹 Cargar repuestos
+  // 🔹 Cargar repuestos existentes
   useEffect(() => {
     const fetchRepuestos = async () => {
       try {
@@ -42,10 +45,35 @@ const EntryFormPage = () => {
     fetchRepuestos();
   }, [token]);
 
-  // 🔹 Filtrar repuestos según el texto
-  const filteredRepuestos = repuestos.filter((r) =>
-    r.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // 🔹 Filtrar repuestos dinámicamente
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      setFilteredRepuestos([]);
+      return;
+    }
+
+    const filtered = repuestos.filter((r) => {
+      const nombre = r.nombre?.toLowerCase() || "";
+      const referencia = r.referencia?.toLowerCase() || "";
+      return (
+        nombre.includes(searchTerm.toLowerCase()) ||
+        referencia.includes(searchTerm.toLowerCase())
+      );
+    });
+
+    setFilteredRepuestos(filtered);
+  }, [searchTerm, repuestos]);
+
+  // 🔹 Seleccionar un repuesto
+  const handleSelectRepuesto = (r) => {
+    setForm({
+      ...form,
+      repuesto_id: r.id || r.repuesto_id,
+      referencia: r.referencia,
+    });
+    setSearchTerm(r.nombre);
+    setShowDropdown(false);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -54,6 +82,11 @@ const EntryFormPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!form.repuesto_id) {
+      toast.error("Por favor selecciona un repuesto del listado.");
+      return;
+    }
 
     const config = {
       headers: {
@@ -64,44 +97,26 @@ const EntryFormPage = () => {
 
     try {
       await api.post("/entradas", form, config);
+
       toast.success("✅ Entrada registrada exitosamente", {
         position: "top-right",
         autoClose: 3000,
         theme: "colored",
       });
-      setTimeout(() => navigate("/historial-repuestos/entradas-salidas"), 1500);
+
+      setTimeout(
+        () => navigate("/historial-repuestos/entradas-entradas"),
+        1500
+      );
     } catch (err) {
-      console.error("Error registrando entrada:", err.response?.data || err.message);
+      console.error(
+        "Error registrando entrada:",
+        err.response?.data || err.message
+      );
+
       toast.error("❌ Error al registrar la entrada", {
         position: "top-right",
         autoClose: 4000,
-        theme: "colored",
-      });
-    }
-  };
-
-  // 🔹 Buscar por referencia
-  const handleSearchByReference = () => {
-    const found = repuestos.find(
-      (r) => r.codigo.toLowerCase() === searchRef.toLowerCase()
-    );
-
-    if (found) {
-      setForm((prev) => ({
-        ...prev,
-        repuesto_id: found.repuesto_id,
-        referencia: found.codigo,
-      }));
-      toast.success(`🔍 Repuesto encontrado: ${found.nombre}`, {
-        position: "top-center",
-        autoClose: 2000,
-        theme: "colored",
-      });
-      setShowModal(false);
-    } else {
-      toast.error("❌ No se encontró ningún repuesto con esa referencia", {
-        position: "top-center",
-        autoClose: 3000,
         theme: "colored",
       });
     }
@@ -112,12 +127,16 @@ const EntryFormPage = () => {
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div
-        className={`flex-1 ${sidebarOpen ? "ml-64" : ""} transition-all duration-300`}
+        className={`flex-1 ${
+          sidebarOpen ? "ml-64" : ""
+        } transition-all duration-300`}
       >
         <TopNavbar onToggleSidebar={toggleSidebar} />
         <main className="p-6 max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-800">Registrar Entrada</h2>
+            <h2 className="text-3xl font-bold text-gray-800">
+              Registrar Entrada
+            </h2>
             <button
               onClick={() => navigate(-1)}
               className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
@@ -141,54 +160,72 @@ const EntryFormPage = () => {
                 value={form.fecha}
                 onChange={handleChange}
                 className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+                required
               />
             </div>
 
-            {/* Repuesto con búsqueda dinámica */}
-            <div className="md:col-span-2">
+            {/* Campo de búsqueda */}
+            <div className="relative md:col-span-2">
               <label className="block text-gray-700 mb-2 font-medium">
-                Buscar repuesto por nombre
+                Buscar repuesto (por nombre o referencia)
               </label>
-              <div className="flex gap-2 mb-3">
-                <input
-                  type="text"
-                  placeholder="Escriba el nombre del repuesto..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="flex-1 border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowModal(true)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-                >
-                  Buscar por referencia
-                </button>
-              </div>
-
-              <select
-                name="repuesto_id"
-                value={form.repuesto_id}
-                onChange={handleChange}
-                required
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setShowDropdown(true);
+                }}
+                placeholder="Ej: Pastilla de freno, 1234-AB"
                 className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Seleccione un repuesto</option>
-                {filteredRepuestos.length > 0 ? (
-                  filteredRepuestos.map((r) => (
-                    <option key={r.repuesto_id} value={r.repuesto_id}>
-                      {r.nombre} ({r.codigo})
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>No se encontraron repuestos</option>
-                )}
-              </select>
+              />
+
+              {/* Lista filtrada */}
+              {showDropdown && (
+                <div className="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 w-full max-h-40 overflow-y-auto shadow-lg">
+                  {filteredRepuestos.length > 0 ? (
+                    <ul>
+                      {filteredRepuestos.map((r) => (
+                        <li
+                          key={r.id || r.repuesto_id}
+                          onClick={() => handleSelectRepuesto(r)}
+                          className="p-2 hover:bg-blue-100 cursor-pointer"
+                        >
+                          <span className="font-medium">{r.nombre}</span>{" "}
+                          <span className="text-gray-500 text-sm">
+                            ({r.referencia})
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="p-2 text-gray-500 italic text-sm text-center">
+                      Sin resultados
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Repuesto seleccionado (solo lectura) */}
+            <div>
+              <label className="block text-gray-700 mb-2 font-medium">
+                Referencia seleccionada
+              </label>
+              <input
+                type="text"
+                name="referencia"
+                value={form.referencia}
+                readOnly
+                className="w-full border rounded-lg px-4 py-2 bg-gray-100"
+              />
             </div>
 
             {/* Cantidad */}
             <div>
-              <label className="block text-gray-700 mb-2 font-medium">Cantidad *</label>
+              <label className="block text-gray-700 mb-2 font-medium">
+                Cantidad *
+              </label>
               <input
                 type="number"
                 name="cantidad"
@@ -222,7 +259,9 @@ const EntryFormPage = () => {
 
             {/* Proveedor */}
             <div>
-              <label className="block text-gray-700 mb-2 font-medium">Proveedor</label>
+              <label className="block text-gray-700 mb-2 font-medium">
+                Proveedor
+              </label>
               <input
                 type="text"
                 name="proveedor"
@@ -250,7 +289,9 @@ const EntryFormPage = () => {
 
             {/* Observación */}
             <div className="md:col-span-2">
-              <label className="block text-gray-700 mb-2 font-medium">Observación</label>
+              <label className="block text-gray-700 mb-2 font-medium">
+                Observación
+              </label>
               <textarea
                 name="observacion"
                 value={form.observacion}
@@ -274,41 +315,9 @@ const EntryFormPage = () => {
         </main>
       </div>
 
-      {/* 🔹 Modal Buscar por referencia */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
-            <h3 className="text-xl font-semibold mb-4 text-gray-800">
-              Buscar repuesto por referencia
-            </h3>
-            <input
-              type="text"
-              placeholder="Ingrese la referencia exacta..."
-              value={searchRef}
-              onChange={(e) => setSearchRef(e.target.value)}
-              className="w-full border rounded-lg px-4 py-2 mb-4 focus:ring-2 focus:ring-blue-500"
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 rounded-lg border hover:bg-gray-100"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleSearchByReference}
-                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-              >
-                Buscar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <ToastContainer />
     </div>
   );
 };
 
-export default EntryFormPage;
+export default EntriesPage;

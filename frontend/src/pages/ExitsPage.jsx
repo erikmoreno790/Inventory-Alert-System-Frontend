@@ -3,19 +3,22 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import TopNavbar from "../components/TopNavbar";
 import api from "../api";
-
-// 🔹 Importaciones para alertas
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const EntryFormPage = () => {
+const ExitsPage = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [repuestos, setRepuestos] = useState([]);
+  const [filteredRepuestos, setFilteredRepuestos] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+
   const [form, setForm] = useState({
     repuesto_id: "",
+    referencia: "",
     tipo_salida: "",
     cantidad: "",
     destino: "",
@@ -42,6 +45,36 @@ const EntryFormPage = () => {
     fetchRepuestos();
   }, [token]);
 
+  // 🔹 Filtrar repuestos dinámicamente
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      setFilteredRepuestos([]);
+      return;
+    }
+
+    const filtered = repuestos.filter((r) => {
+      const nombre = r.nombre?.toLowerCase() || "";
+      const referencia = r.referencia?.toLowerCase() || "";
+      return (
+        nombre.includes(searchTerm.toLowerCase()) ||
+        referencia.includes(searchTerm.toLowerCase())
+      );
+    });
+
+    setFilteredRepuestos(filtered);
+  }, [searchTerm, repuestos]);
+
+  // 🔹 Seleccionar un repuesto
+  const handleSelectRepuesto = (r) => {
+    setForm({
+      ...form,
+      repuesto_id: r.id || r.repuesto_id,
+      referencia: r.referencia,
+    });
+    setSearchTerm(r.nombre);
+    setShowDropdown(false);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -49,6 +82,11 @@ const EntryFormPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!form.repuesto_id) {
+      toast.error("Por favor selecciona un repuesto del listado.");
+      return;
+    }
 
     const config = {
       headers: {
@@ -60,18 +98,12 @@ const EntryFormPage = () => {
     try {
       await api.post("/salidas", form, config);
 
-      // ✅ Mostrar alerta profesional
       toast.success("✅ Salida registrada exitosamente", {
         position: "top-right",
         autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
         theme: "colored",
       });
 
-      // Redirigir después de un corto delay
       setTimeout(() => navigate("/historial-repuestos/entradas-salidas"), 1500);
     } catch (err) {
       console.error(
@@ -114,10 +146,10 @@ const EntryFormPage = () => {
             onSubmit={handleSubmit}
             className="bg-white rounded-xl shadow-lg p-8 grid grid-cols-1 md:grid-cols-2 gap-6"
           >
-            {/*Fecha*/}
+            {/* Fecha */}
             <div>
               <label className="block text-gray-700 mb-2 font-medium">
-                Fecha de entrada
+                Fecha de salida
               </label>
               <input
                 type="date"
@@ -125,28 +157,65 @@ const EntryFormPage = () => {
                 value={form.fecha}
                 onChange={handleChange}
                 className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+                required
               />
             </div>
 
-            {/* Repuesto */}
-            <div className="md:col-span-2">
+            {/* Campo de búsqueda */}
+            <div className="relative md:col-span-2">
               <label className="block text-gray-700 mb-2 font-medium">
-                Repuesto *
+                Buscar repuesto (por nombre o referencia)
               </label>
-              <select
-                name="repuesto_id"
-                value={form.repuesto_id}
-                onChange={handleChange}
-                required
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setShowDropdown(true);
+                }}
+                placeholder="Ej: Pastilla de freno, 1234-AB"
                 className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Seleccione un repuesto</option>
-                {repuestos.map((r) => (
-                  <option key={r.repuesto_id} value={r.repuesto_id}>
-                    {r.nombre} ({r.codigo})
-                  </option>
-                ))}
-              </select>
+              />
+
+              {/* Lista filtrada */}
+              {showDropdown && (
+                <div className="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 w-full max-h-40 overflow-y-auto shadow-lg">
+                  {filteredRepuestos.length > 0 ? (
+                    <ul>
+                      {filteredRepuestos.map((r) => (
+                        <li
+                          key={r.id || r.repuesto_id}
+                          onClick={() => handleSelectRepuesto(r)}
+                          className="p-2 hover:bg-blue-100 cursor-pointer"
+                        >
+                          <span className="font-medium">{r.nombre}</span>{" "}
+                          <span className="text-gray-500 text-sm">
+                            ({r.referencia})
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="p-2 text-gray-500 italic text-sm text-center">
+                      Sin resultados
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Repuesto seleccionado (solo lectura) */}
+            <div>
+              <label className="block text-gray-700 mb-2 font-medium">
+                Referencia seleccionada
+              </label>
+              <input
+                type="text"
+                name="referencia"
+                value={form.referencia}
+                readOnly
+                className="w-full border rounded-lg px-4 py-2 bg-gray-100"
+              />
             </div>
 
             {/* Cantidad */}
@@ -234,7 +303,7 @@ const EntryFormPage = () => {
             <div className="md:col-span-2 flex justify-end">
               <button
                 type="submit"
-                className="bg-red-600 text-white px-6 py-2 rounded-lg shadow hover:bg-green-700 transition"
+                className="bg-red-600 text-white px-6 py-2 rounded-lg shadow hover:bg-red-700 transition"
               >
                 Registrar Salida
               </button>
@@ -243,10 +312,9 @@ const EntryFormPage = () => {
         </main>
       </div>
 
-      {/* 🔹 Contenedor de notificaciones */}
       <ToastContainer />
     </div>
   );
 };
 
-export default EntryFormPage;
+export default ExitsPage;
