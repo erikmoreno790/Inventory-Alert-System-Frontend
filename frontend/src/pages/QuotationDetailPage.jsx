@@ -160,10 +160,7 @@ const QuotationDetailsPage = () => {
                   {quotation.nombre_mecanico || "N/A"}
                 </p>
                 <p>
-                  <strong>Fecha:</strong>{" "}
-                  {quotation.fecha
-                    ? new Date(quotation.fecha).toLocaleDateString()
-                    : ""}
+                  <p><strong>Fecha:</strong> {quotation.fecha}</p>
                 </p>
                 <p>
                   <strong>Estatus:</strong> {quotation.estatus}
