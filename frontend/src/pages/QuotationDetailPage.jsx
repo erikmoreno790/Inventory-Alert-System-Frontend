@@ -160,7 +160,13 @@ const QuotationDetailsPage = () => {
                   {quotation.nombre_mecanico || "N/A"}
                 </p>
                 <p>
-                  <p><strong>Fecha:</strong> {quotation.fecha}</p>
+                  {/*Fecha en formato YYYY/MM/DD zona Colombia*/}
+                  <strong>Fecha:</strong>{" "}
+                  {new Date(quotation.fecha).toLocaleString("es-CO", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  })}
                 </p>
                 <p>
                   <strong>Estatus:</strong> {quotation.estatus}

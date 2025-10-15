@@ -112,9 +112,7 @@ const QuotationsHistoryPage = () => {
     }
 
     // ✅ Quitar duplicados usando filter
-    const uniquePages = pages.filter(
-      (p, index) => pages.indexOf(p) === index
-    );
+    const uniquePages = pages.filter((p, index) => pages.indexOf(p) === index);
 
     return uniquePages.map((p, idx) =>
       p === "..." ? (
@@ -215,7 +213,13 @@ const QuotationsHistoryPage = () => {
                       <td className="border p-2">{q.nombre_cliente}</td>
                       <td className="border p-2">{q.placa}</td>
                       <td className="border p-2">
-                        {q.fecha ? new Date(q.fecha).toLocaleDateString() : ""}
+                        {/*Fecha en formato YYYY/MM/DD zona Colombia*/}
+                        {new Date(q.fecha).toLocaleString("es-CO", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                        })}
+                        {/* {q.fecha} */}
                       </td>
                       <td className="border p-2 capitalize">{q.estatus}</td>
                       <td className="border p-2 font-bold">
