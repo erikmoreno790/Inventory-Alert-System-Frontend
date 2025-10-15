@@ -57,7 +57,7 @@ const InventoryFormPage = () => {
         const res = await api.get(`repuestos/${id}`, config);
         setForm({
           nombre: res.data.nombre || "",
-          descripcion: res.data.descripcion || "",
+          referencia: res.data.referencia || "",
           categoria: res.data.categoria || "",
           marca: res.data.marca || "",
           compatibilidad: res.data.compatibilidad || "",
