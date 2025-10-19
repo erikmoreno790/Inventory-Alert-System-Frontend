@@ -10,6 +10,9 @@ const DashboardPage = () => {
   const [totalCotizaciones, setTotalCotizaciones] = useState(0);
   const [totalRepuestos, setTotalRepuestos] = useState(0);
   const [cantidadRepuestos, setCantidadRepuestos] = useState(0);
+  const [totalRepuestosPorCategoria, setTotalRepuestosPorCategoria] = useState(
+    {}
+  );
   const [alertas, setAlertas] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,16 +31,25 @@ const DashboardPage = () => {
           },
         };
 
-        const [alertasRes, cotizacionesRes, repuestosRes] = await Promise.all([
-          api.get("/alerts/products/:id", config),
-          api.get("/cotizaciones", config),
-          api.get("/repuestos", config),
-        ]);
+        const [alertasRes, cotizacionesRes, repuestosRes, totalRepuestoRes] =
+          await Promise.all([
+            api.get("/alerts/products/:id", config),
+            api.get("/cotizaciones", config),
+            api.get("/repuestos", config),
+            api.get("/repuestos/categoria", config),
+          ]);
+
+        console.log(
+          "Respuesta de repuestos por categoría:",
+          totalRepuestoRes.data
+        );
 
         const alertasActivas = alertasRes.data;
         const cotizaciones = cotizacionesRes.data;
         const repuestos = repuestosRes.data;
+        const totalRepuestosPorCategoria = totalRepuestoRes.data;
 
+        setTotalRepuestosPorCategoria(totalRepuestosPorCategoria);
         setTotalCotizaciones(cotizaciones.length);
         setTotalRepuestos(repuestos.length);
         setCantidadRepuestos(
@@ -106,6 +118,28 @@ const DashboardPage = () => {
                     <p className="text-xl font-bold">{cantidadRepuestos}</p>
                   </div>
                 </div>
+                {/* Total repuesto por categorias */}
+                {/*Los datos llegan así: 
+               0: 
+                {categoria: 'Guaya', cantidad_total: '140'}
+                1
+                : 
+                {categoria: 'Campana', cantidad_total: '186'}*/}
+                {totalRepuestosPorCategoria.map((item, index) => (
+                  <div
+                    key={index}
+                    className="bg-white p-4 rounded-lg shadow flex items-center gap-4"
+                  >
+                    <Boxes className="text-yellow-600" />
+                    <div>
+                      <p className="text-gray-600 text-sm">
+                        Total en {item.categoria}
+                      </p>
+                      <p className="text-xl font-bold">{item.cantidad_total}</p>
+                    </div>
+                  </div>
+                ))}
+
                 {/* Alertas Activas */}
                 <div className="bg-white p-4 rounded-lg shadow flex items-center gap-4">
                   <Bell className="text-red-600" />

@@ -67,7 +67,6 @@ const InventoryFormPage = () => {
           precio_unitario: res.data.precio_unitario || "",
           unidad_medida: res.data.unidad_medida || "unidad",
           estado: res.data.estado || "disponible",
-          referencia: res.data.referencia || "",
           ubicacion: res.data.ubicacion || "",
         });
       } catch (err) {

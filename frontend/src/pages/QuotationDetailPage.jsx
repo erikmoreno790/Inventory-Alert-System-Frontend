@@ -16,24 +16,27 @@ const QuotationDetailsPage = () => {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  // 🔹 Obtener detalles de la cotización
-  const fetchQuotation = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      const { data } = await api.get(`/cotizaciones/${id}`, config);
-      console.log("Detalles de la cotización:", data);
-      setQuotation(data);
-    } catch (err) {
-      console.error(err);
-      alert("Error cargando detalles de la cotización");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // 🔹 Obtener detalles de la cotización (definido dentro del useEffect para evitar dependencias faltantes)
   useEffect(() => {
-    fetchQuotation();
+    const fetchQuotation = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("token");
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        const { data } = await api.get(`/cotizaciones/${id}`, config);
+        console.log("Detalles de la cotización:", data);
+        setQuotation(data);
+      } catch (err) {
+        console.error(err);
+        alert("Error cargando detalles de la cotización");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchQuotation();
+    }
   }, [id]);
 
   const handleStatusChange = async (newStatus) => {
@@ -149,6 +152,9 @@ const QuotationDetailsPage = () => {
                 </p>
                 <p>
                   <strong>Kilometraje:</strong> {quotation.kilometraje || "N/A"}
+                </p>
+                <p>
+                  <strong>Telefono:</strong> {quotation.telefono || "N/A"}
                 </p>
               </div>
               <div>
