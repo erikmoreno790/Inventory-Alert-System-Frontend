@@ -53,25 +53,27 @@ const Sidebar = () => {
       label: "Salidas",
       icon: <ClipboardList size={18} />,
     },
-    { to: "/reportes/repuestos-usados", 
-      label: "Reportes", 
-      icon: <FileText size={18} /> 
+    {
+      to: "/reportes/repuestos-usados",
+      label: "Reportes",
+      icon: <FileText size={18} />,
     },
     {
       to: "/historial-repuestos/entradas-salidas",
       label: "Historial Entradas/Salidas",
       icon: <ClipboardList size={18} />,
     },
-    { to: "/alertas", 
-      label: "Alertas", 
-      icon: <Bell size={18} /> 
-    },
+    { to: "/alertas", label: "Alertas", icon: <Bell size={18} /> },
     {
       to: "/alertas/configuracion",
       label: "Configurar Alertas",
       icon: <AlertTriangle size={18} />,
     },
-    { to: "/usuarios", label: "Usuarios", icon: <Users size={18} /> },
+    {
+      to: "/usuarios",
+      label: "Usuarios",
+      icon: <Users size={18} />,
+    },
     {
       to: "/configuracion",
       label: "Configuración",

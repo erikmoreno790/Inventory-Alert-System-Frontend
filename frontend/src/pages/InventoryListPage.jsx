@@ -237,7 +237,8 @@ const InventoryListPage = () => {
                       <th className="text-center px-4 py-2">
                         Cantidad Actual
                       </th>
-                      <th className="text-center px-4 py-2">Precio Unitario</th>
+                      <th className="text-center px-4 py-2">Precio Unitario de Costo</th>
+                      <th className="text-center px-4 py-2">Precio Unitario de Venta</th>
                       <th className="text-center px-4 py-2">Acciones</th>
                     </tr>
                   </thead>
@@ -260,7 +261,10 @@ const InventoryListPage = () => {
                           {item.stock}
                         </td>
                         <td className="px-4 py-2 text-center">
-                          ${item.precio_unitario}
+                          ${item.precio_unitario_costo}
+                        </td>
+                        <td className="px-4 py-2 text-center">
+                          ${item.precio_unitario_venta}
                         </td>
                         <td className="px-4 py-2 text-center">
                           <div className="flex justify-center gap-2">

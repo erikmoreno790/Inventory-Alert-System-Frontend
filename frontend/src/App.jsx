@@ -15,6 +15,8 @@ import QuotationsHistoryPage from "./pages/QuotationsHistoryPage";
 import QuotationDetailPage from "./pages/QuotationDetailPage";
 import EditQuotationPage from "./pages/EditQuotationPage";
 import ReporteRepuestosPage from "./pages/ReporteRepuestosPage";
+import NewUserPage from "./pages/NewUserPage";
+import UsersDetailsPage from "./pages/UsersDetailsPage";
 // import AlertSettingsPage from './pages/AlertSettingsPage'
 import PrivateRoute from "./components/PrivateRoute";
 
@@ -154,6 +156,22 @@ function App() {
           element={
             <PrivateRoute>
               <ReporteRepuestosPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/usuarios/nuevo-usuario"
+          element={
+            <PrivateRoute>
+              <NewUserPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/usuarios"
+          element={
+            <PrivateRoute>
+              <UsersDetailsPage />
             </PrivateRoute>
           }
         />

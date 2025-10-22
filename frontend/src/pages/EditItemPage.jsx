@@ -20,7 +20,8 @@ const EditRepuestoPage = () => {
     proveedor: "",
     stock: "",
     stock_minimo: "",
-    precio_unitario: "",
+    precio_unitario_costo: "",
+    precio_unitario_venta: "",
     unidad_medida: "",
     estado: "",
     referencia: "",
@@ -214,15 +215,31 @@ const EditRepuestoPage = () => {
               />
             </div>
 
-            {/* Precio */}
+            {/* Precio de costo*/}
             <div>
               <label className="block text-gray-700 mb-2 font-medium">
-                Precio unitario
+                Precio unitario de costo
               </label>
               <input
                 type="number"
-                name="precio_unitario"
-                value={form.precio_unitario}
+                name="precio_unitario_costo"
+                value={form.precio_unitario_costo}
+                onChange={handleChange}
+                min={0}
+                step="0.01"
+                className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Precio de venta */}
+            <div>
+              <label className="block text-gray-700 mb-2 font-medium">
+                Precio unitario de venta
+              </label>
+              <input
+                type="number"
+                name="precio_unitario_venta"
+                value={form.precio_unitario_venta}
                 onChange={handleChange}
                 min={0}
                 step="0.01"
