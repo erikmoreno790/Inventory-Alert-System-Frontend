@@ -5,7 +5,7 @@ import TopNavbar from "../components/TopNavbar";
 import api from "../api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Search, Eye, Pencil } from "lucide-react";
+import { Search, Eye, Pencil, UserCog } from "lucide-react";
 
 const UsersDetailsPage = () => {
   const navigate = useNavigate();
@@ -38,11 +38,12 @@ const UsersDetailsPage = () => {
 
   // Filtrado dinámico
   const filteredUsers = users.filter(
-    (u) =>
-      u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.role.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  (u) =>
+    (u.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (u.email || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (u.role || "").toLowerCase().includes(searchTerm.toLowerCase())
+);
+
 
   // Función para abrir modal
   const openRoleModal = (user) => {
