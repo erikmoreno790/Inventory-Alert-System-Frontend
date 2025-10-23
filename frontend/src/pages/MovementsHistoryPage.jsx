@@ -42,6 +42,7 @@ const MovementsHistory = () => {
           cantidad: m.cantidad,
           destino: m.contraparte || "-",
           factura: m.factura || "",
+          nombre_usuario: m.usuario || "Desconocido",
         }));
 
         setMovements(mapped);
@@ -101,7 +102,9 @@ const MovementsHistory = () => {
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div
-        className={`flex-1 ${sidebarOpen ? "ml-64" : ""} transition-all duration-300`}
+        className={`flex-1 ${
+          sidebarOpen ? "ml-64" : ""
+        } transition-all duration-300`}
       >
         <TopNavbar onToggleSidebar={toggleSidebar} />
 
@@ -173,6 +176,7 @@ const MovementsHistory = () => {
                   <th className="px-4 py-2 text-left">Motivo</th>
                   <th className="px-4 py-2 text-left">Cantidad</th>
                   <th className="px-4 py-2 text-left">Destino/Proveedor</th>
+                  <th className="px-4 py-2 text-left">Usuario</th>
                 </tr>
               </thead>
               <tbody>
@@ -185,7 +189,9 @@ const MovementsHistory = () => {
                       <td className="px-4 py-2">{m.producto}</td>
                       <td
                         className={`px-4 py-2 font-semibold ${
-                          m.tipo === "Entrada" ? "text-green-600" : "text-red-600"
+                          m.tipo === "Entrada"
+                            ? "text-green-600"
+                            : "text-red-600"
                         }`}
                       >
                         {m.tipo}
@@ -193,14 +199,12 @@ const MovementsHistory = () => {
                       <td className="px-4 py-2">{m.motivo}</td>
                       <td className="px-4 py-2">{m.cantidad}</td>
                       <td className="px-4 py-2">{m.destino}</td>
+                      <td className="px-4 py-2">{m.nombre_usuario}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td
-                      colSpan="6"
-                      className="text-center text-gray-500 py-6"
-                    >
+                    <td colSpan="6" className="text-center text-gray-500 py-6">
                       No se encontraron movimientos.
                     </td>
                   </tr>
