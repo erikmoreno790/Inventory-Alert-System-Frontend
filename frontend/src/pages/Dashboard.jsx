@@ -8,12 +8,11 @@ import api from "../api";
 const DashboardPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [totalCotizaciones, setTotalCotizaciones] = useState(0);
-  const [totalRepuestos, setTotalRepuestos] = useState(0);
   const [cantidadRepuestos, setCantidadRepuestos] = useState(0);
   const [totalRepuestosPorCategoria, setTotalRepuestosPorCategoria] = useState(
     {}
   );
-  const [alertas, setAlertas] = useState([]);
+  //const [alertas, setAlertas] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const token = localStorage.getItem("token");
@@ -31,35 +30,30 @@ const DashboardPage = () => {
           },
         };
 
-        const [alertasRes, cotizacionesRes, repuestosRes, totalRepuestoRes] =
+        const [cotizacionesRes, repuestosRes, totalRepuestoRes] =
           await Promise.all([
-            api.get("/alerts/products/:id", config),
+            //api.get("/alerts/products/:id", config),
             api.get("/cotizaciones", config),
-            api.get("/repuestos", config),
+            api.get("/repuestos/total-cantidad", config),
             api.get("/repuestos/categoria", config),
           ]);
 
-        console.log(
+        {
+          /*console.log(
           "Respuesta de repuestos por categoría:",
           totalRepuestoRes.data
-        );
+        );*/
+        }
 
-        const alertasActivas = alertasRes.data;
+        //const alertasActivas = alertasRes.data;
         const cotizaciones = cotizacionesRes.data;
-        const repuestos = repuestosRes.data;
+        const cantidadRepuestosTotales = repuestosRes.data.total;
         const totalRepuestosPorCategoria = totalRepuestoRes.data;
 
         setTotalRepuestosPorCategoria(totalRepuestosPorCategoria);
         setTotalCotizaciones(cotizaciones.length);
-        setTotalRepuestos(repuestos.length);
-        setCantidadRepuestos(
-          // Sumar el campo "cantidad" de todos los repuestos
-          repuestos.reduce(
-            (total, repuesto) => total + (repuesto.stock || 0),
-            0
-          )
-        );
-        setAlertas(alertasActivas.slice(0, 5)); // últimas 5 alertas
+        setCantidadRepuestos(cantidadRepuestosTotales);
+        //setAlertas(alertasActivas.slice(0, 5)); // últimas 5 alertas
       } catch (error) {
         console.error(
           "Error al cargar datos del dashboard:",
@@ -78,9 +72,8 @@ const DashboardPage = () => {
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div
-        className={`flex-1 ${
-          sidebarOpen ? "ml-64" : ""
-        } transition-all duration-300`}
+        className={`flex-1 transition-all duration-300 
+    ${sidebarOpen ? "ml-64" : "ml-0"} md:ml-64`}
       >
         <TopNavbar onToggleSidebar={toggleSidebar} />
 
@@ -101,13 +94,13 @@ const DashboardPage = () => {
                 </div>
 
                 {/* Total Repuestos */}
-                <div className="bg-white p-4 rounded-lg shadow flex items-center gap-4">
+                {/*<div className="bg-white p-4 rounded-lg shadow flex items-center gap-4">
                   <Boxes className="text-blue-600" />
                   <div>
                     <p className="text-gray-600 text-sm">Total Repuestos</p>
-                    <p className="text-xl font-bold">{totalRepuestos}</p>
+                    <p className="text-xl font-bold">{cantidadRepuestos}</p>
                   </div>
-                </div>
+                </div>*/}
                 {/* Cantidad de Repuestos */}
                 <div className="bg-white p-4 rounded-lg shadow flex items-center gap-4">
                   <Boxes className="text-purple-600" />
@@ -145,13 +138,13 @@ const DashboardPage = () => {
                   <Bell className="text-red-600" />
                   <div>
                     <p className="text-gray-600 text-sm">Alertas Activas</p>
-                    <p className="text-xl font-bold">{alertas.length}</p>
+                    <p className="text-xl font-bold">0</p>
                   </div>
                 </div>
               </div>
 
               {/* Últimas alertas */}
-              <div className="bg-white p-4 rounded-lg shadow mb-6">
+              {/*<div className="bg-white p-4 rounded-lg shadow mb-6">
                 <h2 className="text-lg font-semibold mb-4">Últimas Alertas</h2>
                 {alertas.length > 0 ? (
                   <ul className="space-y-3">
@@ -194,7 +187,7 @@ const DashboardPage = () => {
                     No hay alertas recientes.
                   </p>
                 )}
-              </div>
+              </div>*/}
 
               {/* Accesos rápidos */}
               <div className="bg-white p-4 rounded-lg shadow">

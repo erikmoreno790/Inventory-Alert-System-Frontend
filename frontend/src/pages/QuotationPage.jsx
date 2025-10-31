@@ -82,11 +82,14 @@ const NuevaCotizacionPage = () => {
     "Juego de pastillas del. e.o en ceramica",
     "Juego de pastillas tras. e.o en ceramica",
     "Kit reparacion mordaza con mantenimiento",
+    "Kit reparacion cilindro",
     "Mano de obra",
     "Pote de liquido sintético y cte",
     "Prensa bujes",
     "Rotula inferior e.o",
+    "Rotula superior e.o",
     "Soporte amortiguador del. e.o",
+    "Soporte amortiguador tras. e.o",
     "Soporte motor central e.o",
     "Soporte motor derecho e.o",
     "Soporte motor izquierdo e.o",
@@ -198,9 +201,8 @@ const NuevaCotizacionPage = () => {
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div
-        className={`flex-1 ${
-          sidebarOpen ? "ml-64" : ""
-        } transition-all duration-300`}
+        className={`flex-1 transition-all duration-300 
+    ${sidebarOpen ? "ml-64" : "ml-0"} md:ml-64`}
       >
         <TopNavbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
         <main>

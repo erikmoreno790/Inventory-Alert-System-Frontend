@@ -69,9 +69,8 @@ function App() {
             </PrivateRoute>
           }
         />
-
         <Route
-          path="/inventario/entradas"
+          path="/inventario/entradas/:id"
           element={
             <PrivateRoute>
               <EntriesPage />
@@ -79,7 +78,7 @@ function App() {
           }
         />
         <Route
-          path="/inventario/salidas"
+          path="/inventario/salidas/:id"
           element={
             <PrivateRoute>
               <ExitsPage />
@@ -140,14 +139,6 @@ function App() {
           element={
             <PrivateRoute>
               <QuotationsHistoryPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/historial-repuestos/entradas-salidas"
-          element={
-            <PrivateRoute>
-              <MovementsHistoryPage />
             </PrivateRoute>
           }
         />

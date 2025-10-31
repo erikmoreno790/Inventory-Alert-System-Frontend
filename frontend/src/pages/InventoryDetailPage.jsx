@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   AlertTriangle,
@@ -8,6 +8,8 @@ import {
   Trash,
   FileText,
   Package2,
+  PlusCircle,
+  MinusCircle,
 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import TopNavbar from "../components/TopNavbar";
@@ -30,14 +32,14 @@ const RepuestoDetailPage = () => {
     const fetchDetalleProducto = async () => {
       try {
         const config = { headers: { Authorization: `Bearer ${token}` } };
-        const [prodRes, movRes, alertasRes] = await Promise.all([
+        const [prodRes /*, movRes, alertasRes*/] = await Promise.all([
           api.get(`/repuestos/${id}`, config),
           // api.get(`/repuestos/movimientos/${id}`, config),
           // api.get(`/alerts/product/${id}`, config),
         ]);
         setProducto(prodRes.data);
-        setMovimientos(movRes.data);
-        setAlertas(alertasRes.data);
+        // setMovimientos(movRes.data);
+        // setAlertas(alertasRes.data);
       } catch (error) {
         console.error("Error cargando el detalle:", error);
       } finally {
@@ -70,9 +72,8 @@ const RepuestoDetailPage = () => {
     <div className="flex min-h-screen bg-gray-50 text-gray-800">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div
-        className={`flex-1 ${
-          sidebarOpen ? "ml-64" : ""
-        } transition-all duration-300`}
+        className={`flex-1 transition-all duration-300 
+    ${sidebarOpen ? "ml-64" : "ml-0"} md:ml-64`}
       >
         <TopNavbar onToggleSidebar={toggleSidebar} />
 
@@ -92,7 +93,6 @@ const RepuestoDetailPage = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-semibold">{producto.nombre}</h1>
-                {/* Mostrar referencia resaltada para mayor visualizacion */}
                 <p className="text-base text-black-500">
                   Referencia:{" "}
                   <span className="font-mono bg-yellow-300 px-2 py-1 rounded">
@@ -101,22 +101,44 @@ const RepuestoDetailPage = () => {
                 </p>
               </div>
             </div>
+
             <div className="flex flex-wrap gap-2">
+              {/* Nuevo botón: Registrar Entrada */}
+              <button
+                onClick={() => navigate(`/inventario/entradas/${id}`)}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
+              >
+                <PlusCircle size={16} /> Registrar Entrada
+              </button>
+
+              {/* Nuevo botón: Registrar Salida */}
+              <button
+                onClick={() => navigate(`/inventario/salidas/${id}`)}
+                className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition"
+              >
+                <MinusCircle size={16} /> Registrar Salida
+              </button>
+
+              {/* Botón Editar */}
               <button
                 onClick={() => navigate(`/inventario/editar/${id}`)}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
               >
                 <Edit size={16} /> Editar
               </button>
+
+              {/* Botón Eliminar */}
               <button
                 onClick={handleDelete}
                 className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
               >
                 <Trash size={16} /> Eliminar
               </button>
+
+              {/* Botón Movimientos */}
               <button
                 onClick={() => navigate(`/inventario/movimientos/${id}`)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition"
               >
                 <History size={16} /> Movimientos
               </button>

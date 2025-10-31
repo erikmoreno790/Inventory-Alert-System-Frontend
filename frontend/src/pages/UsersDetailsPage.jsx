@@ -37,18 +37,21 @@ const UsersDetailsPage = () => {
   }, []);
 
   // Filtrado dinámico
-  const filteredUsers = users.filter(
-  (u) =>
-    (u.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (u.email || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (u.role || "").toLowerCase().includes(searchTerm.toLowerCase())
-);
+  const filteredUsers = users.filter((u) => {
+    const nombre = u.nombre?.toLowerCase() || "";
+    const email = u.email?.toLowerCase() || "";
+    const rol = u.rol?.toLowerCase() || "";
+    const search = searchTerm.toLowerCase();
 
+    return (
+      nombre.includes(search) || email.includes(search) || rol.includes(search)
+    );
+  });
 
-  // Función para abrir modal
+  // Abrir modal
   const openRoleModal = (user) => {
     setSelectedUser(user);
-    setNewRole(user.role);
+    setNewRole(user.rol);
     setShowRoleModal(true);
   };
 
@@ -61,7 +64,7 @@ const UsersDetailsPage = () => {
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
       await api.post(
-        `/users/assign-role/${selectedUser.id}`,
+        `/users/assign-role/${selectedUser.id_usuario}`,
         { role: newRole },
         config
       );
@@ -69,7 +72,7 @@ const UsersDetailsPage = () => {
       // Actualizar localmente
       setUsers((prev) =>
         prev.map((u) =>
-          u.id === selectedUser.id ? { ...u, role: newRole } : u
+          u.id_usuario === selectedUser.id_usuario ? { ...u, rol: newRole } : u
         )
       );
 
@@ -122,36 +125,36 @@ const UsersDetailsPage = () => {
                   <tr className="bg-gray-100 text-gray-700 uppercase text-sm">
                     <th className="p-3 border-b">Nombre</th>
                     <th className="p-3 border-b">Correo</th>
+                    <th className="p-3 border-b">Teléfono</th>
                     <th className="p-3 border-b">Rol</th>
                     <th className="p-3 border-b">Creado</th>
-                    <th className="p-3 border-b">Actualizado</th>
                     <th className="p-3 border-b text-center">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredUsers.map((user) => (
                     <tr
-                      key={user.id}
+                      key={user.id_usuario}
                       className="hover:bg-gray-50 transition text-gray-700"
                     >
-                      <td className="p-3 border-b">{user.name}</td>
+                      <td className="p-3 border-b">{user.nombre}</td>
                       <td className="p-3 border-b">{user.email}</td>
-                      <td className="p-3 border-b capitalize">{user.role}</td>
+                      <td className="p-3 border-b">{user.telefono}</td>
+                      <td className="p-3 border-b capitalize">{user.rol}</td>
                       <td className="p-3 border-b">
                         {new Date(user.created_at).toLocaleDateString()}
                       </td>
-                      <td className="p-3 border-b">
-                        {new Date(user.updated_at).toLocaleDateString()}
-                      </td>
                       <td className="p-3 border-b text-center flex justify-center gap-3">
                         <button
-                          onClick={() => navigate(`/users/${user.id}`)}
+                          onClick={() => navigate(`/users/${user.id_usuario}`)}
                           className="text-blue-600 hover:text-blue-800"
                         >
                           <Eye size={18} />
                         </button>
                         <button
-                          onClick={() => navigate(`/users/edit/${user.id}`)}
+                          onClick={() =>
+                            navigate(`/users/edit/${user.id_usuario}`)
+                          }
                           className="text-green-600 hover:text-green-800"
                         >
                           <Pencil size={18} />
@@ -181,7 +184,8 @@ const UsersDetailsPage = () => {
             </h3>
 
             <p className="text-sm text-gray-700 mb-2">
-              Usuario: <span className="font-medium">{selectedUser.name}</span>
+              Usuario:{" "}
+              <span className="font-medium">{selectedUser.nombre}</span>
             </p>
 
             <select
