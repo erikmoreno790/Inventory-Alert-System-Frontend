@@ -10,7 +10,6 @@ const InventoryListPage = () => {
   const [inventario, setInventario] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
   const token = localStorage.getItem("token");
 
   // 🔹 Filtros persistentes
@@ -155,9 +154,8 @@ const InventoryListPage = () => {
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div
-        className={`flex-1 ${
-          sidebarOpen ? "ml-64" : ""
-        } transition-all duration-300`}
+        className={`flex-1 transition-all duration-300 
+    ${sidebarOpen ? "ml-64" : "ml-0"} md:ml-64`}
       >
         <TopNavbar onToggleSidebar={toggleSidebar} />
         <main>
@@ -231,13 +229,16 @@ const InventoryListPage = () => {
                 <table className="min-w-full bg-white border rounded-lg shadow">
                   <thead className="bg-gray-100">
                     <tr>
-                      <th className="text-left px-4 py-2">Nombre</th>
                       <th className="text-left px-4 py-2">Categoría</th>
+                      <th className="text-left px-4 py-2">Nombre</th>
                       <th className="text-left px-4 py-2">Referencia</th>
+                      <th className="text-center px-4 py-2">Cantidad Actual</th>
                       <th className="text-center px-4 py-2">
-                        Cantidad Actual
+                        Precio Unitario de Costo
                       </th>
-                      <th className="text-center px-4 py-2">Precio Unitario</th>
+                      <th className="text-center px-4 py-2">
+                        Precio Unitario de Venta
+                      </th>
                       <th className="text-center px-4 py-2">Acciones</th>
                     </tr>
                   </thead>
@@ -247,8 +248,8 @@ const InventoryListPage = () => {
                         key={item.repuesto_id}
                         className="border-t hover:bg-gray-50"
                       >
-                        <td className="px-4 py-2">{item.nombre}</td>
                         <td className="px-4 py-2">{item.categoria}</td>
+                        <td className="px-4 py-2">{item.nombre}</td>
                         <td className="px-4 py-2">{item.referencia}</td>
                         <td
                           className={`px-4 py-2 text-center ${
@@ -260,7 +261,24 @@ const InventoryListPage = () => {
                           {item.stock}
                         </td>
                         <td className="px-4 py-2 text-center">
-                          ${item.precio_unitario}
+                          {Number(item.precio_unitario_costo).toLocaleString(
+                            "es-CO",
+                            {
+                              style: "currency",
+                              currency: "COP",
+                              minimumFractionDigits: 0,
+                            }
+                          )}
+                        </td>
+                        <td className="px-4 py-2 text-center">
+                          {Number(item.precio_unitario_venta).toLocaleString(
+                            "es-CO",
+                            {
+                              style: "currency",
+                              currency: "COP",
+                              minimumFractionDigits: 0,
+                            }
+                          )}
                         </td>
                         <td className="px-4 py-2 text-center">
                           <div className="flex justify-center gap-2">

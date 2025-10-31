@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import TopNavbar from "../components/TopNavbar";
 import api from "../api";
@@ -8,16 +8,13 @@ import "react-toastify/dist/ReactToastify.css";
 
 const EntriesPage = () => {
   const navigate = useNavigate();
+  const { id } = useParams(); // 🔹 ID recibido desde la ruta
   const token = localStorage.getItem("token");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const [repuestos, setRepuestos] = useState([]);
-  const [filteredRepuestos, setFilteredRepuestos] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showDropdown, setShowDropdown] = useState(false);
-
   const [form, setForm] = useState({
     repuesto_id: "",
+    nombre: "",
     referencia: "",
     tipo_entrada: "",
     cantidad: "",
@@ -27,53 +24,29 @@ const EntriesPage = () => {
     fecha: "",
   });
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  // 🔹 Cargar repuestos existentes
+  // 🔹 Si se envía un ID desde el detalle, obtener datos del repuesto
   useEffect(() => {
-    const fetchRepuestos = async () => {
+    const fetchRepuestoById = async () => {
+      if (!id) return;
       try {
         const config = { headers: { Authorization: `Bearer ${token}` } };
-        const res = await api.get("/repuestos", config);
-        setRepuestos(res.data);
+        const res = await api.get(`/repuestos/${id}`, config);
+        const repuesto = res.data;
+
+        setForm((prev) => ({
+          ...prev,
+          repuesto_id: repuesto.repuesto_id,
+          nombre: repuesto.nombre,
+          referencia: repuesto.referencia,
+        }));
       } catch (err) {
-        console.error("Error cargando repuestos:", err);
+        console.error("Error cargando repuesto por id:", err);
       }
     };
-    fetchRepuestos();
-  }, [token]);
-
-  // 🔹 Filtrar repuestos dinámicamente
-  useEffect(() => {
-    if (searchTerm.trim() === "") {
-      setFilteredRepuestos([]);
-      return;
-    }
-
-    const filtered = repuestos.filter((r) => {
-      const nombre = r.nombre?.toLowerCase() || "";
-      const referencia = r.referencia?.toLowerCase() || "";
-      return (
-        nombre.includes(searchTerm.toLowerCase()) ||
-        referencia.includes(searchTerm.toLowerCase())
-      );
-    });
-
-    setFilteredRepuestos(filtered);
-  }, [searchTerm, repuestos]);
-
-  // 🔹 Seleccionar un repuesto
-  const handleSelectRepuesto = (r) => {
-    setForm({
-      ...form,
-      repuesto_id: r.id || r.repuesto_id,
-      referencia: r.referencia,
-    });
-    setSearchTerm(r.nombre);
-    setShowDropdown(false);
-  };
+    fetchRepuestoById();
+  }, [id, token]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -82,11 +55,6 @@ const EntriesPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!form.repuesto_id) {
-      toast.error("Por favor selecciona un repuesto del listado.");
-      return;
-    }
 
     const config = {
       headers: {
@@ -97,23 +65,17 @@ const EntriesPage = () => {
 
     try {
       await api.post("/entradas", form, config);
-
       toast.success("✅ Entrada registrada exitosamente", {
         position: "top-right",
         autoClose: 3000,
         theme: "colored",
       });
-
-      setTimeout(
-        () => navigate("/historial-repuestos/entradas-entradas"),
-        1500
-      );
+      setTimeout(() => navigate("/inventario/movimientos"), 1500);
     } catch (err) {
       console.error(
         "Error registrando entrada:",
         err.response?.data || err.message
       );
-
       toast.error("❌ Error al registrar la entrada", {
         position: "top-right",
         autoClose: 4000,
@@ -125,13 +87,12 @@ const EntriesPage = () => {
   return (
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
       <div
-        className={`flex-1 ${
-          sidebarOpen ? "ml-64" : ""
-        } transition-all duration-300`}
+        className={`flex-1 transition-all duration-300 
+    ${sidebarOpen ? "ml-64" : "ml-0"} md:ml-64`}
       >
         <TopNavbar onToggleSidebar={toggleSidebar} />
+
         <main className="p-6 max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold text-gray-800">
@@ -164,50 +125,20 @@ const EntriesPage = () => {
               />
             </div>
 
-            {/* Campo de búsqueda */}
+            {/* Nombre del repuesto*/}
             <div className="relative md:col-span-2">
               <label className="block text-gray-700 mb-2 font-medium">
-                Buscar repuesto (por nombre o referencia)
+                Nombre del repuesto
               </label>
               <input
                 type="text"
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setShowDropdown(true);
-                }}
-                placeholder="Ej: Pastilla de freno, 1234-AB"
+                value={form.nombre}
+                readOnly
                 className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
               />
-
-              {/* Lista filtrada */}
-              {showDropdown && (
-                <div className="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 w-full max-h-40 overflow-y-auto shadow-lg">
-                  {filteredRepuestos.length > 0 ? (
-                    <ul>
-                      {filteredRepuestos.map((r) => (
-                        <li
-                          key={r.id || r.repuesto_id}
-                          onClick={() => handleSelectRepuesto(r)}
-                          className="p-2 hover:bg-blue-100 cursor-pointer"
-                        >
-                          <span className="font-medium">{r.nombre}</span>{" "}
-                          <span className="text-gray-500 text-sm">
-                            ({r.referencia})
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <div className="p-2 text-gray-500 italic text-sm text-center">
-                      Sin resultados
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
 
-            {/* Repuesto seleccionado (solo lectura) */}
+            {/* Referencia seleccionada */}
             <div>
               <label className="block text-gray-700 mb-2 font-medium">
                 Referencia seleccionada

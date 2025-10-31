@@ -33,13 +33,15 @@ const EditarCotizacionPage = () => {
   });
 
   useEffect(() => {
-  const today = new Date();
-  const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000)
-    .toISOString()
-    .split("T")[0];
+    const today = new Date();
+    const localDate = new Date(
+      today.getTime() - today.getTimezoneOffset() * 60000
+    )
+      .toISOString()
+      .split("T")[0];
 
-  setCotizacion(prev => ({ ...prev, fecha: localDate }));
-}, []);
+    setCotizacion((prev) => ({ ...prev, fecha: localDate }));
+  }, []);
 
   // 🔹 Traer cotización existente
   useEffect(() => {
@@ -195,9 +197,8 @@ const EditarCotizacionPage = () => {
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div
-        className={`flex-1 ${
-          sidebarOpen ? "ml-64" : ""
-        } transition-all duration-300`}
+        className={`flex-1 transition-all duration-300 
+    ${sidebarOpen ? "ml-64" : "ml-0"} md:ml-64`}
       >
         <TopNavbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
         <main>

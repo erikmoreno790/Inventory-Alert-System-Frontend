@@ -9,6 +9,7 @@ const InventoryFormPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { id } = useParams();
   const token = localStorage.getItem("token");
+  const [categorias, setCategorias] = useState([]);
 
   const [form, setForm] = useState({
     nombre: "",
@@ -30,23 +31,19 @@ const InventoryFormPage = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  const categorias = [
-    "Amortiguador",
-    "Disco",
-    "Campana",
-    "Bomba de Freno",
-    "Correa",
-    "Pastilla de Freno",
-    "Manguera de Freno",
-    "Bujía",
-    "Retenedor",
-    "Banda de Freno",
-    "Guardapolvo",
-    "Punta de eje",
-    "Cilindro",
-    "Booster",
-    "Guaya",
-  ];
+  // 🔹 Cargar categorías desde la AP
+  useEffect(() => {
+    const fetchCategorias = async () => {
+      try {
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        const res = await api.get("/repuestos/categorias/lista", config);
+        setCategorias(res.data);
+      } catch (err) {
+        console.error("Error cargando categorías:", err);
+      }
+    };
+    fetchCategorias();
+  }, [token]);
 
   // 🔹 Si hay ID, cargar datos del producto para edición
   useEffect(() => {
@@ -115,9 +112,8 @@ const InventoryFormPage = () => {
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div
-        className={`flex-1 ${
-          sidebarOpen ? "ml-64" : ""
-        } transition-all duration-300`}
+        className={`flex-1 transition-all duration-300 
+    ${sidebarOpen ? "ml-64" : "ml-0"} md:ml-64`}
       >
         <TopNavbar onToggleSidebar={toggleSidebar} />
         <main className="p-6 max-w-5xl mx-auto">

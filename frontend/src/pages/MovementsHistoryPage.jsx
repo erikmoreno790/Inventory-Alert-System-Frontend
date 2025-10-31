@@ -9,44 +9,79 @@ const MovementsHistory = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [movements, setMovements] = useState([]);
+  const [categorias, setCategorias] = useState([]);
   const [filteredMovements, setFilteredMovements] = useState([]);
 
-  // Filtros
-  const [filters, setFilters] = useState({
-    producto: "",
-    tipo: "",
-    motivo: "",
-    factura: "",
-    fechaInicio: "",
-    fechaFin: "",
+  // 🔹 Filtros persistentes (se cargan desde sessionStorage)
+  const [filters, setFilters] = useState(() => {
+    const saved = sessionStorage.getItem("movementsFilters");
+    return (
+      JSON.parse(saved) || {
+        producto: "",
+        tipo: "",
+        motivo: "",
+        categoria: "",
+        factura: "",
+        fechaInicio: "",
+        fechaFin: "",
+      }
+    );
   });
+
+  // 🔹 Paginación persistente
+  const [currentPage, setCurrentPage] = useState(() => {
+    const saved = sessionStorage.getItem("movementsPage");
+    return saved ? parseInt(saved) : 1;
+  });
+
+  const itemsPerPage = 10;
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
+
+  // 🔹 Guardar filtros y página en sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem("movementsFilters", JSON.stringify(filters));
+  }, [filters]);
+
+  useEffect(() => {
+    sessionStorage.setItem("movementsPage", currentPage);
+  }, [currentPage]);
 
   // 🔹 Cargar historial de movimientos
   useEffect(() => {
     const fetchData = async () => {
       try {
         const config = { headers: { Authorization: `Bearer ${token}` } };
-        const res = await api.get("/repuestos/movimientos", config);
 
-        // Normalizamos los datos para la tabla
-        const mapped = res.data.map((m) => ({
+        const [movimientosRes, categoriasRes] = await Promise.all([
+          api.get("/repuestos/movimientos", config),
+          api.get("/repuestos/categorias/lista", config),
+        ]);
+        const res = movimientosRes.data;
+        const categorias = categoriasRes.data;
+
+        // 🔹 Normalizar + eliminar duplicados por ID
+        const mapped = res.map((m) => ({
           id: `${m.tipo_movimiento}-${m.movimiento_id}`,
           fecha: m.fecha,
+          categoria: m.categoria || "Sin categoría",
           producto: m.repuesto || "Desconocido",
           tipo: m.tipo_movimiento,
           motivo: m.subtipo,
           cantidad: m.cantidad,
-          destino: m.contraparte || "-",
+          referencia: m.referencia || "N/A",
           factura: m.factura || "",
-          nombre_usuario: m.usuario || "Desconocido",
         }));
 
-        setMovements(mapped);
-        setFilteredMovements(mapped);
+        const unique = Array.from(
+          new Map(mapped.map((m) => [m.id, m])).values()
+        );
+
+        setMovements(unique);
+        setCategorias(categorias);
+        setFilteredMovements(unique);
       } catch (err) {
         console.error("Error cargando movimientos:", err);
       }
@@ -59,6 +94,7 @@ const MovementsHistory = () => {
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
+    setCurrentPage(1); // Reiniciar a la primera página al filtrar
   };
 
   // 🔹 Aplicar filtros
@@ -78,11 +114,11 @@ const MovementsHistory = () => {
         m.motivo?.toLowerCase().includes(filters.motivo.toLowerCase())
       );
     }
-    if (filters.factura) {
-      result = result.filter((m) =>
-        m.factura?.toLowerCase().includes(filters.factura.toLowerCase())
-      );
+    //Filtro exacto de categoria
+    if (filters.categoria) {
+      result = result.filter((m) => m.categoria === filters.categoria);
     }
+
     if (filters.fechaInicio) {
       result = result.filter(
         (m) => new Date(m.fecha) >= new Date(filters.fechaInicio)
@@ -97,14 +133,41 @@ const MovementsHistory = () => {
     setFilteredMovements(result);
   }, [filters, movements]);
 
+  // 🔹 Paginación
+  const totalPages = Math.ceil(filteredMovements.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedData = filteredMovements.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
+
+  // 🔹 Paginación truncada (por ejemplo: 1 … 4 5 6 … 10)
+  const getVisiblePages = () => {
+    const delta = 2;
+    const range = [];
+    for (
+      let i = Math.max(1, currentPage - delta);
+      i <= Math.min(totalPages, currentPage + delta);
+      i++
+    ) {
+      range.push(i);
+    }
+
+    if (range[0] > 2) range.unshift("...");
+    if (range[0] !== 1) range.unshift(1);
+    if (range[range.length - 1] < totalPages - 1) range.push("...");
+    if (range[range.length - 1] !== totalPages) range.push(totalPages);
+
+    return range;
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div
-        className={`flex-1 ${
-          sidebarOpen ? "ml-64" : ""
-        } transition-all duration-300`}
+        className={`flex-1 transition-all duration-300 
+    ${sidebarOpen ? "ml-64" : "ml-0"} md:ml-64`}
       >
         <TopNavbar onToggleSidebar={toggleSidebar} />
 
@@ -133,22 +196,33 @@ const MovementsHistory = () => {
               <option value="Entrada">Entrada</option>
               <option value="Salida">Salida</option>
             </select>
-            <input
-              type="text"
+            <select
               name="motivo"
-              placeholder="Buscar por motivo"
               value={filters.motivo}
               onChange={handleFilterChange}
               className="border rounded-lg px-3 py-2"
-            />
-            <input
-              type="text"
-              name="factura"
-              placeholder="Buscar por factura"
-              value={filters.factura}
+            >
+              <option value="">Todos</option>
+              <option value="compra">Compra</option>
+              <option value="venta">Venta</option>
+              <option value="devolucion">Devolución</option>
+              <option value="ajuste">Ajuste</option>
+              <option value="otro">Otro</option>
+            </select>
+
+            <select
+              name="categoria"
+              value={filters.categoria}
               onChange={handleFilterChange}
               className="border rounded-lg px-3 py-2"
-            />
+            >
+              <option value="">Todas las categorías</option>
+              {categorias.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
             <input
               type="date"
               name="fechaInicio"
@@ -171,21 +245,22 @@ const MovementsHistory = () => {
               <thead>
                 <tr className="bg-gray-200 text-gray-700">
                   <th className="px-4 py-2 text-left">Fecha</th>
+                  <th className="px-4 py-2 text-left">Categoría</th>
                   <th className="px-4 py-2 text-left">Producto</th>
                   <th className="px-4 py-2 text-left">Tipo</th>
                   <th className="px-4 py-2 text-left">Motivo</th>
                   <th className="px-4 py-2 text-left">Cantidad</th>
-                  <th className="px-4 py-2 text-left">Destino/Proveedor</th>
-                  <th className="px-4 py-2 text-left">Usuario</th>
+                  <th className="px-4 py-2 text-left">Referencia</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredMovements.length > 0 ? (
-                  filteredMovements.map((m) => (
+                {paginatedData.length > 0 ? (
+                  paginatedData.map((m) => (
                     <tr key={m.id} className="border-t hover:bg-gray-50">
                       <td className="px-4 py-2">
                         {new Date(m.fecha).toLocaleDateString()}
                       </td>
+                      <td className="px-4 py-2">{m.categoria}</td>
                       <td className="px-4 py-2">{m.producto}</td>
                       <td
                         className={`px-4 py-2 font-semibold ${
@@ -198,13 +273,12 @@ const MovementsHistory = () => {
                       </td>
                       <td className="px-4 py-2">{m.motivo}</td>
                       <td className="px-4 py-2">{m.cantidad}</td>
-                      <td className="px-4 py-2">{m.destino}</td>
-                      <td className="px-4 py-2">{m.nombre_usuario}</td>
+                      <td className="px-4 py-2">{m.referencia}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="text-center text-gray-500 py-6">
+                    <td colSpan="7" className="text-center text-gray-500 py-6">
                       No se encontraron movimientos.
                     </td>
                   </tr>
@@ -212,6 +286,49 @@ const MovementsHistory = () => {
               </tbody>
             </table>
           </div>
+
+          {/* 🔹 Controles de paginación */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center mt-6 space-x-2">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 bg-gray-200 rounded-lg disabled:opacity-50"
+              >
+                ◀
+              </button>
+
+              {getVisiblePages().map((page, idx) =>
+                page === "..." ? (
+                  <span key={idx} className="px-2">
+                    ...
+                  </span>
+                ) : (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-1 rounded-lg ${
+                      currentPage === page
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                )
+              )}
+
+              <button
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(totalPages, p + 1))
+                }
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 bg-gray-200 rounded-lg disabled:opacity-50"
+              >
+                ▶
+              </button>
+            </div>
+          )}
         </main>
       </div>
     </div>
