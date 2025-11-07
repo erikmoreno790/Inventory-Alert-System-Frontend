@@ -232,10 +232,8 @@ const InventoryListPage = () => {
                       <th className="text-left px-4 py-2">Categoría</th>
                       <th className="text-left px-4 py-2">Nombre</th>
                       <th className="text-left px-4 py-2">Referencia</th>
+                      <th className="text-left px-4 py-2">Marca</th>
                       <th className="text-center px-4 py-2">Cantidad Actual</th>
-                      <th className="text-center px-4 py-2">
-                        Precio Unitario de Costo
-                      </th>
                       <th className="text-center px-4 py-2">
                         Precio Unitario de Venta
                       </th>
@@ -251,6 +249,7 @@ const InventoryListPage = () => {
                         <td className="px-4 py-2">{item.categoria}</td>
                         <td className="px-4 py-2">{item.nombre}</td>
                         <td className="px-4 py-2">{item.referencia}</td>
+                        <td className="px-4 py-2">{item.marca}</td>
                         <td
                           className={`px-4 py-2 text-center ${
                             item.stock < item.stock_minimo
@@ -260,7 +259,7 @@ const InventoryListPage = () => {
                         >
                           {item.stock}
                         </td>
-                        <td className="px-4 py-2 text-center">
+                        {/* <td className="px-4 py-2 text-center">
                           {Number(item.precio_unitario_costo).toLocaleString(
                             "es-CO",
                             {
@@ -269,7 +268,7 @@ const InventoryListPage = () => {
                               minimumFractionDigits: 0,
                             }
                           )}
-                        </td>
+                        </td> */}
                         <td className="px-4 py-2 text-center">
                           {Number(item.precio_unitario_venta).toLocaleString(
                             "es-CO",
