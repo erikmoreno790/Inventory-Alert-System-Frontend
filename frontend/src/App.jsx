@@ -8,6 +8,7 @@ import EditItemPage from "./pages/EditItemPage";
 import EntriesPage from "./pages/EntriesPage";
 import ExitsPage from "./pages/ExitsPage";
 import MovementsHistoryPage from "./pages/MovementsHistoryPage";
+import MovementDetailPage from "./pages/MovementDetailPage";
 import AlertsPage from "./pages/AlertsHistoryPage";
 import QuotationPage from "./pages/QuotationPage";
 import QuotationPDFView from "./pages/QuotationPDFView";
@@ -90,6 +91,14 @@ function App() {
           element={
             <PrivateRoute>
               <MovementsHistoryPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/inventario/movimientos/:id/:tipo"
+          element={
+            <PrivateRoute>
+              <MovementDetailPage />
             </PrivateRoute>
           }
         />
