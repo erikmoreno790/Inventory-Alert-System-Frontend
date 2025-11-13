@@ -23,7 +23,7 @@ const RepuestoDetailPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [producto, setProducto] = useState(null);
   const [movimientos, setMovimientos] = useState([]);
-  const [alertas, setAlertas] = useState([]);
+  //const [alertas, setAlertas] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
@@ -32,13 +32,13 @@ const RepuestoDetailPage = () => {
     const fetchDetalleProducto = async () => {
       try {
         const config = { headers: { Authorization: `Bearer ${token}` } };
-        const [prodRes /*, movRes, alertasRes*/] = await Promise.all([
+        const [prodRes, movRes /* alertasRes*/] = await Promise.all([
           api.get(`/repuestos/${id}`, config),
-          // api.get(`/repuestos/movimientos/${id}`, config),
+          api.get(`/repuestos/movimientos/${id}`, config),
           // api.get(`/alerts/product/${id}`, config),
         ]);
         setProducto(prodRes.data);
-        // setMovimientos(movRes.data);
+        setMovimientos(movRes.data);
         // setAlertas(alertasRes.data);
       } catch (error) {
         console.error("Error cargando el detalle:", error);
@@ -156,13 +156,16 @@ const RepuestoDetailPage = () => {
                 <strong>Categoría:</strong> {producto.categoria}
               </p>
               <p>
+                <strong>Referencia:</strong> {producto.referencia}
+              </p>
+              <p>
                 <strong>Marca:</strong> {producto.marca || "No especificado"}
               </p>
               <p>
                 <strong>Stock actual:</strong>{" "}
                 <span
                   className={`${
-                    producto.stock < producto.stock_minimo
+                    producto.stock < producto.stock
                       ? "text-red-600 font-semibold"
                       : "text-green-600 font-semibold"
                   }`}
@@ -171,16 +174,13 @@ const RepuestoDetailPage = () => {
                 </span>
               </p>
               <p>
-                <strong>Stock mínimo:</strong> {producto.stock_minimo}
-              </p>
-              <p>
                 <strong>Ubicación:</strong>{" "}
                 {producto.ubicacion || "No asignada"}
               </p>
               <p>
-                <strong>Precio:</strong>{" "}
-                {producto.precio_unitario
-                  ? `$ ${parseFloat(producto.precio_unitario)
+                <strong>Precio de Venta:</strong>{" "}
+                {producto.precio_unitario_venta
+                  ? `$ ${parseFloat(producto.precio_unitario_venta)
                       .toFixed(0)
                       .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`
                   : "No especificado"}
@@ -189,7 +189,7 @@ const RepuestoDetailPage = () => {
           </section>
 
           {/* Alertas */}
-          <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          {/*<section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-red-600">
               <AlertTriangle size={20} /> Alertas Asociadas
             </h2>
@@ -206,7 +206,7 @@ const RepuestoDetailPage = () => {
                 No hay alertas para este repuesto.
               </p>
             )}
-          </section>
+          </section>*/}
 
           {/* Movimientos */}
           <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -218,11 +218,15 @@ const RepuestoDetailPage = () => {
                 <table className="min-w-full text-base border border-gray-100 rounded-lg">
                   <thead className="bg-gray-100 text-gray-700">
                     <tr>
+                      <th className="text-left px-4 py-2">Fecha</th>
                       <th className="text-left px-4 py-2">Tipo</th>
                       <th className="text-left px-4 py-2">Cantidad</th>
-                      <th className="text-left px-4 py-2">Fecha</th>
-                      <th className="text-left px-4 py-2">Responsable</th>
-                      <th className="text-left px-4 py-2">Observaciones</th>
+                      <th className="text-left px-4 py-2">Destino</th>
+                      <th className="text-left px-4 py-2">Motivo</th>
+                      <th className="text-left px-4 py-2">
+                        Responsable del registro
+                      </th>
+                      <th className="text-center px-4 py-2">Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -231,13 +235,16 @@ const RepuestoDetailPage = () => {
                         key={i}
                         className="border-t hover:bg-gray-50 transition-colors"
                       >
-                        <td className="px-4 py-2 capitalize">{mov.tipo}</td>
-                        <td className="px-4 py-2">{mov.cantidad}</td>
                         <td className="px-4 py-2">
                           {new Date(mov.fecha).toLocaleDateString()}
                         </td>
-                        <td className="px-4 py-2">{mov.usuario || "N/A"}</td>
-                        <td className="px-4 py-2">{mov.observacion || "—"}</td>
+                        <td className="px-4 py-2">{mov.tipo_movimiento}</td>
+                        <td className="px-4 py-2">{mov.cantidad}</td>
+                        <td className="px-4 py-2">{mov.contraparte || "—"}</td>
+                        <td className="px-4 py-2">{mov.subtipo || "—"}</td>
+                        <td className="px-4 py-2 capitalize">
+                          {mov.usuario || "N/A"}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

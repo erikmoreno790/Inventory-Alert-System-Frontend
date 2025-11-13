@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import TopNavbar from "../components/TopNavbar";
 import api from "../api";
+import { useNavigate } from "react-router-dom";
 
 const MovementsHistory = () => {
   const token = localStorage.getItem("token");
@@ -11,6 +12,7 @@ const MovementsHistory = () => {
   const [movements, setMovements] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [filteredMovements, setFilteredMovements] = useState([]);
+  const navigate = useNavigate();
 
   // 🔹 Filtros persistentes (se cargan desde sessionStorage)
   const [filters, setFilters] = useState(() => {
@@ -60,11 +62,12 @@ const MovementsHistory = () => {
           api.get("/repuestos/categorias/lista", config),
         ]);
         const res = movimientosRes.data;
+        console.log(res);
         const categorias = categoriasRes.data;
 
         // 🔹 Normalizar + eliminar duplicados por ID
         const mapped = res.map((m) => ({
-          id: `${m.tipo_movimiento}-${m.movimiento_id}`,
+          id: m.movimiento_id,
           fecha: m.fecha,
           categoria: m.categoria || "Sin categoría",
           producto: m.repuesto || "Desconocido",
@@ -251,6 +254,7 @@ const MovementsHistory = () => {
                   <th className="px-4 py-2 text-left">Motivo</th>
                   <th className="px-4 py-2 text-left">Cantidad</th>
                   <th className="px-4 py-2 text-left">Referencia</th>
+                  <th className="text-center px-4 py-2">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -274,6 +278,38 @@ const MovementsHistory = () => {
                       <td className="px-4 py-2">{m.motivo}</td>
                       <td className="px-4 py-2">{m.cantidad}</td>
                       <td className="px-4 py-2">{m.referencia}</td>
+                      <td className="px-4 py-2 text-center">
+                        <div className="flex justify-center gap-2">
+                          <button
+                            onClick={() => {
+                              if (!m.id) {
+                                console.error("movimiento_id no definido:", m);
+                                return;
+                              }
+                              navigate(
+                                `/inventario/movimientos/${m.id}/${m.tipo}`
+                              );
+                            }}
+                            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-200"
+                          >
+                            Ver
+                          </button>
+                          <button
+                            onClick={() =>
+                              m.tipo === "Entrada"
+                                ? navigate(
+                                    `/inventario/entradas/${m.movimiento_id}`
+                                  )
+                                : navigate(
+                                    `/inventario/salidas/${m.movimiento_id}`
+                                  )
+                            }
+                            className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition duration-200 ml-2"
+                          >
+                            Editar
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   ))
                 ) : (
