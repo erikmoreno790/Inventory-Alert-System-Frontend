@@ -1,4 +1,3 @@
-// src/pages/MovementsHistory.jsx
 import { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import TopNavbar from "../components/TopNavbar";
@@ -8,13 +7,11 @@ import { useNavigate } from "react-router-dom";
 const MovementsHistory = () => {
   const token = localStorage.getItem("token");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const [movements, setMovements] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [filteredMovements, setFilteredMovements] = useState([]);
   const navigate = useNavigate();
 
-  // 🔹 Filtros persistentes (se cargan desde sessionStorage)
   const [filters, setFilters] = useState(() => {
     const saved = sessionStorage.getItem("movementsFilters");
     return (
@@ -30,7 +27,6 @@ const MovementsHistory = () => {
     );
   });
 
-  // 🔹 Paginación persistente
   const [currentPage, setCurrentPage] = useState(() => {
     const saved = sessionStorage.getItem("movementsPage");
     return saved ? parseInt(saved) : 1;
@@ -42,7 +38,6 @@ const MovementsHistory = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  // 🔹 Guardar filtros y página en sessionStorage
   useEffect(() => {
     sessionStorage.setItem("movementsFilters", JSON.stringify(filters));
   }, [filters]);
@@ -51,23 +46,20 @@ const MovementsHistory = () => {
     sessionStorage.setItem("movementsPage", currentPage);
   }, [currentPage]);
 
-  // 🔹 Cargar historial de movimientos
   useEffect(() => {
     const fetchData = async () => {
       try {
         const config = { headers: { Authorization: `Bearer ${token}` } };
-
         const [movimientosRes, categoriasRes] = await Promise.all([
           api.get("/repuestos/movimientos", config),
           api.get("/repuestos/categorias/lista", config),
         ]);
         const res = movimientosRes.data;
-        console.log(res);
-        const categorias = categoriasRes.data;
+        console.log("Datos de la API:", res);
 
-        // 🔹 Normalizar + eliminar duplicados por ID
-        const mapped = res.map((m) => ({
+        const mapped = res.map((m, index) => ({
           id: m.movimiento_id,
+          uniqueKey: `${m.movimiento_id}-${index}`,
           fecha: m.fecha,
           categoria: m.categoria || "Sin categoría",
           producto: m.repuesto || "Desconocido",
@@ -78,13 +70,22 @@ const MovementsHistory = () => {
           factura: m.factura || "",
         }));
 
-        const unique = Array.from(
-          new Map(mapped.map((m) => [m.id, m])).values()
-        );
+        const idCounts = {};
+        mapped.forEach((m) => {
+          idCounts[m.id] = (idCounts[m.id] || 0) + 1;
+        });
+        console.log("Conteo de movimiento_id:", idCounts);
+        const duplicates = Object.entries(idCounts)
+          .filter(([id, count]) => count > 1)
+          .map(([id, count]) => ({ id, count }));
+        console.log("movimiento_id duplicados:", duplicates);
 
-        setMovements(unique);
-        setCategorias(categorias);
-        setFilteredMovements(unique);
+        const sorted = mapped.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+        console.log("Movimientos mapeados:", sorted);
+        setMovements(sorted);
+        setCategorias(categoriasRes.data);
+        setFilteredMovements(sorted);
       } catch (err) {
         console.error("Error cargando movimientos:", err);
       }
@@ -93,15 +94,14 @@ const MovementsHistory = () => {
     fetchData();
   }, [token]);
 
-  // 🔹 Manejo de cambios en filtros
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
-    setCurrentPage(1); // Reiniciar a la primera página al filtrar
+    setCurrentPage(1);
   };
 
-  // 🔹 Aplicar filtros
   useEffect(() => {
+    console.log("Filtros actuales:", filters);
     let result = movements;
 
     if (filters.producto) {
@@ -117,11 +117,9 @@ const MovementsHistory = () => {
         m.motivo?.toLowerCase().includes(filters.motivo.toLowerCase())
       );
     }
-    //Filtro exacto de categoria
     if (filters.categoria) {
       result = result.filter((m) => m.categoria === filters.categoria);
     }
-
     if (filters.fechaInicio) {
       result = result.filter(
         (m) => new Date(m.fecha) >= new Date(filters.fechaInicio)
@@ -133,18 +131,15 @@ const MovementsHistory = () => {
       );
     }
 
+    console.log("Movimientos filtrados:", result);
     setFilteredMovements(result);
   }, [filters, movements]);
 
-  // 🔹 Paginación
   const totalPages = Math.ceil(filteredMovements.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = filteredMovements.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
+  const paginatedData = filteredMovements.slice(startIndex, startIndex + itemsPerPage);
+  console.log("Datos paginados para renderizar:", paginatedData);
 
-  // 🔹 Paginación truncada (por ejemplo: 1 … 4 5 6 … 10)
   const getVisiblePages = () => {
     const delta = 2;
     const range = [];
@@ -167,19 +162,15 @@ const MovementsHistory = () => {
   return (
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
       <div
         className={`flex-1 transition-all duration-300 
     ${sidebarOpen ? "ml-64" : "ml-0"} md:ml-64`}
       >
         <TopNavbar onToggleSidebar={toggleSidebar} />
-
         <main className="p-6 max-w-7xl mx-auto">
           <h2 className="text-3xl font-bold text-gray-800 mb-6">
             Historial de Movimientos
           </h2>
-
-          {/* 🔹 Filtros */}
           <div className="bg-white p-6 rounded-xl shadow-md mb-6 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <input
               type="text"
@@ -212,7 +203,6 @@ const MovementsHistory = () => {
               <option value="ajuste">Ajuste</option>
               <option value="otro">Otro</option>
             </select>
-
             <select
               name="categoria"
               value={filters.categoria}
@@ -240,9 +230,26 @@ const MovementsHistory = () => {
               onChange={handleFilterChange}
               className="border rounded-lg px-3 py-2"
             />
+            <button
+              onClick={() => {
+                setFilters({
+                  producto: "",
+                  tipo: "",
+                  motivo: "",
+                  categoria: "",
+                  factura: "",
+                  fechaInicio: "",
+                  fechaFin: "",
+                });
+                setCurrentPage(1);
+                sessionStorage.removeItem("movementsFilters");
+                sessionStorage.removeItem("movementsPage");
+              }}
+              className="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600"
+            >
+              Resetear Filtros
+            </button>
           </div>
-
-          {/* 🔹 Tabla */}
           <div className="bg-white rounded-xl shadow-md overflow-x-auto">
             <table className="min-w-full border-collapse">
               <thead>
@@ -260,7 +267,7 @@ const MovementsHistory = () => {
               <tbody>
                 {paginatedData.length > 0 ? (
                   paginatedData.map((m) => (
-                    <tr key={m.id} className="border-t hover:bg-gray-50">
+                    <tr key={m.uniqueKey} className="border-t hover:bg-gray-50">
                       <td className="px-4 py-2">
                         {new Date(m.fecha).toLocaleDateString()}
                       </td>
@@ -297,12 +304,8 @@ const MovementsHistory = () => {
                           <button
                             onClick={() =>
                               m.tipo === "Entrada"
-                                ? navigate(
-                                    `/inventario/entradas/${m.movimiento_id}`
-                                  )
-                                : navigate(
-                                    `/inventario/salidas/${m.movimiento_id}`
-                                  )
+                                ? navigate(`/inventario/entradas/${m.id}`)
+                                : navigate(`/inventario/salidas/${m.id}`)
                             }
                             className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition duration-200 ml-2"
                           >
@@ -322,8 +325,6 @@ const MovementsHistory = () => {
               </tbody>
             </table>
           </div>
-
-          {/* 🔹 Controles de paginación */}
           {totalPages > 1 && (
             <div className="flex justify-center items-center mt-6 space-x-2">
               <button
@@ -333,7 +334,6 @@ const MovementsHistory = () => {
               >
                 ◀
               </button>
-
               {getVisiblePages().map((page, idx) =>
                 page === "..." ? (
                   <span key={idx} className="px-2">
@@ -353,7 +353,6 @@ const MovementsHistory = () => {
                   </button>
                 )
               )}
-
               <button
                 onClick={() =>
                   setCurrentPage((p) => Math.min(totalPages, p + 1))
