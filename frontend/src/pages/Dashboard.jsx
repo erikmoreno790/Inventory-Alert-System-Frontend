@@ -35,7 +35,7 @@ const DashboardPage = () => {
             //api.get("/alerts/products/:id", config),
             api.get("/cotizaciones", config),
             api.get("/repuestos/total-cantidad", config),
-            api.get("/repuestos/categoria", config),
+            //api.get("/repuestos/categoria", config),
           ]);
 
         {
@@ -48,7 +48,7 @@ const DashboardPage = () => {
         //const alertasActivas = alertasRes.data;
         const cotizaciones = cotizacionesRes.data;
         const cantidadRepuestosTotales = repuestosRes.data.total;
-        const totalRepuestosPorCategoria = totalRepuestoRes.data;
+        //const totalRepuestosPorCategoria = totalRepuestoRes.data;
 
         setTotalRepuestosPorCategoria(totalRepuestosPorCategoria);
         setTotalCotizaciones(cotizaciones.length);
@@ -118,7 +118,7 @@ const DashboardPage = () => {
                 1
                 : 
                 {categoria: 'Campana', cantidad_total: '186'}*/}
-                {totalRepuestosPorCategoria.map((item, index) => (
+                {/*{totalRepuestosPorCategoria.map((item, index) => (
                   <div
                     key={index}
                     className="bg-white p-4 rounded-lg shadow flex items-center gap-4"
@@ -131,7 +131,7 @@ const DashboardPage = () => {
                       <p className="text-xl font-bold">{item.cantidad_total}</p>
                     </div>
                   </div>
-                ))}
+                ))}/*}
 
                 {/* Alertas Activas */}
                 <div className="bg-white p-4 rounded-lg shadow flex items-center gap-4">
