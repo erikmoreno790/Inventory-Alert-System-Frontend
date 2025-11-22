@@ -36,6 +36,11 @@ const Sidebar = () => {
       icon: <FileText size={18} />,
     },
     {
+      to: "/scanner",
+      label: "Escanear Repuesto",
+      icon: <FileText size={18} />,
+    },
+    {
       to: "/inventario/nuevo",
       label: "Nuevo Repuesto",
       icon: <Package size={18} />,
