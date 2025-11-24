@@ -14,7 +14,7 @@ const MovementDetailPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [movimiento, setMovimiento] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isDeleting, setIsDeleting] = useState(false);
+  //const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState(null);
 
   // Validate token
@@ -86,29 +86,29 @@ const MovementDetailPage = () => {
   }, [id, tipo, token, navigate]);
 
   // Handle deletion
-  const handleDelete = useCallback(async () => {
-    if (!window.confirm("¿Seguro que deseas eliminar este movimiento?")) return;
+  // const handleDelete = useCallback(async () => {
+  //   if (!window.confirm("¿Seguro que deseas eliminar este movimiento?")) return;
 
-    if (!token || !id || !tipo) {
-      toast.error("Parámetros inválidos.");
-      return;
-    }
+  //   if (!token || !id || !tipo) {
+  //     toast.error("Parámetros inválidos.");
+  //     return;
+  //   }
 
-    try {
-      setIsDeleting(true);
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      const endpoint =
-        tipo === "Entrada" ? `/entradas/${id}` : `/salidas/${id}`;
-      await api.delete(endpoint, config);
-      toast.success("Movimiento eliminado con éxito.");
-      navigate("/inventario/movimientos");
-    } catch (error) {
-      console.error("Error eliminando el movimiento:", error);
-      toast.error("Error al eliminar el movimiento.");
-    } finally {
-      setIsDeleting(false);
-    }
-  }, [id, tipo, token, navigate]);
+  //   try {
+  //     setIsDeleting(true);
+  //     const config = { headers: { Authorization: `Bearer ${token}` } };
+  //     const endpoint =
+  //       tipo === "Entrada" ? `/entradas/${id}` : `/salidas/${id}`;
+  //     await api.delete(endpoint, config);
+  //     toast.success("Movimiento eliminado con éxito.");
+  //     navigate("/inventario/movimientos");
+  //   } catch (error) {
+  //     console.error("Error eliminando el movimiento:", error);
+  //     toast.error("Error al eliminar el movimiento.");
+  //   } finally {
+  //     setIsDeleting(false);
+  //   }
+  // }, [id, tipo, token, navigate]);
 
   // Toggle sidebar
   const toggleSidebar = useCallback(() => {
@@ -187,7 +187,7 @@ const MovementDetailPage = () => {
               </div>
             </div>
             <div className="flex gap-3">
-              <button
+              {/* <button
                 onClick={() =>
                   navigate(
                     `/inventario/movimiento/editar/${tipo.toLowerCase()}/${id}`
@@ -209,7 +209,7 @@ const MovementDetailPage = () => {
                 }
               >
                 <Trash size={16} /> {isDeleting ? "Eliminando..." : "Eliminar"}
-              </button>
+              </button> */}
             </div>
           </div>
 

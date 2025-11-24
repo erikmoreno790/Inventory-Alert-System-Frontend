@@ -15,6 +15,7 @@ import {
   Users,
   AlertTriangle,
   Search,
+  Camera,
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -34,6 +35,11 @@ const Sidebar = () => {
       to: "/historial-cotizaciones",
       label: "Historial de Cotizaciones",
       icon: <FileText size={18} />,
+    },
+    {
+      to: "/scanner",
+      label: "Escanear Repuesto",
+      icon: <Camera size={18} />,
     },
     {
       to: "/inventario/nuevo",

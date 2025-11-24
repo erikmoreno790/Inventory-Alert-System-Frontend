@@ -1,3 +1,5 @@
+
+
 /* Oculta scrollbar visualmente, pero conserva el scroll funcional */
 .sidebar-scroll::-webkit-scrollbar {
   display: none;
@@ -6,3 +8,4 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+

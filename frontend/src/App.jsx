@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
+import Scanner from "./pages/ScannerPage"
 import Login from "./pages/Login";
 import InventoryListPage from "./pages/InventoryListPage";
 import InventoryForm from "./pages/InventoryFormPage";
@@ -34,6 +35,15 @@ function App() {
           element={
             <PrivateRoute>
               <Dashboard />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/scanner"
+          element={
+            <PrivateRoute>
+              <Scanner />
             </PrivateRoute>
           }
         />
