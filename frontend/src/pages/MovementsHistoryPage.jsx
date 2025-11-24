@@ -76,11 +76,13 @@ const MovementsHistory = () => {
         });
         console.log("Conteo de movimiento_id:", idCounts);
         const duplicates = Object.entries(idCounts)
-          .filter(([id, count]) => count > 1)
+          .filter(([, count]) => count > 1)
           .map(([id, count]) => ({ id, count }));
         console.log("movimiento_id duplicados:", duplicates);
 
-        const sorted = mapped.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+        const sorted = mapped.sort(
+          (a, b) => new Date(b.fecha) - new Date(a.fecha)
+        );
 
         console.log("Movimientos mapeados:", sorted);
         setMovements(sorted);
@@ -137,7 +139,10 @@ const MovementsHistory = () => {
 
   const totalPages = Math.ceil(filteredMovements.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = filteredMovements.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedData = filteredMovements.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
   console.log("Datos paginados para renderizar:", paginatedData);
 
   const getVisiblePages = () => {
@@ -301,7 +306,7 @@ const MovementsHistory = () => {
                           >
                             Ver
                           </button>
-                          <button
+                          {/* <button
                             onClick={() =>
                               m.tipo === "Entrada"
                                 ? navigate(`/inventario/entradas/${m.id}`)
@@ -310,7 +315,7 @@ const MovementsHistory = () => {
                             className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition duration-200 ml-2"
                           >
                             Editar
-                          </button>
+                          </button> */}
                         </div>
                       </td>
                     </tr>

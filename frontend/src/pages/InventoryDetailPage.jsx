@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
-  AlertTriangle,
   History,
   Edit,
   Trash,
@@ -10,10 +9,41 @@ import {
   Package2,
   PlusCircle,
   MinusCircle,
+  AlertTriangle, // Añadido para el indicador de stock
+  ShoppingBag, // Para Precio de Venta
+  MapPin, // Para Ubicación
+  Layers, // Para Categoría
+  Tag, // Para Marca
 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import TopNavbar from "../components/TopNavbar";
 import api from "../api";
+
+// Componente auxiliar para las Tarjetas de Información Clave
+const InfoCard = ({
+  icon: Icon,
+  title,
+  value,
+  colorClass = "text-gray-700",
+}) => (
+  <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 flex items-center justify-between transition-transform hover:shadow-lg">
+    <div className="flex flex-col">
+      <p className="text-sm font-medium text-gray-500">{title}</p>
+      <span className={`text-2xl font-bold mt-1 ${colorClass}`}>{value}</span>
+    </div>
+    <Icon size={32} className={`opacity-70 ${colorClass}`} />
+  </div>
+);
+
+// Componente auxiliar para las Acciones
+const ActionButton = ({ icon: Icon, label, onClick, colorClass }) => (
+  <button
+    onClick={onClick}
+    className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${colorClass}`}
+  >
+    <Icon size={18} /> {label}
+  </button>
+);
 
 const RepuestoDetailPage = () => {
   const { id } = useParams();
@@ -23,7 +53,8 @@ const RepuestoDetailPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [producto, setProducto] = useState(null);
   const [movimientos, setMovimientos] = useState([]);
-  //const [alertas, setAlertas] = useState([]);
+  // Descomentar para usar alertas
+  // const [alertas, setAlertas] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
@@ -32,16 +63,19 @@ const RepuestoDetailPage = () => {
     const fetchDetalleProducto = async () => {
       try {
         const config = { headers: { Authorization: `Bearer ${token}` } };
-        const [prodRes, movRes /* alertasRes*/] = await Promise.all([
+        const [prodRes, movRes /*, alertasRes*/] = await Promise.all([
           api.get(`/repuestos/${id}`, config),
           api.get(`/repuestos/movimientos/${id}`, config),
           // api.get(`/alerts/product/${id}`, config),
         ]);
         setProducto(prodRes.data);
-        setMovimientos(movRes.data);
+        setMovimientos(
+          movRes.data.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+        ); // Ordenar por fecha más reciente
         // setAlertas(alertasRes.data);
       } catch (error) {
         console.error("Error cargando el detalle:", error);
+        // Podrías manejar un estado de error
       } finally {
         setLoading(false);
       }
@@ -50,212 +84,274 @@ const RepuestoDetailPage = () => {
   }, [id, token]);
 
   const handleDelete = async () => {
-    if (!window.confirm("¿Seguro que deseas eliminar este repuesto?")) return;
+    if (
+      !window.confirm(
+        "⚠️ ¿Seguro que deseas eliminar este repuesto? Esta acción es irreversible."
+      )
+    )
+      return;
     try {
       await api.delete(`/repuestos/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      alert("Repuesto eliminado con éxito.");
+      alert("✅ Repuesto eliminado con éxito.");
       navigate("/inventario");
     } catch (error) {
-      alert("Error al eliminar el repuesto.");
+      alert("❌ Error al eliminar el repuesto. Inténtalo de nuevo.");
       console.error(error);
     }
   };
 
   if (loading)
-    return <div className="p-6 text-gray-600">Cargando detalles...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen text-lg text-gray-600">
+        Cargando detalles del repuesto...
+      </div>
+    );
   if (!producto)
-    return <div className="p-6 text-red-500">Repuesto no encontrado.</div>;
+    return (
+      <div className="flex justify-center items-center h-screen text-xl text-red-500">
+        ❌ Repuesto no encontrado o eliminado.
+      </div>
+    );
+
+  // Lógica para el color del stock
+  const stockColorClass =
+    producto.stock < 5 // Asumiendo un umbral de 5 para stock bajo
+      ? "text-red-600"
+      : producto.stock < 20
+      ? "text-yellow-600"
+      : "text-green-600";
+
+  // Formato para el precio
+  const formatCurrency = (amount) => {
+    if (!amount) return "No especificado";
+    return `$ ${parseFloat(amount)
+      .toFixed(0)
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-50 text-gray-800">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div
-        className={`flex-1 transition-all duration-300 
-    ${sidebarOpen ? "ml-64" : "ml-0"} md:ml-64`}
+        className={`flex-1 transition-all duration-300 ${
+          sidebarOpen ? "ml-64" : "ml-0"
+        } md:ml-64`}
       >
         <TopNavbar onToggleSidebar={toggleSidebar} />
 
-        <main className="p-8 space-y-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="bg-gray-500 text-white px-4 py-2 rounded"
-          >
-            Regresar
-          </button>
+        <main className="p-4 md:p-8 space-y-8">
+          {/* Header y Acciones Principales */}
+          <div className="space-y-4">
+            <button
+              onClick={() => navigate("/inventario")} // Mejor ir a la lista de inventario
+              className="flex items-center gap-1 text-blue-600 hover:text-blue-800 transition text-sm font-medium"
+            >
+              <ArrowLeft size={16} /> Volver a Inventario
+            </button>
 
-          {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="bg-blue-100 text-blue-700 p-2 rounded-full">
-                <Package2 size={28} />
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white p-6 rounded-xl shadow-md border border-gray-100">
+              {/* Título y Referencia */}
+              <div className="flex items-center gap-4">
+                <div className="bg-blue-100 text-blue-700 p-3 rounded-xl">
+                  <Package2 size={32} />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">
+                    {producto.nombre}
+                  </h1>
+                  <p className="text-sm text-gray-500">
+                    Referencia:{" "}
+                    <span className="font-mono bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-sm font-semibold">
+                      {producto.referencia}
+                    </span>
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-semibold">{producto.nombre}</h1>
-                <p className="text-base text-black-500">
-                  Referencia:{" "}
-                  <span className="font-mono bg-yellow-300 px-2 py-1 rounded">
-                    {producto.referencia}
-                  </span>
-                </p>
+
+              {/* Botones de Acción */}
+              <div className="flex flex-wrap gap-2 lg:justify-end">
+                <ActionButton
+                  icon={PlusCircle}
+                  label="Entrada"
+                  onClick={() => navigate(`/inventario/entradas/${id}`)}
+                  colorClass="bg-green-600 hover:bg-green-700 text-white"
+                />
+                <ActionButton
+                  icon={MinusCircle}
+                  label="Salida"
+                  onClick={() => navigate(`/inventario/salidas/${id}`)}
+                  colorClass="bg-orange-600 hover:bg-orange-700 text-white"
+                />
+                <ActionButton
+                  icon={Edit}
+                  label="Editar"
+                  onClick={() => navigate(`/inventario/editar/${id}`)}
+                  colorClass="bg-blue-600 hover:bg-blue-700 text-white"
+                />
+                <ActionButton
+                  icon={Trash}
+                  label="Eliminar"
+                  onClick={handleDelete}
+                  colorClass="bg-red-600 hover:bg-red-700 text-white"
+                />
               </div>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {/* Nuevo botón: Registrar Entrada */}
-              <button
-                onClick={() => navigate(`/inventario/entradas/${id}`)}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
-              >
-                <PlusCircle size={16} /> Registrar Entrada
-              </button>
-
-              {/* Nuevo botón: Registrar Salida */}
-              <button
-                onClick={() => navigate(`/inventario/salidas/${id}`)}
-                className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition"
-              >
-                <MinusCircle size={16} /> Registrar Salida
-              </button>
-
-              {/* Botón Editar */}
-              <button
-                onClick={() => navigate(`/inventario/editar/${id}`)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
-              >
-                <Edit size={16} /> Editar
-              </button>
-
-              {/* Botón Eliminar */}
-              <button
-                onClick={handleDelete}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
-              >
-                <Trash size={16} /> Eliminar
-              </button>
-
-              {/* Botón Movimientos */}
-              <button
-                onClick={() => navigate(`/inventario/movimientos/${id}`)}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition"
-              >
-                <History size={16} /> Movimientos
-              </button>
             </div>
           </div>
 
-          {/* Información general */}
-          <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-xl font-semibold mb-4 text-orange-700">
-              <FileText size={20} className="inline-block mr-2" />
-              Información General
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-base ">
-              <p>
-                <strong>Categoría:</strong> {producto.categoria}
-              </p>
-              <p>
-                <strong>Referencia:</strong> {producto.referencia}
-              </p>
-              <p>
-                <strong>Marca:</strong> {producto.marca || "No especificado"}
-              </p>
-              <p>
-                <strong>Stock actual:</strong>{" "}
-                <span
-                  className={`${
-                    producto.stock < producto.stock
-                      ? "text-red-600 font-semibold"
-                      : "text-green-600 font-semibold"
-                  }`}
-                >
-                  {producto.stock}
-                </span>
-              </p>
-              <p>
-                <strong>Ubicación:</strong>{" "}
-                {producto.ubicacion || "No asignada"}
-              </p>
-              <p>
-                <strong>Precio de Venta:</strong>{" "}
-                {producto.precio_unitario_venta
-                  ? `$ ${parseFloat(producto.precio_unitario_venta)
-                      .toFixed(0)
-                      .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`
-                  : "No especificado"}
-              </p>
-            </div>
+          <hr className="border-gray-200" />
+
+          {/* Tarjetas de Información Clave (Métricas) */}
+          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <InfoCard
+              icon={AlertTriangle}
+              title="Stock Actual"
+              value={producto.stock}
+              colorClass={stockColorClass}
+            />
+            <InfoCard
+              icon={Layers}
+              title="Categoría"
+              value={producto.categoria}
+              colorClass="text-purple-600"
+            />
+            <InfoCard
+              icon={Tag}
+              title="Marca"
+              value={producto.marca || "N/A"}
+              colorClass="text-indigo-600"
+            />
+            <InfoCard
+              icon={ShoppingBag}
+              title="Precio de Venta"
+              value={formatCurrency(producto.precio_unitario_venta)}
+              colorClass="text-teal-600"
+            />
           </section>
 
-          {/* Alertas */}
-          {/*<section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-red-600">
-              <AlertTriangle size={20} /> Alertas Asociadas
+          {/* Detalles y Movimientos */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Columna 1: Información Detallada */}
+            <section className="lg:col-span-1 bg-white rounded-xl shadow-md border border-gray-100 p-6 h-fit">
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-800 border-b pb-2">
+                <FileText size={20} /> Detalles del Repuesto
+              </h2>
+              <div className="space-y-3 text-base">
+                <p className="flex items-center gap-2">
+                  <Package2 size={16} className="text-blue-500" />
+                  <strong>Referencia:</strong> {producto.referencia}
+                </p>
+                <p className="flex items-center gap-2">
+                  <MapPin size={16} className="text-orange-500" />
+                  <strong>Ubicación:</strong>{" "}
+                  {producto.ubicacion || "No asignada"}
+                </p>
+                {/* Agrega más campos si son relevantes y están disponibles, por ejemplo: */}
+                {/* <p className="flex items-center gap-2">
+                  <Calendar size={16} className="text-green-500" />
+                  <strong>Última entrada:</strong> {new Date(producto.ultima_entrada).toLocaleDateString()}
+                </p> */}
+              </div>
+            </section>
+
+            {/* Columna 2: Historial de Movimientos */}
+            <section className="lg:col-span-2 bg-white rounded-xl shadow-md border border-gray-100 p-6">
+              <div className="flex items-center justify-between mb-4 border-b pb-2">
+                <h2 className="text-xl font-semibold flex items-center gap-2 text-gray-800">
+                  <History size={20} /> Historial de Movimientos
+                </h2>
+                <button
+                  onClick={() => navigate(`/inventario/movimientos/${id}`)}
+                  className="text-blue-600 hover:text-blue-800 text-sm font-medium transition"
+                >
+                  Ver todos &rarr;
+                </button>
+              </div>
+
+              {movimientos.length > 0 ? (
+                <div className="overflow-x-auto max-h-96">
+                  <table className="min-w-full text-sm">
+                    <thead className="bg-gray-50 text-gray-600 sticky top-0">
+                      <tr>
+                        <th className="text-left px-4 py-2">Fecha</th>
+                        <th className="text-left px-4 py-2">Tipo</th>
+                        <th className="text-left px-4 py-2">Cantidad</th>
+                        <th className="text-left px-4 py-2">Destino/Origen</th>
+                        <th className="text-left px-4 py-2">Motivo</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {movimientos.slice(0, 10).map((mov, i) => (
+                        <tr
+                          key={i}
+                          className="hover:bg-gray-50 transition-colors"
+                        >
+                          <td className="px-4 py-2">
+                            {new Date(mov.fecha).toLocaleDateString()}
+                          </td>
+                          <td className="px-4 py-2">
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                mov.tipo_movimiento === "Entrada"
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-red-100 text-red-700"
+                              }`}
+                            >
+                              {mov.tipo_movimiento}
+                            </span>
+                          </td>
+                          <td
+                            className={`px-4 py-2 font-medium ${
+                              mov.tipo_movimiento === "Entrada"
+                                ? "text-green-600"
+                                : "text-red-600"
+                            }`}
+                          >
+                            {mov.tipo_movimiento === "Entrada"
+                              ? `+${mov.cantidad}`
+                              : `-${mov.cantidad}`}
+                          </td>
+                          <td className="px-4 py-2">
+                            {mov.contraparte || "—"}
+                          </td>
+                          <td className="px-4 py-2 text-gray-500">
+                            {mov.subtipo || "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-base text-gray-500 py-4">
+                  Aún no hay movimientos registrados para este repuesto.
+                </p>
+              )}
+            </section>
+          </div>
+
+          {/* Alertas (Mantenido como sección comentada para fácil activación) */}
+          {/*
+          <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-red-600 border-b pb-2">
+              <AlertTriangle size={20} /> Alertas de Inventario
             </h2>
             {alertas.length > 0 ? (
               <ul className="divide-y divide-gray-100">
                 {alertas.map((alerta, index) => (
-                  <li key={index} className="py-2 text-base">
-                    🔔 {alerta.mensaje || alerta.descripcion}
+                  <li key={index} className="py-2 text-base flex items-center gap-2">
+                    <AlertTriangle size={16} className="text-red-500" /> {alerta.mensaje || alerta.descripcion}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-gray-500">
-                No hay alertas para este repuesto.
-              </p>
-            )}
-          </section>*/}
-
-          {/* Movimientos */}
-          <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-700">
-              <History size={20} /> Historial de Movimientos
-            </h2>
-            {movimientos.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-base border border-gray-100 rounded-lg">
-                  <thead className="bg-gray-100 text-gray-700">
-                    <tr>
-                      <th className="text-left px-4 py-2">Fecha</th>
-                      <th className="text-left px-4 py-2">Tipo</th>
-                      <th className="text-left px-4 py-2">Cantidad</th>
-                      <th className="text-left px-4 py-2">Destino</th>
-                      <th className="text-left px-4 py-2">Motivo</th>
-                      <th className="text-left px-4 py-2">
-                        Responsable del registro
-                      </th>
-                      <th className="text-center px-4 py-2">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {movimientos.map((mov, i) => (
-                      <tr
-                        key={i}
-                        className="border-t hover:bg-gray-50 transition-colors"
-                      >
-                        <td className="px-4 py-2">
-                          {new Date(mov.fecha).toLocaleDateString()}
-                        </td>
-                        <td className="px-4 py-2">{mov.tipo_movimiento}</td>
-                        <td className="px-4 py-2">{mov.cantidad}</td>
-                        <td className="px-4 py-2">{mov.contraparte || "—"}</td>
-                        <td className="px-4 py-2">{mov.subtipo || "—"}</td>
-                        <td className="px-4 py-2 capitalize">
-                          {mov.usuario || "N/A"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500">
-                Este repuesto no tiene movimientos registrados.
+              <p className="text-base text-gray-500">
+                No hay alertas activas para este repuesto.
               </p>
             )}
           </section>
+          */}
         </main>
       </div>
     </div>

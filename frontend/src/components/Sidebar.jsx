@@ -15,6 +15,7 @@ import {
   Users,
   AlertTriangle,
   Search,
+  Camera,
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -38,7 +39,7 @@ const Sidebar = () => {
     {
       to: "/scanner",
       label: "Escanear Repuesto",
-      icon: <FileText size={18} />,
+      icon: <Camera size={18} />,
     },
     {
       to: "/inventario/nuevo",

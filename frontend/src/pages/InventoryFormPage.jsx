@@ -4,14 +4,7 @@ import Sidebar from "../components/Sidebar";
 import TopNavbar from "../components/TopNavbar";
 import api from "../api";
 import { BrowserMultiFormatReader } from "@zxing/library";
-import {
-  Scan,
-  QrCode,
-  Save,
-  ArrowLeft,
-  Camera,
-  CameraOff,
-} from "lucide-react";
+import { Scan, QrCode, Save, ArrowLeft, Camera, CameraOff } from "lucide-react";
 
 const InventoryFormPage = () => {
   const navigate = useNavigate();
@@ -23,6 +16,7 @@ const InventoryFormPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [scanning, setScanning] = useState(false);
+  const [showNewCategory, setShowNewCategory] = useState(false);
 
   // Refs críticos
   const videoRef = useRef(null);
@@ -98,6 +92,7 @@ const InventoryFormPage = () => {
           codigo_barras: res.data.codigo_barras || "",
         });
       } catch (err) {
+        console.error("Error cargando repuesto:", err);
         setError("Error al cargar el repuesto");
       } finally {
         setLoading(false);
@@ -331,7 +326,16 @@ const InventoryFormPage = () => {
                 <select
                   name="categoria"
                   value={form.categoria}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === "__new__") {
+                      setForm((prev) => ({ ...prev, categoria: "" }));
+                      setShowNewCategory(true);
+                    } else {
+                      setShowNewCategory(false);
+                      handleChange(e);
+                    }
+                  }}
                   required
                   className="w-full border rounded-lg px-4 py-3"
                 >
@@ -341,8 +345,41 @@ const InventoryFormPage = () => {
                       {cat}
                     </option>
                   ))}
+                  <option value="__new__">➕ Agregar nueva categoría</option>
                 </select>
               </div>
+
+              {showNewCategory && (
+                <div className="mt-3">
+                  <label className="block text-gray-700 font-semibold mb-2">
+                    Nueva categoría
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Escribe la nueva categoría"
+                    className="w-full border rounded-lg px-4 py-3"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        const nueva = e.target.value.trim();
+                        if (!nueva) return;
+
+                        // Agregar a la lista local
+                        setCategorias((prev) => [...prev, nueva]);
+
+                        // Seleccionar automáticamente
+                        setForm((prev) => ({ ...prev, categoria: nueva }));
+
+                        // Ocultar el input
+                        setShowNewCategory(false);
+                      }
+                    }}
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    Presiona Enter para agregarla
+                  </p>
+                </div>
+              )}
 
               <div>
                 <label className="block text-gray-700 font-semibold mb-2">
@@ -499,7 +536,11 @@ const InventoryFormPage = () => {
                 className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white font-bold text-xl px-12 py-5 rounded-xl shadow-2xl disabled:opacity-70 transition-all transform hover:scale-105"
               >
                 <Save size={28} />
-                {loading ? "Guardando..." : id ? "Actualizar Repuesto" : "Guardar Repuesto"}
+                {loading
+                  ? "Guardando..."
+                  : id
+                  ? "Actualizar Repuesto"
+                  : "Guardar Repuesto"}
               </button>
             </div>
           </form>
