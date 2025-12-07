@@ -92,7 +92,9 @@ const UsersDetailsPage = () => {
 
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold">Usuarios Registrados</h2>
+            <h1 className="text-3xl font-bold text-gray-800 mb-6">
+              Usuarios Registrados
+            </h1>
             <button
               onClick={() => navigate("/usuarios/nuevo-usuario")}
               className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
