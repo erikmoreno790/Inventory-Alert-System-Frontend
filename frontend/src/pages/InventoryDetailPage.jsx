@@ -158,7 +158,7 @@ const RepuestoDetailPage = () => {
                   <Package2 size={32} />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">
+                  <h1 className="text-3xl font-bold text-gray-800 mb-6">
                     {producto.nombre}
                   </h1>
                   <p className="text-sm text-gray-500">

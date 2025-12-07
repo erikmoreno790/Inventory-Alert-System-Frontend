@@ -28,16 +28,13 @@ const InventoryFormPage = () => {
     referencia: "",
     categoria: "",
     marca: "",
-    compatibilidad: "",
     proveedor: "",
-    stock: 0,
-    stock_minimo: 0,
     precio_unitario_costo: "",
     precio_unitario_venta: "",
-    unidad_medida: "unidad",
-    estado: "disponible",
-    ubicacion: "",
     codigo_barras: "",
+    // Campos solo para creación inicial
+    cantidad_inicial: 1,
+    tipo_entrada: "compra",
   });
 
   // Inicializar el lector ZXing UNA SOLA VEZ
@@ -80,16 +77,12 @@ const InventoryFormPage = () => {
           referencia: res.data.referencia || "",
           categoria: res.data.categoria || "",
           marca: res.data.marca || "",
-          compatibilidad: res.data.compatibilidad || "",
           proveedor: res.data.proveedor || "",
-          stock: res.data.stock || 0,
-          stock_minimo: res.data.stock_minimo || 0,
           precio_unitario_costo: res.data.precio_unitario_costo || "",
           precio_unitario_venta: res.data.precio_unitario_venta || "",
-          unidad_medida: res.data.unidad_medida || "unidad",
-          estado: res.data.estado || "disponible",
-          ubicacion: res.data.ubicacion || "",
           codigo_barras: res.data.codigo_barras || "",
+          cantidad_inicial: 1,
+          tipo_entrada: "compra",
         });
       } catch (err) {
         console.error("Error cargando repuesto:", err);
@@ -205,13 +198,13 @@ const InventoryFormPage = () => {
         <TopNavbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
         <main className="p-6 max-w-7xl mx-auto">
-          <div className="mb-8 flex justify-between items-center">
+          <div className="mb-6 flex justify-between items-center">
             <h1 className="text-3xl font-bold text-gray-800">
-              {id ? "Editar Repuesto" : "Nuevo Repuesto"}
+              {id ? "Editar Repuesto" : "Agregar Nuevo Repuesto"}
             </h1>
             <button
               onClick={() => navigate(-1)}
-              className="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-5 py-3 rounded-lg"
+              className="flex items-center gap-2 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
             >
               <ArrowLeft size={20} />
               Regresar
@@ -226,26 +219,26 @@ const InventoryFormPage = () => {
 
           <form
             onSubmit={handleSubmit}
-            className="bg-white rounded-2xl shadow-xl p-8 grid grid-cols-1 lg:grid-cols-3 gap-8"
+            className="bg-white rounded-xl shadow-lg p-8"
           >
             {/* ESCÁNER */}
-            <div className="lg:col-span-3 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border-2 border-dashed border-blue-300">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
-                  <QrCode size={32} />
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200 mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                  <QrCode size={24} />
                   Escanear Código de Barras
-                </h3>
+                </h2>
                 <button
                   type="button"
                   onClick={scanning ? stopScanning : startScanning}
-                  className={`flex items-center gap-3 px-6 py-3 rounded-xl font-bold text-white shadow-lg transition-all ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-white shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                     scanning
-                      ? "bg-red-600 hover:bg-red-700"
-                      : "bg-green-600 hover:bg-green-700"
+                      ? "bg-red-500 hover:bg-red-600 focus:ring-red-500"
+                      : "bg-green-500 hover:bg-green-600 focus:ring-green-500"
                   }`}
                 >
-                  {scanning ? <CameraOff size={24} /> : <Camera size={24} />}
-                  {scanning ? "Detener Escáner" : "Activar Cámara"}
+                  {scanning ? <CameraOff size={20} /> : <Camera size={20} />}
+                  {scanning ? "Detener" : "Activar Cámara"}
                 </button>
               </div>
 
@@ -253,20 +246,22 @@ const InventoryFormPage = () => {
                 {scanning ? (
                   <video
                     ref={videoRef}
-                    className="w-full max-w-2xl rounded-xl shadow-2xl border-4 border-blue-600"
+                    className="w-full max-w-2xl rounded-lg shadow-lg border-2 border-blue-500"
                     playsInline
                   />
                 ) : form.codigo_barras ? (
-                  <div className="text-center p-10 bg-green-100 rounded-xl">
-                    <p className="text-3xl font-mono font-bold text-green-800">
+                  <div className="text-center p-8 bg-green-50 rounded-lg border border-green-200">
+                    <p className="text-2xl font-mono font-bold text-green-800">
                       {form.codigo_barras}
                     </p>
-                    <p className="text-green-600 mt-2">Código detectado</p>
+                    <p className="text-green-600 mt-2 text-sm">
+                      Código detectado
+                    </p>
                   </div>
                 ) : (
-                  <div className="text-center text-gray-500 p-10">
-                    <Scan size={80} className="mx-auto mb-4 opacity-30" />
-                    <p className="text-xl">
+                  <div className="text-center text-gray-400 p-8">
+                    <Scan size={64} className="mx-auto mb-3 opacity-30" />
+                    <p className="text-base">
                       Haz clic en "Activar Cámara" para escanear
                     </p>
                   </div>
@@ -275,9 +270,9 @@ const InventoryFormPage = () => {
             </div>
 
             {/* Campo manual */}
-            <div className="lg:col-span-3">
-              <label className="block text-gray-700 font-semibold mb-2">
-                Código de Barras (o ingresa manualmente)
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Código de Barras (manual)
               </label>
               <input
                 type="text"
@@ -285,16 +280,16 @@ const InventoryFormPage = () => {
                 value={form.codigo_barras}
                 onChange={handleChange}
                 placeholder="1234567890123"
-                className="w-full border-2 border-gray-300 rounded-xl px-5 py-4 text-lg font-mono focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm font-mono focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
               />
             </div>
 
-            {/* Resto del formulario */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:col-span-3">
+            {/* Formulario principal */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Nombre */}
               <div className="md:col-span-2">
-                <label className="block text-gray-700 font-semibold mb-2">
-                  Nombre *
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nombre del Repuesto *
                 </label>
                 <input
                   type="text"
@@ -302,12 +297,13 @@ const InventoryFormPage = () => {
                   value={form.nombre}
                   onChange={handleChange}
                   required
-                  className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
                 />
               </div>
 
+              {/* Referencia */}
               <div>
-                <label className="block text-gray-700 font-semibold mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Referencia
                 </label>
                 <input
@@ -315,12 +311,13 @@ const InventoryFormPage = () => {
                   name="referencia"
                   value={form.referencia}
                   onChange={handleChange}
-                  className="w-full border rounded-lg px-4 py-3"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
                 />
               </div>
 
+              {/* Categoría */}
               <div>
-                <label className="block text-gray-700 font-semibold mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Categoría *
                 </label>
                 <select
@@ -337,7 +334,7 @@ const InventoryFormPage = () => {
                     }
                   }}
                   required
-                  className="w-full border rounded-lg px-4 py-3"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
                 >
                   <option value="">Seleccionar...</option>
                   {categorias.map((cat) => (
@@ -350,39 +347,35 @@ const InventoryFormPage = () => {
               </div>
 
               {showNewCategory && (
-                <div className="mt-3">
-                  <label className="block text-gray-700 font-semibold mb-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Nueva categoría
                   </label>
                   <input
                     type="text"
                     placeholder="Escribe la nueva categoría"
-                    className="w-full border rounded-lg px-4 py-3"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
                         const nueva = e.target.value.trim();
                         if (!nueva) return;
 
-                        // Agregar a la lista local
                         setCategorias((prev) => [...prev, nueva]);
-
-                        // Seleccionar automáticamente
                         setForm((prev) => ({ ...prev, categoria: nueva }));
-
-                        // Ocultar el input
                         setShowNewCategory(false);
                       }
                     }}
                   />
-                  <p className="text-sm text-gray-500 mt-1">
-                    Presiona Enter para agregarla
+                  <p className="text-xs text-gray-500 mt-1">
+                    Presiona Enter para agregar
                   </p>
                 </div>
               )}
 
+              {/* Marca */}
               <div>
-                <label className="block text-gray-700 font-semibold mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Marca
                 </label>
                 <input
@@ -390,26 +383,13 @@ const InventoryFormPage = () => {
                   name="marca"
                   value={form.marca}
                   onChange={handleChange}
-                  className="w-full border rounded-lg px-4 py-3"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
                 />
               </div>
 
-              <div className="md:col-span-2">
-                <label className="block text-gray-700 font-semibold mb-2">
-                  Compatibilidad
-                </label>
-                <input
-                  type="text"
-                  name="compatibilidad"
-                  value={form.compatibilidad}
-                  onChange={handleChange}
-                  placeholder="Ej: Toyota Hilux 2015-2022"
-                  className="w-full border rounded-lg px-4 py-3"
-                />
-              </div>
-
+              {/* Proveedor */}
               <div>
-                <label className="block text-gray-700 font-semibold mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Proveedor
                 </label>
                 <input
@@ -417,56 +397,14 @@ const InventoryFormPage = () => {
                   name="proveedor"
                   value={form.proveedor}
                   onChange={handleChange}
-                  className="w-full border rounded-lg px-4 py-3"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
                 />
               </div>
 
+              {/* Precio costo */}
               <div>
-                <label className="block text-gray-700 font-semibold mb-2">
-                  Ubicación
-                </label>
-                <input
-                  type="text"
-                  name="ubicacion"
-                  value={form.ubicacion}
-                  onChange={handleChange}
-                  placeholder="Estante A-12"
-                  className="w-full border rounded-lg px-4 py-3"
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-700 font-semibold mb-2">
-                  Stock actual *
-                </label>
-                <input
-                  type="number"
-                  name="stock"
-                  value={form.stock}
-                  onChange={handleChange}
-                  required
-                  min="0"
-                  className="w-full border rounded-lg px-4 py-3"
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-700 font-semibold mb-2">
-                  Stock mínimo
-                </label>
-                <input
-                  type="number"
-                  name="stock_minimo"
-                  value={form.stock_minimo}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full border rounded-lg px-4 py-3"
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-700 font-semibold mb-2">
-                  Precio costo *
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Precio Costo *
                 </label>
                 <input
                   type="number"
@@ -475,13 +413,15 @@ const InventoryFormPage = () => {
                   onChange={handleChange}
                   required
                   step="0.01"
-                  className="w-full border rounded-lg px-4 py-3"
+                  min="0"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
                 />
               </div>
 
+              {/* Precio venta */}
               <div>
-                <label className="block text-gray-700 font-semibold mb-2">
-                  Precio venta *
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Precio Venta *
                 </label>
                 <input
                   type="number"
@@ -490,57 +430,62 @@ const InventoryFormPage = () => {
                   onChange={handleChange}
                   required
                   step="0.01"
-                  className="w-full border rounded-lg px-4 py-3"
+                  min="0"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
                 />
               </div>
 
-              <div>
-                <label className="block text-gray-700 font-semibold mb-2">
-                  Unidad de medida
-                </label>
-                <select
-                  name="unidad_medida"
-                  value={form.unidad_medida}
-                  onChange={handleChange}
-                  className="w-full border rounded-lg px-4 py-3"
-                >
-                  <option value="unidad">Unidad</option>
-                  <option value="par">Par</option>
-                  <option value="juego">Juego</option>
-                  <option value="kit">Kit</option>
-                </select>
-              </div>
+              {/* Cantidad inicial (solo para nuevo) */}
+              {!id && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Cantidad Inicial *
+                    </label>
+                    <input
+                      type="number"
+                      name="cantidad_inicial"
+                      value={form.cantidad_inicial}
+                      onChange={handleChange}
+                      required
+                      min="1"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-gray-700 font-semibold mb-2">
-                  Estado
-                </label>
-                <select
-                  name="estado"
-                  value={form.estado}
-                  onChange={handleChange}
-                  className="w-full border rounded-lg px-4 py-3"
-                >
-                  <option value="disponible">Disponible</option>
-                  <option value="agotado">Agotado</option>
-                  <option value="descontinuado">Descontinuado</option>
-                </select>
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Tipo de Entrada *
+                    </label>
+                    <select
+                      name="tipo_entrada"
+                      value={form.tipo_entrada}
+                      onChange={handleChange}
+                      required
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                    >
+                      <option value="compra">Compra</option>
+                      <option value="ajuste">Ajuste Inicial</option>
+                      <option value="otro">Otro</option>
+                    </select>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Botón Guardar */}
-            <div className="lg:col-span-3 flex justify-end mt-8">
+            <div className="flex justify-end mt-6 pt-6 border-t border-gray-200">
               <button
                 type="submit"
                 disabled={loading}
-                className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white font-bold text-xl px-12 py-5 rounded-xl shadow-2xl disabled:opacity-70 transition-all transform hover:scale-105"
+                className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white font-medium px-6 py-3 rounded-lg shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
-                <Save size={28} />
+                <Save size={20} />
                 {loading
                   ? "Guardando..."
                   : id
                   ? "Actualizar Repuesto"
-                  : "Guardar Repuesto"}
+                  : "Crear Repuesto"}
               </button>
             </div>
           </form>
