@@ -14,14 +14,14 @@ const QuotationPDFView = () => {
   const { id } = useParams();
 
   // Agrega esta función arriba del componente
-const formatCurrency = (value) => {
-  if (typeof value !== "number") value = Number(value);
-  if (isNaN(value)) return "$ 0";
-  return `$ ${value.toLocaleString("es-CO", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  })}`;
-};
+  const formatCurrency = (value) => {
+    if (typeof value !== "number") value = Number(value);
+    if (isNaN(value)) return "$ 0";
+    return `$ ${value.toLocaleString("es-CO", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    })}`;
+  };
 
   // Fetch quotation details
   const fetchQuotation = async () => {
@@ -40,8 +40,8 @@ const formatCurrency = (value) => {
 
   // Load data on component mount
   useEffect(() => {
-  fetchQuotation();
-}, [id]);
+    fetchQuotation();
+  }, [id]);
 
   if (loading) {
     return (
@@ -159,9 +159,12 @@ const formatCurrency = (value) => {
               <p>
                 <strong>Mecanico:</strong> {quotation.nombre_mecanico}
               </p>
-              <p>
-                <strong>Modelo:</strong> {quotation.modelo}
-              </p>
+              {quotation.segundo_mecanico && (
+                <p>
+                  <strong>Segundo Mecanico:</strong>{" "}
+                  {quotation.segundo_mecanico}
+                </p>
+              )}
               <p>
                 <strong>Kilometraje:</strong> {quotation.kilometraje}
               </p>
@@ -208,9 +211,10 @@ const formatCurrency = (value) => {
                 >
                   <td style={tdStyle}>{item.descripcion}</td>
                   <td style={tdStyle}>{item.cantidad}</td>
-                  <td style={tdStyle}>{formatCurrency(item.precio_unitario)}</td>
-<td style={tdStyle}>{formatCurrency(item.total)}</td>
-               
+                  <td style={tdStyle}>
+                    {formatCurrency(item.precio_unitario)}
+                  </td>
+                  <td style={tdStyle}>{formatCurrency(item.total)}</td>
                 </tr>
               ))
             ) : (
@@ -223,35 +227,35 @@ const formatCurrency = (value) => {
           </tbody>
         </table>
 
-       {/* Totals */}
-<div className="w-full max-w-sm ml-auto mb-8">
-  <div className="bg-white p-4">
-    <div className="text-right space-y-2">
-      <p style={{ fontSize: "14px", color: "#4B5563" }}>
-  <strong>Subtotal:</strong> {formatCurrency(quotation.subtotal)}
-</p>
+        {/* Totals */}
+        <div className="w-full max-w-sm ml-auto mb-8">
+          <div className="bg-white p-4">
+            <div className="text-right space-y-2">
+              <p style={{ fontSize: "14px", color: "#4B5563" }}>
+                <strong>Subtotal:</strong> {formatCurrency(quotation.subtotal)}
+              </p>
 
-{quotation.descuento > 0 && (
-  <p style={{ fontSize: "14px", color: "#DC2626" }}>
-    <strong>Descuento:</strong> -{formatCurrency(quotation.descuento)}
-  </p>
-)}
+              {quotation.descuento > 0 && (
+                <p style={{ fontSize: "14px", color: "#DC2626" }}>
+                  <strong>Descuento:</strong> -
+                  {formatCurrency(quotation.descuento)}
+                </p>
+              )}
 
-      <p style={{
-  fontSize: "16px",
-  fontWeight: "bold",
-  color: "#1E3A8A",
-  borderTop: "1px solid #D1D5DB",
-  paddingTop: "8px"
-}}>
-  <strong>Total:</strong> {formatCurrency(quotation.total)}
-</p>
-    </div>
-  </div>
-</div>
-
-
-
+              <p
+                style={{
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                  color: "#1E3A8A",
+                  borderTop: "1px solid #D1D5DB",
+                  paddingTop: "8px",
+                }}
+              >
+                <strong>Total:</strong> {formatCurrency(quotation.total)}
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* Signature */}
         <div style={{ marginBottom: "40px", fontSize: "13px" }}>
@@ -267,45 +271,44 @@ const formatCurrency = (value) => {
           ></div>
         </div>
 
-       {/* Footer */}
-<footer
-  style={{
-    borderTop: "1px solid #E2E8F0",
-    marginTop: "40px",
-    paddingTop: "15px",
-    textAlign: "center",
-    fontSize: "13px",
-    color: "#4A5568",
-    lineHeight: "1.6",
-  }}
->
-  <p style={{ margin: "0", fontWeight: "500" }}>
-    © {new Date().getFullYear()} Frenos y Servicios del Valle. Todos los
-    derechos reservados.
-  </p>
+        {/* Footer */}
+        <footer
+          style={{
+            borderTop: "1px solid #E2E8F0",
+            marginTop: "40px",
+            paddingTop: "15px",
+            textAlign: "center",
+            fontSize: "13px",
+            color: "#4A5568",
+            lineHeight: "1.6",
+          }}
+        >
+          <p style={{ margin: "0", fontWeight: "500" }}>
+            © {new Date().getFullYear()} Frenos y Servicios del Valle. Todos los
+            derechos reservados.
+          </p>
 
-  <p style={{ margin: "8px 0 0" }}>
-    Desarrollado por <strong>Erik Moreno</strong>
-  </p>
+          <p style={{ margin: "8px 0 0" }}>
+            Desarrollado por <strong>Erik Moreno</strong>
+          </p>
 
-  <p style={{ margin: "5px 0 0" }}>
-    📧{" "}
-    <a
-      href="mailto:erikmoreno790@gmail.com"
-      style={{ color: "#2B6CB0", textDecoration: "none" }}
-    >
-      erikmoreno790@gmail.com
-    </a>{" "}
-    | 📱{" "}
-    <a
-      href="tel:+573027515585"
-      style={{ color: "#2B6CB0", textDecoration: "none" }}
-    >
-      302 751 5585
-    </a>
-  </p>
-</footer>
-
+          <p style={{ margin: "5px 0 0" }}>
+            📧{" "}
+            <a
+              href="mailto:erikmoreno790@gmail.com"
+              style={{ color: "#2B6CB0", textDecoration: "none" }}
+            >
+              erikmoreno790@gmail.com
+            </a>{" "}
+            | 📱{" "}
+            <a
+              href="tel:+573027515585"
+              style={{ color: "#2B6CB0", textDecoration: "none" }}
+            >
+              302 751 5585
+            </a>
+          </p>
+        </footer>
       </div>
 
       {/* Buttons */}
