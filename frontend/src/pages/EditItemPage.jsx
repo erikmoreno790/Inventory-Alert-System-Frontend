@@ -97,9 +97,9 @@ const EditRepuestoPage = () => {
         <TopNavbar onToggleSidebar={toggleSidebar} />
         <main className="p-6 max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-800">
+            <h1 className="text-3xl font-bold text-gray-800 mb-6">
               Editar Repuesto
-            </h2>
+            </h1>
             <button
               onClick={() => navigate(-1)}
               className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
