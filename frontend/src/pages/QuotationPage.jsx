@@ -20,18 +20,124 @@ const NuevaCotizacionPage = () => {
     nit_cc: "",
     telefono: "",
     vehiculo: "",
-    modelo: "",
     placa: "",
     kilometraje: "",
     nombre_mecanico: "",
+    segundo_mecanico: "",
     observaciones: "",
     estatus: "Pendiente",
     porcentaje_descuento: 0,
-    items: [{ descripcion: "", cantidad: 1, precio_unitario: 0, sub_total: 0 }],
+    items: [
+      {
+        tipo_fuente: "manual", // "manual" o "inventario"
+        categoria: "",
+        referencia: "",
+        descripcion: "",
+        cantidad: 1,
+        precio_unitario: 0,
+        sub_total: 0,
+        stock_disponible: null,
+      },
+    ],
   };
 
   const [cotizacion, setCotizacion] = useState(initialCotizacion);
   const [imagenes, setImagenes] = useState([]);
+  const [categorias, setCategorias] = useState([]);
+  const [repuestosPorCategoria, setRepuestosPorCategoria] = useState({});
+
+  // Lista de vehículos predefinidos
+  const vehiculosPredefinidos = [
+    "Chevrolet Trailblazer",
+    "Chevrolet Captiva",
+    "Chevrolet Tracker",
+    "Chevrolet Aveo",
+    "Chevrolet Spark",
+    "Chevrolet D-Max",
+    "Chevrolet Sail",
+    "Chevrolet Optra",
+    "Chevrolet Onix",
+    "Ford Explorer",
+    "Ford Escape",
+    "Ford EcoSport",
+    "Ford Ranger",
+    "Ford Fiesta",
+    "Ford Focus",
+    "Ford F-150",
+    "Hyundai Tucson",
+    "Hyundai Santa Fe",
+    "Hyundai Creta",
+    "Hyundai Elantra",
+    "Hyundai Accent",
+    "Honda CR-V",
+    "Honda HR-V",
+    "Honda Civic",
+    "Kia Sportage",
+    "Kia Sorento",
+    "Kia Seltos",
+    "Kia Rio",
+    "Kia Picanto",
+    "Kia Cerato",
+    "Mazda 3",
+    "Mazda 2",
+    "Mazda CX-3",
+    "Mazda CX-5",
+    "Mazda CX-30",
+    "Mazda CX-9",
+    "Mazda BT-50",
+    "Mazda B2000",
+    "Mitsubishi L200",
+    "Nissan X-Trail",
+    "Nissan Qashqai",
+    "Nissan Navara",
+    "Nissan Kicks",
+    "Nissan Sentra",
+    "Nissan Versa",
+    "Nissan Frontier (NP300)",
+    "Renault Koleos",
+    "Renault Duster",
+    "Renault Stepway",
+    "Renault Logan",
+    "Renault Symbol",
+    "Renault Fluence",
+    "Renault Megane",
+    "Toyota Prado TXL",
+    "Toyota Fortuner",
+    "Toyota Hilux",
+    "Toyota Land Cruiser",
+    "Toyota Rav4",
+    "Toyota 4Runner",
+    "Toyota Corolla",
+    "Volkswagen Amarok",
+    "Volkswagen Tiguan",
+    "Volkswagen T-Cross",
+    "Volkswagen Jetta",
+    "Volkswagen Golf",
+  ];
+
+  // Lista de mecánicos predefinidos
+  const mecanicosPredefinidos = [
+    "Enuar Sierra",
+    "Rodrigo Alvernia",
+    "Jesus Domínguez",
+    "Carlos Castillo",
+    "Jose Barbosa",
+    "Jhorman Peralta",
+  ];
+
+  const [listaVehiculos, setListaVehiculos] = useState(vehiculosPredefinidos);
+  const [listaMecanicos, setListaMecanicos] = useState(mecanicosPredefinidos);
+  const [mostrarInputVehiculo, setMostrarInputVehiculo] = useState(false);
+  const [mostrarInputMecanico, setMostrarInputMecanico] = useState(false);
+  const [mostrarInputSegundoMecanico, setMostrarInputSegundoMecanico] =
+    useState(false);
+  const [nuevoVehiculo, setNuevoVehiculo] = useState("");
+  const [nuevoMecanico, setNuevoMecanico] = useState("");
+  const [nuevoSegundoMecanico, setNuevoSegundoMecanico] = useState("");
+
+  // Estados para validación
+  const [errorTelefono, setErrorTelefono] = useState("");
+  const [errorPlaca, setErrorPlaca] = useState("");
 
   // 🔹 Al montar, intentar cargar borrador desde localStorage
   useEffect(() => {
@@ -39,7 +145,41 @@ const NuevaCotizacionPage = () => {
     if (draft) {
       setCotizacion(JSON.parse(draft));
     }
+    // Cargar categorías disponibles
+    cargarCategorias();
   }, []);
+
+  // 🔹 Cargar categorías únicas del inventario
+  const cargarCategorias = async () => {
+    try {
+      const response = await api.get("/repuestos/categorias/lista", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCategorias(response.data);
+    } catch (error) {
+      console.error("Error cargando categorías:", error);
+    }
+  };
+
+  // 🔹 Cargar repuestos por categoría
+  const cargarRepuestosPorCategoria = async (categoria) => {
+    if (repuestosPorCategoria[categoria]) return; // Ya cargados
+
+    try {
+      const response = await api.get(
+        `/repuestos?categoria=${encodeURIComponent(categoria)}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setRepuestosPorCategoria((prev) => ({
+        ...prev,
+        [categoria]: response.data.data || [],
+      }));
+    } catch (error) {
+      console.error("Error cargando repuestos:", error);
+    }
+  };
 
   // 🔹 Guardar automáticamente cada vez que cambie la cotización
   useEffect(() => {
@@ -66,18 +206,140 @@ const NuevaCotizacionPage = () => {
     setCotizacion({ ...cotizacion, [e.target.name]: e.target.value });
   };
 
+  // 🔹 Validar teléfono (10 dígitos)
+  const validarTelefono = (telefono) => {
+    if (!telefono) {
+      setErrorTelefono("");
+      return true;
+    }
+    const regex = /^\d{10}$/;
+    if (!regex.test(telefono)) {
+      setErrorTelefono("⚠️ El teléfono debe tener exactamente 10 dígitos");
+      return false;
+    }
+    setErrorTelefono("");
+    return true;
+  };
+
+  // 🔹 Validar placa (3 letras + 3 números)
+  const validarPlaca = (placa) => {
+    if (!placa) {
+      setErrorPlaca("");
+      return true;
+    }
+    const regex = /^[A-Z]{3}\d{3}$/i;
+    if (!regex.test(placa)) {
+      setErrorPlaca(
+        "⚠️ La placa debe tener 3 letras seguidas de 3 números (ej: ABC123)"
+      );
+      return false;
+    }
+    setErrorPlaca("");
+    return true;
+  };
+
+  // 🔹 Manejar cambio de teléfono con validación
+  const handleTelefonoChange = (e) => {
+    const valor = e.target.value;
+    setCotizacion({ ...cotizacion, telefono: valor });
+    validarTelefono(valor);
+  };
+
+  // 🔹 Manejar cambio de placa con validación
+  const handlePlacaChange = (e) => {
+    const valor = e.target.value.toUpperCase();
+    setCotizacion({ ...cotizacion, placa: valor });
+    validarPlaca(valor);
+  };
+
+  // 🔹 Manejar cambio de vehículo
+  const handleVehiculoChange = (e) => {
+    const valor = e.target.value;
+    if (valor === "__agregar_otro__") {
+      setMostrarInputVehiculo(true);
+      setCotizacion({ ...cotizacion, vehiculo: "" });
+    } else {
+      setMostrarInputVehiculo(false);
+      setCotizacion({ ...cotizacion, vehiculo: valor });
+    }
+  };
+
+  // Manejar cambio de mecánico
+  const handleMecanicoChange = (e) => {
+    const valor = e.target.value;
+    if (valor === "__agregar_otro__") {
+      setMostrarInputMecanico(true);
+      setCotizacion({ ...cotizacion, nombre_mecanico: "" });
+    } else {
+      setMostrarInputMecanico(false);
+      setCotizacion({ ...cotizacion, nombre_mecanico: valor });
+    }
+  };
+
+  // Manejar cambio de segundo mecánico
+  const handleSegundoMecanicoChange = (e) => {
+    const valor = e.target.value;
+    if (valor === "__agregar_otro__") {
+      setMostrarInputSegundoMecanico(true);
+      setCotizacion({ ...cotizacion, segundo_mecanico: "" });
+    } else {
+      setMostrarInputSegundoMecanico(false);
+      setCotizacion({ ...cotizacion, segundo_mecanico: valor });
+    }
+  };
+
+  // 🔹 Agregar nuevo vehículo a la lista
+  const agregarNuevoVehiculo = () => {
+    if (
+      nuevoVehiculo.trim() &&
+      !listaVehiculos.includes(nuevoVehiculo.trim())
+    ) {
+      const nuevoVehiculoFormateado = nuevoVehiculo.trim();
+      setListaVehiculos([...listaVehiculos, nuevoVehiculoFormateado]);
+      setCotizacion({ ...cotizacion, vehiculo: nuevoVehiculoFormateado });
+      setNuevoVehiculo("");
+      setMostrarInputVehiculo(false);
+    }
+  };
+
+  const agregarNuevoMecanico = () => {
+    if (
+      nuevoMecanico.trim() &&
+      !listaMecanicos.includes(nuevoMecanico.trim())
+    ) {
+      const nuevoMecanicoFormateado = nuevoMecanico.trim();
+      setListaMecanicos([...listaMecanicos, nuevoMecanicoFormateado]);
+      setCotizacion({
+        ...cotizacion,
+        nombre_mecanico: nuevoMecanicoFormateado,
+      });
+      setNuevoMecanico("");
+      setMostrarInputMecanico(false);
+    }
+  };
+
+  const agregarNuevoSegundoMecanico = () => {
+    if (
+      nuevoSegundoMecanico.trim() &&
+      !listaMecanicos.includes(nuevoSegundoMecanico.trim())
+    ) {
+      const nuevoMecanicoFormateado = nuevoSegundoMecanico.trim();
+      setListaMecanicos([...listaMecanicos, nuevoMecanicoFormateado]);
+      setCotizacion({
+        ...cotizacion,
+        segundo_mecanico: nuevoMecanicoFormateado,
+      });
+      setNuevoSegundoMecanico("");
+      setMostrarInputSegundoMecanico(false);
+    }
+  };
+
   const opcionesDescripcion = [
-    "Axiales de direccion e.o",
     "Campana tras. rectificada",
-    "Correa accesorio",
-    "Banda de freno tras. pegada",
-    "Balineras soporte amortiguador del.",
-    "Buje barra estab. del.",
-    "Buje tijera puño e.o",
-    "Buje interno cuña e.o",
-    "Buje tijera parte delantera",
     "Disco del. y tras. rectificado",
     "Guardapolvo eje lado rueda con grasa y abrazada",
+    "Guardapolvo eje lado caja",
+    "Guardapolvo pasador mordaza der.",
     "Guardapolvo pasador mordaza izq.",
     "Juego de pastillas del. e.o en ceramica",
     "Juego de pastillas tras. e.o en ceramica",
@@ -88,21 +350,59 @@ const NuevaCotizacionPage = () => {
     "Prensa bujes",
     "Rotula inferior e.o",
     "Rotula superior e.o",
-    "Soporte amortiguador del. e.o",
-    "Soporte amortiguador tras. e.o",
-    "Soporte motor central e.o",
-    "Soporte motor derecho e.o",
-    "Soporte motor izquierdo e.o",
-    "Tijera del. e.o",
   ];
 
   // 🔹 Cambiar valores de ítems
-  const handleItemChange = (index, field, value) => {
+  const handleItemChange = async (index, field, value) => {
     const newItems = [...cotizacion.items];
-    newItems[index][field] =
-      field === "cantidad" || field === "precio_unitario"
-        ? parseFloat(value) || 0
-        : value;
+    const item = newItems[index];
+
+    // Cambio de tipo de fuente
+    if (field === "tipo_fuente") {
+      item.tipo_fuente = value;
+      if (value === "manual") {
+        item.categoria = "";
+        item.referencia = "";
+        item.stock_disponible = null;
+      } else {
+        item.descripcion = "";
+      }
+    }
+
+    // Cambio de categoría
+    else if (field === "categoria") {
+      item.categoria = value;
+      item.referencia = "";
+      item.descripcion = "";
+      item.stock_disponible = null;
+      // Cargar repuestos de esta categoría
+      if (value) {
+        await cargarRepuestosPorCategoria(value);
+      }
+    }
+
+    // Cambio de referencia
+    else if (field === "referencia") {
+      item.referencia = value;
+      if (value && item.categoria) {
+        const repuestos = repuestosPorCategoria[item.categoria] || [];
+        const repuesto = repuestos.find((r) => r.referencia === value);
+        if (repuesto) {
+          item.descripcion = repuesto.nombre;
+          item.stock_disponible = repuesto.stock;
+          item.precio_unitario = repuesto.precio || 0;
+        }
+      }
+    }
+
+    // Cambios normales
+    else {
+      item[field] =
+        field === "cantidad" || field === "precio_unitario"
+          ? parseFloat(value) || 0
+          : value;
+    }
+
     setCotizacion({ ...cotizacion, items: newItems });
   };
 
@@ -112,7 +412,16 @@ const NuevaCotizacionPage = () => {
       ...cotizacion,
       items: [
         ...cotizacion.items,
-        { descripcion: "", cantidad: 1, precio_unitario: 0, sub_total: 0 },
+        {
+          tipo_fuente: "manual",
+          categoria: "",
+          referencia: "",
+          descripcion: "",
+          cantidad: 1,
+          precio_unitario: 0,
+          sub_total: 0,
+          stock_disponible: null,
+        },
       ],
     });
   };
@@ -141,6 +450,44 @@ const NuevaCotizacionPage = () => {
       setAlert({
         type: "error",
         message: "Por favor completa los campos obligatorios",
+        show: true,
+      });
+      return;
+    }
+
+    // 🔹 Validar teléfono y placa antes de enviar
+    const telefonoValido = validarTelefono(cotizacion.telefono);
+    const placaValida = validarPlaca(cotizacion.placa);
+
+    if (!telefonoValido || !placaValida) {
+      setAlert({
+        type: "error",
+        message:
+          "Por favor corrige los errores de validación en teléfono o placa",
+        show: true,
+      });
+      return;
+    }
+
+    // 🔹 Validar stock para items de inventario
+    const itemsConStockInsuficiente = items.filter(
+      (item) =>
+        item.tipo_fuente === "inventario" &&
+        item.stock_disponible !== null &&
+        item.cantidad > item.stock_disponible
+    );
+
+    if (itemsConStockInsuficiente.length > 0) {
+      const detalles = itemsConStockInsuficiente
+        .map(
+          (item) =>
+            `${item.descripcion}: necesita ${item.cantidad}, disponible ${item.stock_disponible}`
+        )
+        .join("\n");
+
+      setAlert({
+        type: "error",
+        message: `Stock insuficiente:\n${detalles}`,
         show: true,
       });
       return;
@@ -189,11 +536,29 @@ const NuevaCotizacionPage = () => {
       navigate("/historial-cotizaciones");
     } catch (error) {
       console.error(error);
-      setAlert({
-        type: "error",
-        message: "Error al guardar la cotización",
-        show: true,
-      });
+      const errorMsg =
+        error.response?.data?.error || "Error al guardar la cotización";
+      const detalles = error.response?.data?.detalles;
+
+      if (detalles && Array.isArray(detalles)) {
+        const stockErrors = detalles
+          .map(
+            (e) =>
+              `${e.item}: necesita ${e.solicitado}, disponible ${e.disponible}`
+          )
+          .join("\n");
+        setAlert({
+          type: "error",
+          message: `${errorMsg}:\n${stockErrors}`,
+          show: true,
+        });
+      } else {
+        setAlert({
+          type: "error",
+          message: errorMsg,
+          show: true,
+        });
+      }
     }
   };
 
@@ -207,14 +572,10 @@ const NuevaCotizacionPage = () => {
         <TopNavbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
         <main>
           <div className="p-6 max-w-4xl mx-auto">
-            <div className="flex justify-between items-center border-b pb-4 mb-6">
-              <h2 className="text-3xl font-bold">Nueva Cotización</h2>
-              <button
-                onClick={() => navigate(-1)}
-                className="bg-gray-500 text-white px-4 py-2 rounded"
-              >
-                Regresar
-              </button>
+            <div className="flex justify-center items-center border-b pb-4 mb-6">
+              <h1 className="text-3xl font-bold text-gray-800 mb-6 ">
+                Nueva Cotización
+              </h1>
             </div>
 
             {/* Datos Generales */}
@@ -240,34 +601,95 @@ const NuevaCotizacionPage = () => {
                 placeholder="NIT/CC"
                 className="border p-2"
               />
-              <input
-                name="telefono"
-                value={cotizacion.telefono}
-                onChange={handleChange}
-                placeholder="Teléfono"
-                className="border p-2"
-              />
-              <input
-                name="placa"
-                value={cotizacion.placa}
-                onChange={handleChange}
-                placeholder="Placa del vehículo *"
-                className="border p-2"
-              />
-              <input
-                name="vehiculo"
-                value={cotizacion.vehiculo}
-                onChange={handleChange}
-                placeholder="Vehículo"
-                className="border p-2"
-              />
-              <input
-                name="modelo"
-                value={cotizacion.modelo}
-                onChange={handleChange}
-                placeholder="Modelo"
-                className="border p-2"
-              />
+              <div>
+                <input
+                  name="telefono"
+                  type="text"
+                  maxLength="10"
+                  value={cotizacion.telefono}
+                  onChange={handleTelefonoChange}
+                  placeholder="Teléfono (10 dígitos)"
+                  className={`border p-2 w-full ${
+                    errorTelefono ? "border-red-500" : ""
+                  }`}
+                />
+                {errorTelefono && (
+                  <p className="text-xs text-red-600 mt-1">{errorTelefono}</p>
+                )}
+              </div>
+              <div>
+                <input
+                  name="placa"
+                  type="text"
+                  maxLength="6"
+                  value={cotizacion.placa}
+                  onChange={handlePlacaChange}
+                  placeholder="Placa del vehículo * (ABC123)"
+                  className={`border p-2 w-full ${
+                    errorPlaca ? "border-red-500" : ""
+                  }`}
+                />
+                {errorPlaca && (
+                  <p className="text-xs text-red-600 mt-1">{errorPlaca}</p>
+                )}
+              </div>
+
+              {/* Selector de vehículo */}
+              <div className="relative">
+                {!mostrarInputVehiculo ? (
+                  <select
+                    name="vehiculo"
+                    value={cotizacion.vehiculo}
+                    onChange={handleVehiculoChange}
+                    className="border p-2 w-full"
+                  >
+                    <option value="">Seleccionar vehículo</option>
+                    {listaVehiculos.map((vehiculo, idx) => (
+                      <option key={idx} value={vehiculo}>
+                        {vehiculo}
+                      </option>
+                    ))}
+                    <option
+                      value="__agregar_otro__"
+                      className="font-semibold text-indigo-600"
+                    >
+                      + Agregar otro vehículo
+                    </option>
+                  </select>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={nuevoVehiculo}
+                      onChange={(e) => setNuevoVehiculo(e.target.value)}
+                      onKeyPress={(e) =>
+                        e.key === "Enter" && agregarNuevoVehiculo()
+                      }
+                      placeholder="Ingrese nuevo vehículo"
+                      className="border p-2 flex-1"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={agregarNuevoVehiculo}
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+                    >
+                      ✓
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMostrarInputVehiculo(false);
+                        setNuevoVehiculo("");
+                      }}
+                      className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <input
                 name="kilometraje"
                 value={cotizacion.kilometraje}
@@ -275,13 +697,118 @@ const NuevaCotizacionPage = () => {
                 placeholder="Kilometraje"
                 className="border p-2"
               />
-              <input
-                name="nombre_mecanico"
-                value={cotizacion.nombre_mecanico}
-                onChange={handleChange}
-                placeholder="Mecánico"
-                className="border p-2"
-              />
+
+              {/* Selector de mecánico */}
+              <div className="relative">
+                {!mostrarInputMecanico ? (
+                  <select
+                    name="nombre_mecanico"
+                    value={cotizacion.nombre_mecanico}
+                    onChange={handleMecanicoChange}
+                    className="border p-2 w-full"
+                  >
+                    <option value="">Seleccionar mecánico</option>
+                    {listaMecanicos.map((mecanico, idx) => (
+                      <option key={idx} value={mecanico}>
+                        {mecanico}
+                      </option>
+                    ))}
+                    <option
+                      value="__agregar_otro__"
+                      className="font-semibold text-indigo-600"
+                    >
+                      + Agregar otro mecánico
+                    </option>
+                  </select>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={nuevoMecanico}
+                      onChange={(e) => setNuevoMecanico(e.target.value)}
+                      onKeyPress={(e) =>
+                        e.key === "Enter" && agregarNuevoMecanico()
+                      }
+                      placeholder="Ingrese nuevo mecánico"
+                      className="border p-2 flex-1"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={agregarNuevoMecanico}
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+                    >
+                      ✓
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMostrarInputMecanico(false);
+                        setNuevoMecanico("");
+                      }}
+                      className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Selector de segundo mecánico */}
+              <div className="relative">
+                {!mostrarInputSegundoMecanico ? (
+                  <select
+                    name="segundo_mecanico"
+                    value={cotizacion.segundo_mecanico}
+                    onChange={handleSegundoMecanicoChange}
+                    className="border p-2 w-full"
+                  >
+                    <option value="">Segundo mecánico (opcional)</option>
+                    {listaMecanicos.map((mecanico, idx) => (
+                      <option key={idx} value={mecanico}>
+                        {mecanico}
+                      </option>
+                    ))}
+                    <option
+                      value="__agregar_otro__"
+                      className="font-semibold text-indigo-600"
+                    >
+                      + Agregar otro mecánico
+                    </option>
+                  </select>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={nuevoSegundoMecanico}
+                      onChange={(e) => setNuevoSegundoMecanico(e.target.value)}
+                      onKeyPress={(e) =>
+                        e.key === "Enter" && agregarNuevoSegundoMecanico()
+                      }
+                      placeholder="Ingrese segundo mecánico"
+                      className="border p-2 flex-1"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={agregarNuevoSegundoMecanico}
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+                    >
+                      ✓
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMostrarInputSegundoMecanico(false);
+                        setNuevoSegundoMecanico("");
+                      }}
+                      className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             <textarea
@@ -361,19 +888,244 @@ const NuevaCotizacionPage = () => {
             </div>
 
             {/* Items */}
-            <div className="flex gap-2 mb-4">
-              <button
-                type="button"
-                onClick={addItem}
-                className="bg-green-500 text-white px-3 py-1 rounded"
-              >
-                + Agregar Ítem
-              </button>
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-800">
+                  Items de la Cotización
+                </h2>
+                <button
+                  type="button"
+                  onClick={addItem}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md transition duration-200 flex items-center gap-2"
+                >
+                  <span className="text-xl">+</span>
+                  Agregar Ítem
+                </button>
+              </div>
+
+              {/* Cards de Items */}
+              <div className="space-y-4">
+                {items.map((item, idx) => {
+                  const repuestosCategoria =
+                    repuestosPorCategoria[item.categoria] || [];
+                  const stockInsuficiente =
+                    item.stock_disponible !== null &&
+                    item.cantidad > item.stock_disponible;
+
+                  return (
+                    <div
+                      key={idx}
+                      className={`bg-white border-2 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow ${
+                        stockInsuficiente
+                          ? "border-red-300 bg-red-50"
+                          : "border-gray-200"
+                      }`}
+                    >
+                      {/* Header del Item */}
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold text-gray-700">
+                          Ítem #{idx + 1}
+                        </h3>
+                        <button
+                          type="button"
+                          onClick={() => removeItem(idx)}
+                          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg transition duration-200 flex items-center gap-1"
+                        >
+                          <span>✕</span>
+                          Eliminar
+                        </button>
+                      </div>
+
+                      {/* Grid de Campos */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {/* Tipo de Fuente */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Tipo de Fuente *
+                          </label>
+                          <select
+                            value={item.tipo_fuente}
+                            onChange={(e) =>
+                              handleItemChange(
+                                idx,
+                                "tipo_fuente",
+                                e.target.value
+                              )
+                            }
+                            className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          >
+                            <option value="manual">✍️ Manual</option>
+                            <option value="inventario">📦 Inventario</option>
+                          </select>
+                        </div>
+
+                        {/* Categoría (solo inventario) */}
+                        {item.tipo_fuente === "inventario" && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Categoría *
+                            </label>
+                            <select
+                              value={item.categoria}
+                              onChange={(e) =>
+                                handleItemChange(
+                                  idx,
+                                  "categoria",
+                                  e.target.value
+                                )
+                              }
+                              className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            >
+                              <option value="">Seleccionar categoría...</option>
+                              {categorias.map((cat) => (
+                                <option key={cat} value={cat}>
+                                  {cat}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+
+                        {/* Referencia (solo inventario con categoría) */}
+                        {item.tipo_fuente === "inventario" &&
+                          item.categoria && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Referencia *
+                              </label>
+                              <select
+                                value={item.referencia}
+                                onChange={(e) =>
+                                  handleItemChange(
+                                    idx,
+                                    "referencia",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                              >
+                                <option value="">
+                                  Seleccionar referencia...
+                                </option>
+                                {repuestosCategoria.map((rep) => (
+                                  <option
+                                    key={rep.repuesto_id}
+                                    value={rep.referencia}
+                                  >
+                                    {rep.referencia} - Stock: {rep.stock}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
+
+                        {/* Descripción */}
+                        <div
+                          className={
+                            item.tipo_fuente === "inventario"
+                              ? "md:col-span-2 lg:col-span-3"
+                              : "md:col-span-2"
+                          }
+                        >
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Descripción *
+                          </label>
+                          {item.tipo_fuente === "manual" ? (
+                            <input
+                              list="opcionesDescripcion"
+                              value={item.descripcion}
+                              onChange={(e) =>
+                                handleItemChange(
+                                  idx,
+                                  "descripcion",
+                                  e.target.value
+                                )
+                              }
+                              className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                              placeholder="Ingrese descripción del servicio/repuesto"
+                            />
+                          ) : (
+                            <input
+                              value={item.descripcion}
+                              readOnly
+                              className="w-full border border-gray-300 rounded-lg p-2.5 bg-gray-100 text-gray-600 cursor-not-allowed"
+                              placeholder="Se completa automáticamente al seleccionar referencia"
+                            />
+                          )}
+                        </div>
+
+                        {/* Cantidad */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Cantidad *
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={item.cantidad}
+                            onChange={(e) =>
+                              handleItemChange(idx, "cantidad", e.target.value)
+                            }
+                            className={`w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 ${
+                              stockInsuficiente
+                                ? "border-red-500 focus:border-red-500"
+                                : "border-gray-300 focus:border-indigo-500"
+                            }`}
+                          />
+                          {stockInsuficiente && (
+                            <p className="text-xs text-red-600 mt-1 font-medium">
+                              ⚠️ Stock disponible: {item.stock_disponible}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Precio Unitario */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Precio Unitario *
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={item.precio_unitario}
+                            onChange={(e) =>
+                              handleItemChange(
+                                idx,
+                                "precio_unitario",
+                                e.target.value
+                              )
+                            }
+                            className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            placeholder="$0"
+                          />
+                        </div>
+
+                        {/* Subtotal */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Subtotal
+                          </label>
+                          <div className="w-full border border-gray-200 rounded-lg p-2.5 bg-gray-50 text-gray-700 font-semibold">
+                            {item.sub_total.toLocaleString("es-CO", {
+                              style: "currency",
+                              currency: "COP",
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
-            <table className="w-full border mb-4">
+            {/* Tabla oculta - solo para compatibilidad */}
+            <table className="hidden">
               <thead className="bg-gray-200">
                 <tr>
+                  <th className="border p-2">Tipo</th>
+                  <th className="border p-2">Categoría</th>
+                  <th className="border p-2">Referencia</th>
                   <th className="border p-2">Descripción</th>
                   <th className="border p-2">Cantidad</th>
                   <th className="border p-2">Precio</th>
@@ -382,59 +1134,165 @@ const NuevaCotizacionPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {items.map((item, idx) => (
-                  <tr key={idx}>
-                    <td className="border p-2">
-                      <input
-                        list="opcionesDescripcion"
-                        value={item.descripcion}
-                        onChange={(e) =>
-                          handleItemChange(idx, "descripcion", e.target.value)
-                        }
-                        className="border p-1 w-full"
-                      />
-                    </td>
-                    <td className="border p-2">
-                      <input
-                        type="number"
-                        value={item.cantidad}
-                        onChange={(e) =>
-                          handleItemChange(idx, "cantidad", e.target.value)
-                        }
-                        className="border p-1 w-16"
-                      />
-                    </td>
-                    <td className="border p-2">
-                      <input
-                        type="number"
-                        value={item.precio_unitario}
-                        onChange={(e) =>
-                          handleItemChange(
-                            idx,
-                            "precio_unitario",
-                            e.target.value
-                          )
-                        }
-                        className="border p-1 w-24"
-                      />
-                    </td>
-                    <td className="border p-2">
-                      {item.sub_total.toLocaleString("es-CO", {
-                        style: "currency",
-                        currency: "COP",
-                      })}
-                    </td>
-                    <td className="border p-2 text-center">
-                      <button
-                        type="button"
-                        onClick={() => removeItem(idx)}
-                        className="bg-red-500 text-white px-2 py-1 rounded"
-                      >
-                        X
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {items.map((item, idx) => {
+                  const repuestosCategoria =
+                    repuestosPorCategoria[item.categoria] || [];
+                  const stockInsuficiente =
+                    item.stock_disponible !== null &&
+                    item.cantidad > item.stock_disponible;
+
+                  return (
+                    <tr
+                      key={idx}
+                      className={stockInsuficiente ? "bg-red-50" : ""}
+                    >
+                      {/* Selector de tipo */}
+                      <td className="border p-2">
+                        <select
+                          value={item.tipo_fuente}
+                          onChange={(e) =>
+                            handleItemChange(idx, "tipo_fuente", e.target.value)
+                          }
+                          className="border p-1 w-full"
+                        >
+                          <option value="manual">Manual</option>
+                          <option value="inventario">Inventario</option>
+                        </select>
+                      </td>
+
+                      {/* Categoría (solo si es inventario) */}
+                      <td className="border p-2">
+                        {item.tipo_fuente === "inventario" ? (
+                          <select
+                            value={item.categoria}
+                            onChange={(e) =>
+                              handleItemChange(idx, "categoria", e.target.value)
+                            }
+                            className="border p-1 w-full"
+                          >
+                            <option value="">Seleccionar...</option>
+                            {categorias.map((cat) => (
+                              <option key={cat} value={cat}>
+                                {cat}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <span className="text-gray-400 text-sm">N/A</span>
+                        )}
+                      </td>
+
+                      {/* Referencia (solo si es inventario y tiene categoría) */}
+                      <td className="border p-2">
+                        {item.tipo_fuente === "inventario" && item.categoria ? (
+                          <select
+                            value={item.referencia}
+                            onChange={(e) =>
+                              handleItemChange(
+                                idx,
+                                "referencia",
+                                e.target.value
+                              )
+                            }
+                            className="border p-1 w-full"
+                          >
+                            <option value="">Seleccionar...</option>
+                            {repuestosCategoria.map((rep) => (
+                              <option
+                                key={rep.repuesto_id}
+                                value={rep.referencia}
+                              >
+                                {rep.referencia} (Stock: {rep.stock})
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <span className="text-gray-400 text-sm">N/A</span>
+                        )}
+                      </td>
+
+                      {/* Descripción */}
+                      <td className="border p-2">
+                        {item.tipo_fuente === "manual" ? (
+                          <input
+                            list="opcionesDescripcion"
+                            value={item.descripcion}
+                            onChange={(e) =>
+                              handleItemChange(
+                                idx,
+                                "descripcion",
+                                e.target.value
+                              )
+                            }
+                            className="border p-1 w-full"
+                            placeholder="Descripción manual"
+                          />
+                        ) : (
+                          <input
+                            value={item.descripcion}
+                            readOnly
+                            className="border p-1 w-full bg-gray-100"
+                            placeholder="Auto-rellenado"
+                          />
+                        )}
+                      </td>
+
+                      {/* Cantidad */}
+                      <td className="border p-2">
+                        <input
+                          type="number"
+                          value={item.cantidad}
+                          onChange={(e) =>
+                            handleItemChange(idx, "cantidad", e.target.value)
+                          }
+                          className={`border p-1 w-16 ${
+                            stockInsuficiente ? "border-red-500" : ""
+                          }`}
+                        />
+                        {stockInsuficiente && (
+                          <div className="text-xs text-red-600 mt-1">
+                            Stock: {item.stock_disponible}
+                          </div>
+                        )}
+                      </td>
+
+                      {/* Precio */}
+                      <td className="border p-2">
+                        <input
+                          type="number"
+                          value={item.precio_unitario}
+                          onChange={(e) =>
+                            handleItemChange(
+                              idx,
+                              "precio_unitario",
+                              e.target.value
+                            )
+                          }
+                          className="border p-1 w-24"
+                        />
+                      </td>
+
+                      {/* Subtotal */}
+                      <td className="border p-2">
+                        {item.sub_total.toLocaleString("es-CO", {
+                          style: "currency",
+                          currency: "COP",
+                        })}
+                      </td>
+
+                      {/* Eliminar */}
+                      <td className="border p-2 text-center">
+                        <button
+                          type="button"
+                          onClick={() => removeItem(idx)}
+                          className="bg-red-500 text-white px-2 py-1 rounded"
+                        >
+                          X
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
 
