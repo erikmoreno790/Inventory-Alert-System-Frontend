@@ -18,7 +18,7 @@
     "html2pdf.js": "^0.12.0",
     "lucide-react": "^0.535.0",
     "motion": "^12.23.12",
-    "quagga": "^0.12.1",
+    "quagga": "^0.6.16",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-redux": "^9.2.0",
