@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import TopNavbar from "../components/TopNavbar";
 import api from "../api";
 import { BrowserMultiFormatReader } from "@zxing/library";
 import { Scan, QrCode, Save, ArrowLeft, Camera, CameraOff } from "lucide-react";
 
 const InventoryFormPage = () => {
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { id } = useParams();
   const token = localStorage.getItem("token");
 
@@ -16,7 +14,9 @@ const InventoryFormPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [scanning, setScanning] = useState(false);
-  const [showNewCategory, setShowNewCategory] = useState(false);
+  const [mostrarInputCategoria, setMostrarInputCategoria] = useState(false);
+  const [nuevaCategoria, setNuevaCategoria] = useState("");
+  const [sidebarOpen] = useState(true);
 
   // Refs críticos
   const videoRef = useRef(null);
@@ -99,6 +99,29 @@ const InventoryFormPage = () => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Manejar cambio de categoría
+  const handleCategoriaChange = (e) => {
+    const valor = e.target.value;
+    if (valor === "__agregar_otra__") {
+      setMostrarInputCategoria(true);
+      setForm((prev) => ({ ...prev, categoria: "" }));
+    } else {
+      setMostrarInputCategoria(false);
+      setForm((prev) => ({ ...prev, categoria: valor }));
+    }
+  };
+
+  // Agregar nueva categoría a la lista
+  const agregarNuevaCategoria = () => {
+    if (nuevaCategoria.trim() && !categorias.includes(nuevaCategoria.trim())) {
+      const nuevaCategoriaFormateada = nuevaCategoria.trim();
+      setCategorias([...categorias, nuevaCategoriaFormateada]);
+      setForm((prev) => ({ ...prev, categoria: nuevaCategoriaFormateada }));
+      setNuevaCategoria("");
+      setMostrarInputCategoria(false);
+    }
+  };
+
   // ESCÁNER: Iniciar
   const startScanning = async () => {
     if (scanning) return;
@@ -162,13 +185,33 @@ const InventoryFormPage = () => {
       return;
     }
 
+    if (!form.categoria.trim()) {
+      setError("La categoría es obligatoria");
+      setLoading(false);
+      return;
+    }
+
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
+      // Preparar datos asegurando valores numéricos válidos
+      const dataToSend = {
+        ...form,
+        precio_unitario_costo: form.precio_unitario_costo
+          ? parseFloat(form.precio_unitario_costo)
+          : 0,
+        precio_unitario_venta: form.precio_unitario_venta
+          ? parseFloat(form.precio_unitario_venta)
+          : 0,
+        cantidad_inicial: form.cantidad_inicial
+          ? parseInt(form.cantidad_inicial)
+          : 1,
+      };
+
       if (id) {
-        await api.put(`/repuestos/${id}`, form, config);
+        await api.put(`/repuestos/${id}`, dataToSend, config);
       } else {
-        await api.post("/repuestos", form, config);
+        await api.post("/repuestos", dataToSend, config);
       }
 
       navigate("/inventario", {
@@ -188,15 +231,13 @@ const InventoryFormPage = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar />
 
       <div
         className={`flex-1 transition-all duration-300 ${
           sidebarOpen ? "ml-64" : "ml-0"
         } md:ml-64`}
       >
-        <TopNavbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-
         <main className="p-6 max-w-7xl mx-auto">
           <div className="mb-6 flex justify-between items-center">
             <h1 className="text-3xl font-bold text-gray-800">
@@ -222,7 +263,7 @@ const InventoryFormPage = () => {
             className="bg-white rounded-xl shadow-lg p-8"
           >
             {/* ESCÁNER */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200 mb-6">
+            <div className="bg-linear-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200 mb-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                   <QrCode size={24} />
@@ -320,58 +361,59 @@ const InventoryFormPage = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Categoría *
                 </label>
-                <select
-                  name="categoria"
-                  value={form.categoria}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value === "__new__") {
-                      setForm((prev) => ({ ...prev, categoria: "" }));
-                      setShowNewCategory(true);
-                    } else {
-                      setShowNewCategory(false);
-                      handleChange(e);
-                    }
-                  }}
-                  required
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                >
-                  <option value="">Seleccionar...</option>
-                  {categorias.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                  <option value="__new__">➕ Agregar nueva categoría</option>
-                </select>
-              </div>
-
-              {showNewCategory && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nueva categoría
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Escribe la nueva categoría"
+                {mostrarInputCategoria ? (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={nuevaCategoria}
+                      onChange={(e) => setNuevaCategoria(e.target.value)}
+                      placeholder="Nueva categoría..."
+                      className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          agregarNuevaCategoria();
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={agregarNuevaCategoria}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      ✓
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMostrarInputCategoria(false);
+                        setNuevaCategoria("");
+                      }}
+                      className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <select
+                    name="categoria"
+                    value={form.categoria}
+                    onChange={handleCategoriaChange}
+                    required
                     className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        const nueva = e.target.value.trim();
-                        if (!nueva) return;
-
-                        setCategorias((prev) => [...prev, nueva]);
-                        setForm((prev) => ({ ...prev, categoria: nueva }));
-                        setShowNewCategory(false);
-                      }
-                    }}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Presiona Enter para agregar
-                  </p>
-                </div>
-              )}
+                  >
+                    <option value="">Seleccionar...</option>
+                    {categorias.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                    <option value="__agregar_otra__">
+                      ➕ Agregar nueva categoría
+                    </option>
+                  </select>
+                )}
+              </div>
 
               {/* Marca */}
               <div>

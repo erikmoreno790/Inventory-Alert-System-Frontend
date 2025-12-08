@@ -16,16 +16,10 @@ import {
   Tag, // Para Marca
 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
-import TopNavbar from "../components/TopNavbar";
 import api from "../api";
 
 // Componente auxiliar para las Tarjetas de Información Clave
-const InfoCard = ({
-  icon: Icon,
-  title,
-  value,
-  colorClass = "text-gray-700",
-}) => (
+const InfoCard = ({ title, value, colorClass = "text-gray-700" }) => (
   <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 flex items-center justify-between transition-transform hover:shadow-lg">
     <div className="flex flex-col">
       <p className="text-sm font-medium text-gray-500">{title}</p>
@@ -36,7 +30,7 @@ const InfoCard = ({
 );
 
 // Componente auxiliar para las Acciones
-const ActionButton = ({ icon: Icon, label, onClick, colorClass }) => (
+const ActionButton = ({ label, onClick, colorClass }) => (
   <button
     onClick={onClick}
     className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${colorClass}`}
@@ -50,16 +44,18 @@ const RepuestoDetailPage = () => {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [producto, setProducto] = useState(null);
   const [movimientos, setMovimientos] = useState([]);
   // Descomentar para usar alertas
   // const [alertas, setAlertas] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [sidebarOpen] = useState(false);
 
   useEffect(() => {
+    // Prevenir carga si se está eliminando
+    if (isDeleting) return;
+
     const fetchDetalleProducto = async () => {
       try {
         const config = { headers: { Authorization: `Bearer ${token}` } };
@@ -75,13 +71,18 @@ const RepuestoDetailPage = () => {
         // setAlertas(alertasRes.data);
       } catch (error) {
         console.error("Error cargando el detalle:", error);
-        // Podrías manejar un estado de error
+        // Si el repuesto no existe, redirigir
+        if (error.response?.status === 404) {
+          navigate("/inventario", {
+            state: { message: "El repuesto no existe o fue eliminado" },
+          });
+        }
       } finally {
         setLoading(false);
       }
     };
     fetchDetalleProducto();
-  }, [id, token]);
+  }, [id, token, isDeleting, navigate]);
 
   const handleDelete = async () => {
     if (
@@ -90,14 +91,21 @@ const RepuestoDetailPage = () => {
       )
     )
       return;
+
+    setIsDeleting(true); // Prevenir que useEffect intente cargar de nuevo
+
     try {
       await api.delete(`/repuestos/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      alert("✅ Repuesto eliminado con éxito.");
-      navigate("/inventario");
+
+      // Usar window.location para forzar recarga completa y evitar problemas
+      window.location.href = "/inventario";
     } catch (error) {
-      alert("❌ Error al eliminar el repuesto. Inténtalo de nuevo.");
+      setIsDeleting(false);
+      const errorMsg =
+        error.response?.data?.error || "Error al eliminar el repuesto";
+      alert(`❌ ${errorMsg}`);
       console.error(error);
     }
   };
@@ -133,14 +141,12 @@ const RepuestoDetailPage = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50 text-gray-800">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar />
       <div
         className={`flex-1 transition-all duration-300 ${
           sidebarOpen ? "ml-64" : "ml-0"
         } md:ml-64`}
       >
-        <TopNavbar onToggleSidebar={toggleSidebar} />
-
         <main className="p-4 md:p-8 space-y-8">
           {/* Header y Acciones Principales */}
           <div className="space-y-4">
