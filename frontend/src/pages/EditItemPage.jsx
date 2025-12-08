@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import TopNavbar from "../components/TopNavbar";
 import api from "../api";
 import AlertMessage from "../components/AlertMessage";
 
 const EditRepuestoPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const token = localStorage.getItem("token");
   const [alert, setAlert] = useState({ show: false, type: "", message: "" });
+  const [sidebarOpen] = useState(false);
 
   const [form, setForm] = useState({
     nombre: "",
@@ -19,7 +18,6 @@ const EditRepuestoPage = () => {
     compatibilidad: "",
     proveedor: "",
     stock: "",
-    stock_minimo: "",
     precio_unitario_costo: "",
     precio_unitario_venta: "",
     unidad_medida: "",
@@ -84,17 +82,14 @@ const EditRepuestoPage = () => {
     }
   };
 
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
-
   return (
     <div className="flex min-h-screen bg-gray-100">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar />
 
       <div
         className={`flex-1 transition-all duration-300 
     ${sidebarOpen ? "ml-64" : "ml-0"} md:ml-64`}
       >
-        <TopNavbar onToggleSidebar={toggleSidebar} />
         <main className="p-6 max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold text-gray-800 mb-6">
