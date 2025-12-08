@@ -1,8 +1,8 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // QuotationsHistoryPage.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import TopNavbar from "../components/TopNavbar";
 import api from "../api";
 
 const QuotationsHistoryPage = () => {
@@ -24,7 +24,6 @@ const QuotationsHistoryPage = () => {
   const itemsPerPage = 50; // Items por página desde el backend
 
   const navigate = useNavigate();
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   // 🔹 Cargar cotizaciones con paginación del servidor y filtros
   const fetchQuotations = async (page = 1, appliedFilters = filters) => {
@@ -179,7 +178,6 @@ const QuotationsHistoryPage = () => {
         className={`flex-1 transition-all duration-300 
     ${sidebarOpen ? "ml-64" : "ml-0"} md:ml-64`}
       >
-        <TopNavbar onToggleSidebar={toggleSidebar} />
         <main className="p-6 max-w-6xl mx-auto">
           {/* Encabezado */}
           <div className="flex justify-between items-center mb-6">
@@ -264,7 +262,7 @@ const QuotationsHistoryPage = () => {
           ) : (
             <div className="overflow-x-auto bg-white rounded-lg shadow">
               <table className="w-full border-collapse">
-                <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                <thead className="bg-linear-to-r from-gray-50 to-gray-100">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       Cliente

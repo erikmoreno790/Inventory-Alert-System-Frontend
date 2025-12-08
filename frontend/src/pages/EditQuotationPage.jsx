@@ -9,14 +9,12 @@ import {
   AlertCircle,
 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
-import TopNavbar from "../components/TopNavbar";
 import api from "../api";
 import AlertMessage from "../components/AlertMessage";
 
 const EditarCotizacionPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [newImages, setNewImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -345,13 +343,12 @@ const EditarCotizacionPage = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar />
       <div
         className={`flex-1 transition-all duration-300 ${
           sidebarOpen ? "ml-64" : "ml-0"
         } md:ml-64`}
       >
-        <TopNavbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
         <main>
           <div className="p-6 max-w-4xl mx-auto">
             {/* 🔹 Encabezado mejorado */}
@@ -759,7 +756,7 @@ const EditarCotizacionPage = () => {
             </div>
 
             {/* Totales - Diseño moderno */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 shadow-md rounded-xl p-6 border border-blue-100">
+            <div className="bg-linear-to-br from-blue-50 to-indigo-50 shadow-md rounded-xl p-6 border border-blue-100">
               <h2 className="text-lg font-bold text-gray-800 mb-4">
                 Resumen de Totales
               </h2>

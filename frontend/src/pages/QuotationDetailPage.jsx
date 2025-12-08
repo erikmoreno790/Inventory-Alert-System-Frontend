@@ -16,16 +16,10 @@ import {
   AlertCircle,
 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
-import TopNavbar from "../components/TopNavbar";
 import api from "../api";
 
 // Componente auxiliar para las Tarjetas de Información
-const InfoCard = ({
-  icon: Icon,
-  title,
-  value,
-  colorClass = "text-gray-700",
-}) => (
+const InfoCard = ({ title, value, colorClass = "text-gray-700" }) => (
   <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3 transition-transform hover:shadow-md">
     <Icon size={24} className={`opacity-70 ${colorClass}`} />
     <div className="flex flex-col">
@@ -38,13 +32,7 @@ const InfoCard = ({
 );
 
 // Componente auxiliar para los botones de acción
-const ActionButton = ({
-  icon: Icon,
-  label,
-  onClick,
-  colorClass,
-  disabled = false,
-}) => (
+const ActionButton = ({ label, onClick, colorClass, disabled = false }) => (
   <button
     onClick={onClick}
     disabled={disabled}
@@ -58,14 +46,12 @@ const QuotationDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [quotation, setQuotation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [updating, setUpdating] = useState(false);
-
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  const [sidebarOpen] = useState(true);
 
   // 🔹 Obtener detalles de la cotización
   useEffect(() => {
@@ -188,13 +174,12 @@ const QuotationDetailsPage = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar />
       <div
         className={`flex-1 transition-all duration-300 ${
           sidebarOpen ? "ml-64" : "ml-0"
         } md:ml-64`}
       >
-        <TopNavbar onToggleSidebar={toggleSidebar} />
         <main className="p-6 max-w-7xl mx-auto">
           {/* 🔹 Encabezado con breadcrumb y acciones */}
           <div className="mb-6">
@@ -433,13 +418,10 @@ const QuotationDetailsPage = () => {
                   <thead>
                     <tr className="bg-gray-50 border-b-2 border-gray-200">
                       <th className="text-left p-3 font-semibold text-gray-700">
-                        #
+                        Cantidad
                       </th>
                       <th className="text-left p-3 font-semibold text-gray-700">
                         Producto/Servicio
-                      </th>
-                      <th className="text-center p-3 font-semibold text-gray-700">
-                        Cantidad
                       </th>
                       <th className="text-right p-3 font-semibold text-gray-700">
                         Precio Unit.
@@ -455,15 +437,13 @@ const QuotationDetailsPage = () => {
                         key={idx}
                         className="border-b border-gray-100 hover:bg-gray-50 transition"
                       >
-                        <td className="p-3 text-gray-600 font-medium">
-                          {idx + 1}
+                        <td className="p-3 text-left text-gray-700 font-medium">
+                          {item.cantidad}
                         </td>
                         <td className="p-3 text-gray-800">
                           {item.descripcion}
                         </td>
-                        <td className="p-3 text-center text-gray-700 font-medium">
-                          {item.cantidad}
-                        </td>
+
                         <td className="p-3 text-right text-gray-700">
                           {formatCurrency(item.precio_unitario)}
                         </td>
@@ -479,7 +459,7 @@ const QuotationDetailsPage = () => {
           )}
 
           {/* 🔹 Totales */}
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 shadow-md rounded-xl p-6 border border-blue-100">
+          <div className="bg-linear-to-br from-blue-50 to-indigo-50 shadow-md rounded-xl p-6 border border-blue-100">
             <div className="flex justify-end">
               <div className="w-full md:w-96 space-y-3">
                 <div className="flex justify-between items-center py-2 border-b border-blue-200">
