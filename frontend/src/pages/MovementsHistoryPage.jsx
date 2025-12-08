@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import {
   Search,
@@ -8,17 +9,16 @@ import {
   Calendar,
 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
-import TopNavbar from "../components/TopNavbar";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
 
 const MovementsHistory = () => {
   const token = localStorage.getItem("token");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [movements, setMovements] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
   // 🔹 Paginación del servidor
@@ -175,13 +175,12 @@ const MovementsHistory = () => {
   if (loading) {
     return (
       <div className="flex min-h-screen bg-gray-50">
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <Sidebar />
         <div
           className={`flex-1 transition-all duration-300 ${
             sidebarOpen ? "ml-64" : "ml-0"
           } md:ml-64`}
         >
-          <TopNavbar onToggleSidebar={toggleSidebar} />
           <main className="p-6 max-w-7xl mx-auto">
             <div className="flex justify-center items-center min-h-[60vh]">
               <div className="text-center">
@@ -199,7 +198,7 @@ const MovementsHistory = () => {
   if (error) {
     return (
       <div className="flex min-h-screen bg-gray-50">
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <Sidebar />
         <div
           className={`flex-1 transition-all duration-300 ${
             sidebarOpen ? "ml-64" : "ml-0"
@@ -231,7 +230,7 @@ const MovementsHistory = () => {
   if (loading) {
     return (
       <div className="flex min-h-screen bg-gray-50">
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <Sidebar />
         <div
           className={`flex-1 transition-all duration-300 ${
             sidebarOpen ? "ml-64" : "ml-0"
@@ -255,7 +254,7 @@ const MovementsHistory = () => {
   if (error) {
     return (
       <div className="flex min-h-screen bg-gray-50">
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <Sidebar />
         <div
           className={`flex-1 transition-all duration-300 ${
             sidebarOpen ? "ml-64" : "ml-0"
@@ -285,13 +284,12 @@ const MovementsHistory = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar />
       <div
         className={`flex-1 transition-all duration-300 ${
           sidebarOpen ? "ml-64" : "ml-0"
         } md:ml-64`}
       >
-        <TopNavbar onToggleSidebar={toggleSidebar} />
         <main className="p-6 max-w-7xl mx-auto">
           {/* 🔹 Header */}
           <div className="mb-6">
@@ -420,7 +418,7 @@ const MovementsHistory = () => {
           </div>
           <div className="bg-white rounded-xl shadow-md overflow-x-auto">
             <table className="min-w-full border-collapse">
-              <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+              <thead className="bg-linear-to-r from-gray-50 to-gray-100">
                 <tr>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Fecha

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Package2,
@@ -15,17 +15,11 @@ import {
   Hash,
 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
-import TopNavbar from "../components/TopNavbar";
 import api from "../api";
 import { toast } from "react-toastify";
 
 // Componente auxiliar para las tarjetas de información
-const InfoCard = ({
-  icon: Icon,
-  title,
-  value,
-  colorClass = "text-gray-700",
-}) => (
+const InfoCard = ({ title, value, colorClass = "text-gray-700" }) => (
   <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 flex items-center justify-between transition-transform hover:shadow-lg">
     <div className="flex flex-col">
       <p className="text-sm font-medium text-gray-500">{title}</p>
@@ -36,14 +30,8 @@ const InfoCard = ({
 );
 
 // Componente para fila de detalle
-const DetailRow = ({
-  icon: Icon,
-  label,
-  value,
-  iconColor = "text-blue-500",
-}) => (
+const DetailRow = ({ label, value }) => (
   <div className="flex items-start gap-3 py-2">
-    <Icon size={18} className={`mt-0.5 ${iconColor}`} />
     <div className="flex-1">
       <strong className="text-gray-600 text-sm">{label}:</strong>
       <p className="text-gray-800 mt-0.5">{value || "N/A"}</p>
@@ -56,7 +44,6 @@ const MovementDetailPage = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [movimiento, setMovimiento] = useState(null);
   const [loading, setLoading] = useState(true);
   //const [isDeleting, setIsDeleting] = useState(false);
@@ -159,22 +146,12 @@ const MovementDetailPage = () => {
   //   }
   // }, [id, tipo, token, navigate]);
 
-  // Toggle sidebar
-  const toggleSidebar = useCallback(() => {
-    setSidebarOpen((prev) => !prev);
-  }, []);
-
   // Loading state
   if (loading) {
     return (
       <div className="flex min-h-screen bg-gray-50">
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-        <div
-          className={`flex-1 transition-all duration-300 ${
-            sidebarOpen ? "ml-64" : "ml-0"
-          } md:ml-64`}
-        >
-          <TopNavbar onToggleSidebar={toggleSidebar} />
+        <Sidebar />
+        <div className="flex-1 md:ml-64">
           <main className="p-6 max-w-7xl mx-auto">
             <div className="flex justify-center items-center min-h-[60vh]">
               <div className="text-center">
@@ -192,13 +169,8 @@ const MovementDetailPage = () => {
   if (error || !movimiento) {
     return (
       <div className="flex min-h-screen bg-gray-50">
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-        <div
-          className={`flex-1 transition-all duration-300 ${
-            sidebarOpen ? "ml-64" : "ml-0"
-          } md:ml-64`}
-        >
-          <TopNavbar onToggleSidebar={toggleSidebar} />
+        <Sidebar />
+        <div className="flex-1 md:ml-64">
           <main className="p-6 max-w-7xl mx-auto">
             <div className="flex justify-center items-center min-h-[60vh]">
               <div className="text-center bg-white p-8 rounded-xl shadow-lg max-w-md">
@@ -222,13 +194,8 @@ const MovementDetailPage = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50 text-gray-800">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div
-        className={`flex-1 transition-all duration-300 ${
-          sidebarOpen ? "ml-64" : "ml-0"
-        } md:ml-64`}
-      >
-        <TopNavbar onToggleSidebar={toggleSidebar} />
+      <Sidebar />
+      <div className="flex-1 md:ml-64">
         <main className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto">
           {/* Breadcrumb */}
           <button
