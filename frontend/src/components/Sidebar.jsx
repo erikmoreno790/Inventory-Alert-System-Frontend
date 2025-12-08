@@ -88,7 +88,7 @@ const Sidebar = () => {
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 h-full w-64 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-700 text-gray-200 shadow-xl transform transition-transform duration-300 z-40 flex flex-col
+        className={`fixed top-0 left-0 h-full w-64 bg-linear-to-b from-gray-900 via-gray-800 to-gray-700 text-gray-200 shadow-xl transform transition-transform duration-300 z-40 flex flex-col
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
           md:translate-x-0`}
       >
