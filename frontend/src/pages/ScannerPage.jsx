@@ -2,7 +2,6 @@ import { useState, useCallback } from "react";
 import { AlertCircle, QrCode } from "lucide-react";
 import api from "../api";
 import Sidebar from "../components/Sidebar";
-import TopNavbar from "../components/TopNavbar";
 import ScannerButton from "../components/ScannerButton";
 import ScannerViewport from "../components/ScannerViewport";
 import RepuestoCard from "../components/RepuestoCard";
@@ -10,10 +9,10 @@ import useBarcodeScanner from "../hooks/useBarcodeScanner";
 import { toast, ToastContainer } from "react-toastify";
 
 const ScannerPage = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [repuesto, setRepuesto] = useState(null);
   const [loading, setLoading] = useState(false);
   const [codigoManual, setCodigoManual] = useState("");
+  const [sidebarOpen] = useState(false);
 
   const token = localStorage.getItem("token");
 
@@ -92,16 +91,14 @@ const ScannerPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+    <div className="flex min-h-screen bg-linear-to-br from-blue-50 to-indigo-100">
+      <Sidebar />
 
       <div
         className={`flex-1 transition-all duration-300 ${
           sidebarOpen ? "ml-64" : "ml-0"
         } md:ml-64`}
       >
-        <TopNavbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-
         <main className="p-6 max-w-4xl mx-auto">
           {/* Título */}
           <div className="text-center mb-6">

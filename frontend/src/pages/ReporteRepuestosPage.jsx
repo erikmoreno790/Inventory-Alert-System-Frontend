@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Sidebar from "../components/Sidebar";
-import TopNavbar from "../components/TopNavbar";
 import api from "../api";
 
 const token = localStorage.getItem("token");
@@ -56,15 +55,17 @@ const ReporteRepuestosPage = () => {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col">
-        <TopNavbar setSidebarOpen={setSidebarOpen} />
-
         <main className="flex-1 p-6 overflow-y-auto">
-          <h1 className="text-2xl font-bold mb-4">📊 Reporte de Repuestos Usados</h1>
+          <h1 className="text-2xl font-bold mb-4">
+            📊 Reporte de Repuestos Usados
+          </h1>
 
           {/* Filtros */}
           <div className="bg-white p-4 rounded-lg shadow mb-6 flex flex-col md:flex-row items-center gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Fecha inicio</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Fecha inicio
+              </label>
               <input
                 type="date"
                 value={fechaInicio}
@@ -73,7 +74,9 @@ const ReporteRepuestosPage = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Fecha fin</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Fecha fin
+              </label>
               <input
                 type="date"
                 value={fechaFin}
@@ -91,7 +94,9 @@ const ReporteRepuestosPage = () => {
 
           {/* 🔍 Barra de búsqueda */}
           <div className="bg-white p-4 rounded-lg shadow mb-6">
-            <label className="block text-sm font-medium text-gray-700">Buscar repuesto</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Buscar repuesto
+            </label>
             <input
               type="text"
               placeholder="Ej: Bandas de freno pegadas"
@@ -120,9 +125,15 @@ const ReporteRepuestosPage = () => {
             <table className="min-w-full divide-y divide-gray-200 text-sm">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-2 text-left font-medium text-gray-600">Repuesto</th>
-                  <th className="px-4 py-2 text-center font-medium text-gray-600">Cantidad total</th>
-                  <th className="px-4 py-2 text-center font-medium text-gray-600">Valor total</th>
+                  <th className="px-4 py-2 text-left font-medium text-gray-600">
+                    Repuesto
+                  </th>
+                  <th className="px-4 py-2 text-center font-medium text-gray-600">
+                    Cantidad total
+                  </th>
+                  <th className="px-4 py-2 text-center font-medium text-gray-600">
+                    Valor total
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -136,7 +147,9 @@ const ReporteRepuestosPage = () => {
                   filteredData.map((item, index) => (
                     <tr key={index}>
                       <td className="px-4 py-2">{item.descripcion}</td>
-                      <td className="px-4 py-2 text-center">{item.total_cantidad}</td>
+                      <td className="px-4 py-2 text-center">
+                        {item.total_cantidad}
+                      </td>
                       <td className="px-4 py-2 text-center">
                         ${Number(item.total_valor).toLocaleString("es-CO")}
                       </td>
