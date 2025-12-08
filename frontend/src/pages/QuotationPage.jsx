@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import TopNavbar from "../components/TopNavbar";
 import api from "../api";
 import AlertMessage from "../components/AlertMessage";
 
 const NuevaCotizacionPage = () => {
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [alert, setAlert] = useState({ type: "", message: "", show: false });
+  const [sidebarOpen] = useState(true);
 
   const token = localStorage.getItem("token");
 
@@ -147,6 +146,7 @@ const NuevaCotizacionPage = () => {
     }
     // Cargar categorías disponibles
     cargarCategorias();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 🔹 Cargar categorías únicas del inventario
@@ -564,12 +564,11 @@ const NuevaCotizacionPage = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar />
       <div
         className={`flex-1 transition-all duration-300 
     ${sidebarOpen ? "ml-64" : "ml-0"} md:ml-64`}
       >
-        <TopNavbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
         <main>
           <div className="p-6 max-w-4xl mx-auto">
             <div className="flex justify-center items-center border-b pb-4 mb-6">
