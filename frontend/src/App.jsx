@@ -1,13 +1,11 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Dashboard from "./pages/Dashboard";
-import Scanner from "./pages/ScannerPage"
+import Dashboard from "./pages/DashboardPage";
+import Scanner from "./pages/ScannerPage";
 import Login from "./pages/Login";
 import InventoryListPage from "./pages/InventoryListPage";
 import InventoryForm from "./pages/InventoryFormPage";
 import InventoryDetailPage from "./pages/InventoryDetailPage";
 import EditItemPage from "./pages/EditItemPage";
-import EntriesPage from "./pages/EntriesPage";
-import ExitsPage from "./pages/ExitsPage";
 import MovementsHistoryPage from "./pages/MovementsHistoryPage";
 import MovementDetailPage from "./pages/MovementDetailPage";
 import AlertsPage from "./pages/AlertsHistoryPage";
@@ -17,9 +15,8 @@ import QuotationsHistoryPage from "./pages/QuotationsHistoryPage";
 import QuotationDetailPage from "./pages/QuotationDetailPage";
 import EditQuotationPage from "./pages/EditQuotationPage";
 import ReporteRepuestosPage from "./pages/ReporteRepuestosPage";
-import NewUserPage from "./pages/NewUserPage";
-import UsersDetailsPage from "./pages/UsersDetailsPage";
-// import AlertSettingsPage from './pages/AlertSettingsPage'
+import Profiles from "./pages/Profiles";
+import AlertSettingsPage from "./pages/AlertSettingsPage";
 import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
@@ -81,22 +78,6 @@ function App() {
           }
         />
         <Route
-          path="/inventario/entradas/:id"
-          element={
-            <PrivateRoute>
-              <EntriesPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/inventario/salidas/:id"
-          element={
-            <PrivateRoute>
-              <ExitsPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
           path="/inventario/movimientos"
           element={
             <PrivateRoute>
@@ -120,7 +101,14 @@ function App() {
             </PrivateRoute>
           }
         />
-        {/* <Route path="/alertas/configuracion" element={<PrivateRoute><AlertSettingsPage/></PrivateRoute>} /> */}
+        <Route
+          path="/alertas/configuracion"
+          element={
+            <PrivateRoute>
+              <AlertSettingsPage />
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/cotizacion"
           element={
@@ -170,18 +158,10 @@ function App() {
           }
         />
         <Route
-          path="/usuarios/nuevo-usuario"
-          element={
-            <PrivateRoute>
-              <NewUserPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
           path="/usuarios"
           element={
             <PrivateRoute>
-              <UsersDetailsPage />
+              <Profiles />
             </PrivateRoute>
           }
         />
