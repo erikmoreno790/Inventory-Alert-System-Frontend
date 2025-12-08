@@ -21,7 +21,6 @@ import api from "../api";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const AlertsPage = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [alertas, setAlertas] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -269,13 +268,9 @@ const AlertsPage = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar />
 
-      <div
-        className={`flex-1 transition-all duration-300 ${
-          sidebarOpen ? "ml-64" : "ml-0"
-        } md:ml-64`}
-      >
+      <div className="flex-1 md:ml-64">
         <main className="p-6 max-w-7xl mx-auto">
           {/* Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">

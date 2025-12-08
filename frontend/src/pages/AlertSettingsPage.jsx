@@ -4,7 +4,6 @@ import Sidebar from "../components/Sidebar";
 import api from "../api";
 
 const AlertSettingsPage = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [estadisticas, setEstadisticas] = useState([]);
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
@@ -70,13 +69,9 @@ const AlertSettingsPage = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar />
 
-      <div
-        className={`flex-1 ${
-          sidebarOpen ? "ml-64" : ""
-        } transition-all duration-300`}
-      >
+      <div className="flex-1 md:ml-64">
         <main className="p-6 max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-8">
