@@ -3,13 +3,12 @@ import api from "../api";
 import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import Sidebar from "../components/Sidebar";
-import TopNavbar from "../components/TopNavbar";
 
 const InventoryListPage = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [inventario, setInventario] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sidebarOpen] = useState(true);
   const navigate = useNavigate();
 
   // 🔹 Listas para filtros desplegables
@@ -27,8 +26,6 @@ const InventoryListPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const itemsPerPage = 50;
-
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   // 🔹 Cargar categorías y marcas al iniciar
   useEffect(() => {
@@ -108,6 +105,7 @@ const InventoryListPage = () => {
       nombre: filtroNombre,
       referencia: filtroReferencia,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
   // 🔹 Aplicar filtros: resetear a página 1 y recargar con debounce
@@ -126,6 +124,7 @@ const InventoryListPage = () => {
     }, 300); // Espera 300ms después de que el usuario deja de escribir
 
     return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtroCategoria, filtroMarca, filtroNombre, filtroReferencia]);
 
   // 🔹 Verificar si hay filtros activos
@@ -197,13 +196,12 @@ const InventoryListPage = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar />
 
       <div
         className={`flex-1 transition-all duration-300 
     ${sidebarOpen ? "ml-64" : "ml-0"} md:ml-64`}
       >
-        <TopNavbar onToggleSidebar={toggleSidebar} />
         <main>
           <div className="p-6">
             <div className="flex justify-between items-center mb-4">
@@ -336,7 +334,7 @@ const InventoryListPage = () => {
               <div className="bg-white rounded-lg shadow overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                    <thead className="bg-linear-to-r from-gray-50 to-gray-100">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                           Categoría
@@ -392,9 +390,9 @@ const InventoryListPage = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-center">
                             <span
                               className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
-                                item.stock < item.stock_minimo
+                                item.stock < 2
                                   ? "bg-red-100 text-red-800 ring-2 ring-red-200"
-                                  : item.stock < item.stock_minimo * 1.5
+                                  : item.stock < 5
                                   ? "bg-yellow-100 text-yellow-800"
                                   : "bg-green-100 text-green-800"
                               }`}
