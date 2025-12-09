@@ -19,9 +19,14 @@ import Sidebar from "../components/Sidebar";
 import api from "../api";
 
 // Componente auxiliar para las Tarjetas de Información
-const InfoCard = ({ title, value, colorClass = "text-gray-700" }) => (
+const InfoCard = ({
+  icon: Icon,
+  title,
+  value,
+  colorClass = "text-gray-700",
+}) => (
   <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3 transition-transform hover:shadow-md">
-    <Icon size={24} className={`opacity-70 ${colorClass}`} />
+    {Icon && <Icon size={24} className={`opacity-70 ${colorClass}`} />}
     <div className="flex flex-col">
       <p className="text-xs font-medium text-gray-500 uppercase">{title}</p>
       <span className={`text-lg font-semibold mt-0.5 ${colorClass}`}>
@@ -32,13 +37,19 @@ const InfoCard = ({ title, value, colorClass = "text-gray-700" }) => (
 );
 
 // Componente auxiliar para los botones de acción
-const ActionButton = ({ label, onClick, colorClass, disabled = false }) => (
+const ActionButton = ({
+  icon: Icon,
+  label,
+  onClick,
+  colorClass,
+  disabled = false,
+}) => (
   <button
     onClick={onClick}
     disabled={disabled}
     className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${colorClass}`}
   >
-    <Icon size={18} /> {label}
+    {Icon && <Icon size={18} />} {label}
   </button>
 );
 

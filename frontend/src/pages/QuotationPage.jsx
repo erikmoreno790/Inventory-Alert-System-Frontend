@@ -36,6 +36,7 @@ const NuevaCotizacionPage = () => {
         precio_unitario: 0,
         sub_total: 0,
         stock_disponible: null,
+        repuesto_id: null, // ID único del repuesto
       },
     ],
   };
@@ -161,20 +162,38 @@ const NuevaCotizacionPage = () => {
     }
   };
 
-  // 🔹 Cargar repuestos por categoría
+  // 🔹 Cargar repuestos por categoría (TODOS, paginando si es necesario)
   const cargarRepuestosPorCategoria = async (categoria) => {
     if (repuestosPorCategoria[categoria]) return; // Ya cargados
 
     try {
-      const response = await api.get(
-        `/repuestos?categoria=${encodeURIComponent(categoria)}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      let todosLosRepuestos = [];
+      let page = 1;
+      let hasMore = true;
+
+      // Hacer peticiones paginadas hasta obtener todos los repuestos
+      while (hasMore) {
+        const response = await api.get(
+          `/repuestos?categoria=${encodeURIComponent(
+            categoria
+          )}&page=${page}&limit=100`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const datos = response.data.data || [];
+        todosLosRepuestos = [...todosLosRepuestos, ...datos];
+
+        // Verificar si hay más páginas
+        const totalPages = response.data.pagination?.totalPages || 1;
+        hasMore = page < totalPages;
+        page++;
+      }
+
       setRepuestosPorCategoria((prev) => ({
         ...prev,
-        [categoria]: response.data.data || [],
+        [categoria]: todosLosRepuestos,
       }));
     } catch (error) {
       console.error("Error cargando repuestos:", error);
@@ -364,6 +383,7 @@ const NuevaCotizacionPage = () => {
         item.categoria = "";
         item.referencia = "";
         item.stock_disponible = null;
+        item.repuesto_id = null;
       } else {
         item.descripcion = "";
       }
@@ -375,22 +395,27 @@ const NuevaCotizacionPage = () => {
       item.referencia = "";
       item.descripcion = "";
       item.stock_disponible = null;
+      item.repuesto_id = null;
       // Cargar repuestos de esta categoría
       if (value) {
         await cargarRepuestosPorCategoria(value);
       }
     }
 
-    // Cambio de referencia
-    else if (field === "referencia") {
-      item.referencia = value;
+    // Cambio de repuesto_id (cuando selecciona una referencia)
+    else if (field === "repuesto_id") {
+      item.repuesto_id = value;
       if (value && item.categoria) {
         const repuestos = repuestosPorCategoria[item.categoria] || [];
-        const repuesto = repuestos.find((r) => r.referencia === value);
+        const repuesto = repuestos.find(
+          (r) => r.repuesto_id === parseInt(value)
+        );
         if (repuesto) {
-          item.descripcion = repuesto.nombre;
+          item.referencia = repuesto.referencia;
+          // Agregar categoría a la descripción: "Categoria - Nombre"
+          item.descripcion = `${repuesto.categoria} - ${repuesto.nombre}`;
           item.stock_disponible = repuesto.stock;
-          item.precio_unitario = repuesto.precio || 0;
+          item.precio_unitario = repuesto.precio_unitario_venta || 0;
         }
       }
     }
@@ -421,6 +446,7 @@ const NuevaCotizacionPage = () => {
           precio_unitario: 0,
           sub_total: 0,
           stock_disponible: null,
+          repuesto_id: null,
         },
       ],
     });
@@ -569,16 +595,16 @@ const NuevaCotizacionPage = () => {
         className={`flex-1 transition-all duration-300 
     ${sidebarOpen ? "ml-64" : "ml-0"} md:ml-64`}
       >
-        <main>
-          <div className="p-6 max-w-4xl mx-auto">
-            <div className="flex justify-center items-center border-b pb-4 mb-6">
-              <h1 className="text-3xl font-bold text-gray-800 mb-6 ">
+        <main className="lg:p-6">
+          <div className="p-4 lg:p-6 max-w-4xl mx-auto">
+            <div className="flex justify-center items-center border-b pb-4 mb-4 lg:mb-6">
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-4 lg:mb-6">
                 Nueva Cotización
               </h1>
             </div>
 
             {/* Datos Generales */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4 mb-4 lg:mb-6">
               <input
                 type="date"
                 name="fecha"
@@ -889,22 +915,53 @@ const NuevaCotizacionPage = () => {
             {/* Items */}
             <div className="mb-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-gray-800">
-                  Items de la Cotización
-                </h2>
+                <div className="flex items-center gap-3">
+                  <h2 className="text-lg lg:text-xl font-bold text-gray-800">
+                    Items de la Cotización
+                  </h2>
+                  <span className="bg-indigo-100 text-indigo-700 font-semibold px-3 py-1 rounded-full text-sm">
+                    {items.length}
+                  </span>
+                </div>
                 <button
                   type="button"
                   onClick={addItem}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md transition duration-200 flex items-center gap-2"
+                  className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 lg:px-4 lg:py-2 rounded-lg shadow-md transition duration-200 flex items-center gap-2 text-sm lg:text-base"
                 >
                   <span className="text-xl">+</span>
-                  Agregar Ítem
+                  <span className="hidden sm:inline">Agregar Ítem</span>
+                  <span className="sm:hidden">Ítem</span>
                 </button>
               </div>
 
-              {/* Cards de Items */}
-              <div className="space-y-4">
-                {items.map((item, idx) => {
+              {/* Cards de Items con scroll independiente en móviles/tablets */}
+              <div className="space-y-4 lg:space-y-4 max-h-[calc(100vh-28rem)] lg:max-h-none overflow-y-auto lg:overflow-visible pr-2 lg:pr-0 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+                {items.length === 0 ? (
+                  <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
+                    <div className="text-gray-400 mb-2">
+                      <svg
+                        className="w-16 h-16 mx-auto mb-3"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                      <p className="text-lg font-medium text-gray-600">
+                        No hay ítems agregados
+                      </p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Haz clic en "Agregar Ítem" para comenzar
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  items.map((item, idx) => {
                   const repuestosCategoria =
                     repuestosPorCategoria[item.categoria] || [];
                   const stockInsuficiente =
@@ -914,7 +971,7 @@ const NuevaCotizacionPage = () => {
                   return (
                     <div
                       key={idx}
-                      className={`bg-white border-2 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow ${
+                      className={`bg-white border-2 rounded-xl p-4 lg:p-6 shadow-sm hover:shadow-md transition-shadow ${
                         stockInsuficiente
                           ? "border-red-300 bg-red-50"
                           : "border-gray-200"
@@ -922,16 +979,16 @@ const NuevaCotizacionPage = () => {
                     >
                       {/* Header del Item */}
                       <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg font-semibold text-gray-700">
+                        <h3 className="text-base lg:text-lg font-semibold text-gray-700">
                           Ítem #{idx + 1}
                         </h3>
                         <button
                           type="button"
                           onClick={() => removeItem(idx)}
-                          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg transition duration-200 flex items-center gap-1"
+                          className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 lg:px-3 lg:py-1.5 rounded-lg transition duration-200 flex items-center gap-1 text-sm"
                         >
                           <span>✕</span>
-                          Eliminar
+                          <span className="hidden sm:inline">Eliminar</span>
                         </button>
                       </div>
 
@@ -990,28 +1047,29 @@ const NuevaCotizacionPage = () => {
                           item.categoria && (
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Referencia *
+                                Repuesto *
                               </label>
                               <select
-                                value={item.referencia}
+                                value={item.repuesto_id || ""}
                                 onChange={(e) =>
                                   handleItemChange(
                                     idx,
-                                    "referencia",
+                                    "repuesto_id",
                                     e.target.value
                                   )
                                 }
                                 className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                               >
                                 <option value="">
-                                  Seleccionar referencia...
+                                  Seleccionar repuesto...
                                 </option>
                                 {repuestosCategoria.map((rep) => (
                                   <option
                                     key={rep.repuesto_id}
-                                    value={rep.referencia}
+                                    value={rep.repuesto_id}
                                   >
-                                    {rep.referencia} - Stock: {rep.stock}
+                                    {rep.referencia} - {rep.nombre} (Stock:{" "}
+                                    {rep.stock})
                                   </option>
                                 ))}
                               </select>
@@ -1114,7 +1172,8 @@ const NuevaCotizacionPage = () => {
                       </div>
                     </div>
                   );
-                })}
+                })
+                )}
               </div>
             </div>
 
@@ -1303,7 +1362,7 @@ const NuevaCotizacionPage = () => {
             </datalist>
 
             {/* Descuento */}
-            <div className="mb-4 flex items-center gap-4">
+            <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
               <label className="font-medium text-gray-700">
                 Descuento (%):
               </label>
@@ -1319,42 +1378,53 @@ const NuevaCotizacionPage = () => {
                     porcentaje_descuento: parseFloat(e.target.value) || 0,
                   })
                 }
-                className="border p-2 w-24"
+                className="border p-2 w-full sm:w-24 rounded-lg"
               />
             </div>
 
             {/* Totales */}
-            <div className="text-right mb-6 border-t pt-4">
-              <p>
-                Subtotal:{" "}
-                {subtotal.toLocaleString("es-CO", {
-                  style: "currency",
-                  currency: "COP",
-                })}
-              </p>
-              {descuento > 0 && (
-                <p className="text-yellow-600">
-                  Descuento: -{" "}
-                  {descuento.toLocaleString("es-CO", {
-                    style: "currency",
-                    currency: "COP",
-                  })}
-                </p>
-              )}
-              <p className="font-bold text-2xl text-green-700">
-                Total a pagar:{" "}
-                {total.toLocaleString("es-CO", {
-                  style: "currency",
-                  currency: "COP",
-                })}
-              </p>
+            <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl p-4 lg:p-6 mb-6 border border-indigo-200">
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700 font-medium">Subtotal:</span>
+                  <span className="text-lg font-semibold text-gray-800">
+                    {subtotal.toLocaleString("es-CO", {
+                      style: "currency",
+                      currency: "COP",
+                    })}
+                  </span>
+                </div>
+                {descuento > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-yellow-600 font-medium">Descuento:</span>
+                    <span className="text-lg font-semibold text-yellow-600">
+                      -{" "}
+                      {descuento.toLocaleString("es-CO", {
+                        style: "currency",
+                        currency: "COP",
+                      })}
+                    </span>
+                  </div>
+                )}
+                <div className="border-t border-indigo-300 pt-2 mt-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-800 font-bold text-lg">Total a pagar:</span>
+                    <span className="font-bold text-2xl lg:text-3xl text-green-600">
+                      {total.toLocaleString("es-CO", {
+                        style: "currency",
+                        currency: "COP",
+                      })}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Botón */}
             <div className="flex gap-2 justify-end">
               <button
                 onClick={handleSubmit}
-                className="bg-indigo-600 text-white px-4 py-2 rounded"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg shadow-md transition duration-200 font-medium w-full sm:w-auto"
               >
                 Guardar Cotización
               </button>

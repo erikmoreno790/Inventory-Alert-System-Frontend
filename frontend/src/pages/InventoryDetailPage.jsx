@@ -19,23 +19,36 @@ import Sidebar from "../components/Sidebar";
 import api from "../api";
 
 // Componente auxiliar para las Tarjetas de Información Clave
-const InfoCard = ({ title, value, colorClass = "text-gray-700" }) => (
-  <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 flex items-center justify-between transition-transform hover:shadow-lg">
+const InfoCard = ({
+  icon: Icon,
+  title,
+  value,
+  colorClass = "text-gray-700",
+}) => (
+  <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3 transition-transform hover:shadow-md">
+    {Icon && <Icon size={24} className={`opacity-70 ${colorClass}`} />}
     <div className="flex flex-col">
-      <p className="text-sm font-medium text-gray-500">{title}</p>
-      <span className={`text-2xl font-bold mt-1 ${colorClass}`}>{value}</span>
+      <p className="text-xs font-medium text-gray-500 uppercase">{title}</p>
+      <span className={`text-lg font-semibold mt-0.5 ${colorClass}`}>
+        {value}
+      </span>
     </div>
-    <Icon size={32} className={`opacity-70 ${colorClass}`} />
   </div>
 );
 
-// Componente auxiliar para las Acciones
-const ActionButton = ({ label, onClick, colorClass }) => (
+const ActionButton = ({
+  icon: Icon,
+  label,
+  onClick,
+  colorClass,
+  disabled = false,
+}) => (
   <button
     onClick={onClick}
-    className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${colorClass}`}
+    disabled={disabled}
+    className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${colorClass}`}
   >
-    <Icon size={18} /> {label}
+    {Icon && <Icon size={18} />} {label}
   </button>
 );
 
