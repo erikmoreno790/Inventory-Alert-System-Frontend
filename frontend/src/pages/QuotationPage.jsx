@@ -962,217 +962,223 @@ const NuevaCotizacionPage = () => {
                   </div>
                 ) : (
                   items.map((item, idx) => {
-                  const repuestosCategoria =
-                    repuestosPorCategoria[item.categoria] || [];
-                  const stockInsuficiente =
-                    item.stock_disponible !== null &&
-                    item.cantidad > item.stock_disponible;
+                    const repuestosCategoria =
+                      repuestosPorCategoria[item.categoria] || [];
+                    const stockInsuficiente =
+                      item.stock_disponible !== null &&
+                      item.cantidad > item.stock_disponible;
 
-                  return (
-                    <div
-                      key={idx}
-                      className={`bg-white border-2 rounded-xl p-4 lg:p-6 shadow-sm hover:shadow-md transition-shadow ${
-                        stockInsuficiente
-                          ? "border-red-300 bg-red-50"
-                          : "border-gray-200"
-                      }`}
-                    >
-                      {/* Header del Item */}
-                      <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-base lg:text-lg font-semibold text-gray-700">
-                          Ítem #{idx + 1}
-                        </h3>
-                        <button
-                          type="button"
-                          onClick={() => removeItem(idx)}
-                          className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 lg:px-3 lg:py-1.5 rounded-lg transition duration-200 flex items-center gap-1 text-sm"
-                        >
-                          <span>✕</span>
-                          <span className="hidden sm:inline">Eliminar</span>
-                        </button>
-                      </div>
-
-                      {/* Grid de Campos */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {/* Tipo de Fuente */}
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Tipo de Fuente *
-                          </label>
-                          <select
-                            value={item.tipo_fuente}
-                            onChange={(e) =>
-                              handleItemChange(
-                                idx,
-                                "tipo_fuente",
-                                e.target.value
-                              )
-                            }
-                            className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    return (
+                      <div
+                        key={idx}
+                        className={`bg-white border-2 rounded-xl p-4 lg:p-6 shadow-sm hover:shadow-md transition-shadow ${
+                          stockInsuficiente
+                            ? "border-red-300 bg-red-50"
+                            : "border-gray-200"
+                        }`}
+                      >
+                        {/* Header del Item */}
+                        <div className="flex justify-between items-center mb-4">
+                          <h3 className="text-base lg:text-lg font-semibold text-gray-700">
+                            Ítem #{idx + 1}
+                          </h3>
+                          <button
+                            type="button"
+                            onClick={() => removeItem(idx)}
+                            className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 lg:px-3 lg:py-1.5 rounded-lg transition duration-200 flex items-center gap-1 text-sm"
                           >
-                            <option value="manual">✍️ Manual</option>
-                            <option value="inventario">📦 Inventario</option>
-                          </select>
+                            <span>✕</span>
+                            <span className="hidden sm:inline">Eliminar</span>
+                          </button>
                         </div>
 
-                        {/* Categoría (solo inventario) */}
-                        {item.tipo_fuente === "inventario" && (
+                        {/* Grid de Campos */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {/* Tipo de Fuente */}
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Categoría *
+                              Tipo de Fuente *
                             </label>
                             <select
-                              value={item.categoria}
+                              value={item.tipo_fuente}
                               onChange={(e) =>
                                 handleItemChange(
                                   idx,
-                                  "categoria",
+                                  "tipo_fuente",
                                   e.target.value
                                 )
                               }
                               className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             >
-                              <option value="">Seleccionar categoría...</option>
-                              {categorias.map((cat) => (
-                                <option key={cat} value={cat}>
-                                  {cat}
-                                </option>
-                              ))}
+                              <option value="manual">✍️ Manual</option>
+                              <option value="inventario">📦 Inventario</option>
                             </select>
                           </div>
-                        )}
 
-                        {/* Referencia (solo inventario con categoría) */}
-                        {item.tipo_fuente === "inventario" &&
-                          item.categoria && (
+                          {/* Categoría (solo inventario) */}
+                          {item.tipo_fuente === "inventario" && (
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Repuesto *
+                                Categoría *
                               </label>
                               <select
-                                value={item.repuesto_id || ""}
+                                value={item.categoria}
                                 onChange={(e) =>
                                   handleItemChange(
                                     idx,
-                                    "repuesto_id",
+                                    "categoria",
                                     e.target.value
                                   )
                                 }
                                 className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                               >
                                 <option value="">
-                                  Seleccionar repuesto...
+                                  Seleccionar categoría...
                                 </option>
-                                {repuestosCategoria.map((rep) => (
-                                  <option
-                                    key={rep.repuesto_id}
-                                    value={rep.repuesto_id}
-                                  >
-                                    {rep.referencia} - {rep.nombre} (Stock:{" "}
-                                    {rep.stock})
+                                {categorias.map((cat) => (
+                                  <option key={cat} value={cat}>
+                                    {cat}
                                   </option>
                                 ))}
                               </select>
                             </div>
                           )}
 
-                        {/* Descripción */}
-                        <div
-                          className={
-                            item.tipo_fuente === "inventario"
-                              ? "md:col-span-2 lg:col-span-3"
-                              : "md:col-span-2"
-                          }
-                        >
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Descripción *
-                          </label>
-                          {item.tipo_fuente === "manual" ? (
+                          {/* Referencia (solo inventario con categoría) */}
+                          {item.tipo_fuente === "inventario" &&
+                            item.categoria && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  Repuesto *
+                                </label>
+                                <select
+                                  value={item.repuesto_id || ""}
+                                  onChange={(e) =>
+                                    handleItemChange(
+                                      idx,
+                                      "repuesto_id",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                >
+                                  <option value="">
+                                    Seleccionar repuesto...
+                                  </option>
+                                  {repuestosCategoria.map((rep) => (
+                                    <option
+                                      key={rep.repuesto_id}
+                                      value={rep.repuesto_id}
+                                    >
+                                      {rep.referencia} - {rep.nombre} (Stock:{" "}
+                                      {rep.stock})
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            )}
+
+                          {/* Descripción */}
+                          <div
+                            className={
+                              item.tipo_fuente === "inventario"
+                                ? "md:col-span-2 lg:col-span-3"
+                                : "md:col-span-2"
+                            }
+                          >
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Descripción *
+                            </label>
+                            {item.tipo_fuente === "manual" ? (
+                              <input
+                                list="opcionesDescripcion"
+                                value={item.descripcion}
+                                onChange={(e) =>
+                                  handleItemChange(
+                                    idx,
+                                    "descripcion",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="Ingrese descripción del servicio/repuesto"
+                              />
+                            ) : (
+                              <input
+                                value={item.descripcion}
+                                readOnly
+                                className="w-full border border-gray-300 rounded-lg p-2.5 bg-gray-100 text-gray-600 cursor-not-allowed"
+                                placeholder="Se completa automáticamente al seleccionar referencia"
+                              />
+                            )}
+                          </div>
+
+                          {/* Cantidad */}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Cantidad *
+                            </label>
                             <input
-                              list="opcionesDescripcion"
-                              value={item.descripcion}
+                              type="number"
+                              min="1"
+                              value={item.cantidad}
                               onChange={(e) =>
                                 handleItemChange(
                                   idx,
-                                  "descripcion",
+                                  "cantidad",
+                                  e.target.value
+                                )
+                              }
+                              className={`w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 ${
+                                stockInsuficiente
+                                  ? "border-red-500 focus:border-red-500"
+                                  : "border-gray-300 focus:border-indigo-500"
+                              }`}
+                            />
+                            {stockInsuficiente && (
+                              <p className="text-xs text-red-600 mt-1 font-medium">
+                                ⚠️ Stock disponible: {item.stock_disponible}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Precio Unitario */}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Precio Unitario *
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              value={item.precio_unitario}
+                              onChange={(e) =>
+                                handleItemChange(
+                                  idx,
+                                  "precio_unitario",
                                   e.target.value
                                 )
                               }
                               className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                              placeholder="Ingrese descripción del servicio/repuesto"
+                              placeholder="$0"
                             />
-                          ) : (
-                            <input
-                              value={item.descripcion}
-                              readOnly
-                              className="w-full border border-gray-300 rounded-lg p-2.5 bg-gray-100 text-gray-600 cursor-not-allowed"
-                              placeholder="Se completa automáticamente al seleccionar referencia"
-                            />
-                          )}
-                        </div>
+                          </div>
 
-                        {/* Cantidad */}
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Cantidad *
-                          </label>
-                          <input
-                            type="number"
-                            min="1"
-                            value={item.cantidad}
-                            onChange={(e) =>
-                              handleItemChange(idx, "cantidad", e.target.value)
-                            }
-                            className={`w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 ${
-                              stockInsuficiente
-                                ? "border-red-500 focus:border-red-500"
-                                : "border-gray-300 focus:border-indigo-500"
-                            }`}
-                          />
-                          {stockInsuficiente && (
-                            <p className="text-xs text-red-600 mt-1 font-medium">
-                              ⚠️ Stock disponible: {item.stock_disponible}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Precio Unitario */}
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Precio Unitario *
-                          </label>
-                          <input
-                            type="number"
-                            min="0"
-                            value={item.precio_unitario}
-                            onChange={(e) =>
-                              handleItemChange(
-                                idx,
-                                "precio_unitario",
-                                e.target.value
-                              )
-                            }
-                            className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="$0"
-                          />
-                        </div>
-
-                        {/* Subtotal */}
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Subtotal
-                          </label>
-                          <div className="w-full border border-gray-200 rounded-lg p-2.5 bg-gray-50 text-gray-700 font-semibold">
-                            {item.sub_total.toLocaleString("es-CO", {
-                              style: "currency",
-                              currency: "COP",
-                            })}
+                          {/* Subtotal */}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Subtotal
+                            </label>
+                            <div className="w-full border border-gray-200 rounded-lg p-2.5 bg-gray-50 text-gray-700 font-semibold">
+                              {item.sub_total.toLocaleString("es-CO", {
+                                style: "currency",
+                                currency: "COP",
+                              })}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })
+                    );
+                  })
                 )}
               </div>
             </div>
@@ -1396,7 +1402,9 @@ const NuevaCotizacionPage = () => {
                 </div>
                 {descuento > 0 && (
                   <div className="flex justify-between items-center">
-                    <span className="text-yellow-600 font-medium">Descuento:</span>
+                    <span className="text-yellow-600 font-medium">
+                      Descuento:
+                    </span>
                     <span className="text-lg font-semibold text-yellow-600">
                       -{" "}
                       {descuento.toLocaleString("es-CO", {
@@ -1408,7 +1416,9 @@ const NuevaCotizacionPage = () => {
                 )}
                 <div className="border-t border-indigo-300 pt-2 mt-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-800 font-bold text-lg">Total a pagar:</span>
+                    <span className="text-gray-800 font-bold text-lg">
+                      Total a pagar:
+                    </span>
                     <span className="font-bold text-2xl lg:text-3xl text-green-600">
                       {total.toLocaleString("es-CO", {
                         style: "currency",
