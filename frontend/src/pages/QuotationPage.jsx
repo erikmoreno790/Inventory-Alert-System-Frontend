@@ -1389,7 +1389,7 @@ const NuevaCotizacionPage = () => {
             </div>
 
             {/* Totales */}
-            <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl p-4 lg:p-6 mb-6 border border-indigo-200">
+            <div className="bg-linear-to-r from-indigo-50 to-blue-50 rounded-xl p-4 lg:p-6 mb-6 border border-indigo-200">
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-700 font-medium">Subtotal:</span>
