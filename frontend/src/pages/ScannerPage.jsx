@@ -12,7 +12,6 @@ const ScannerPage = () => {
   const [repuesto, setRepuesto] = useState(null);
   const [loading, setLoading] = useState(false);
   const [codigoManual, setCodigoManual] = useState("");
-  const [sidebarOpen] = useState(false);
 
   const token = localStorage.getItem("token");
 
@@ -91,15 +90,11 @@ const ScannerPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-linear-to-br from-blue-50 to-indigo-100">
+    <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
 
-      <div
-        className={`flex-1 transition-all duration-300 ${
-          sidebarOpen ? "ml-64" : "ml-0"
-        } md:ml-64`}
-      >
-        <main className="p-6 max-w-4xl mx-auto">
+      <div className="flex-1 md:ml-64">
+        <main className="p-6 max-w-7xl mx-auto">
           {/* Título */}
           <div className="text-center mb-6">
             <h1 className="text-4xl font-bold text-gray-800 mb-2 flex items-center justify-center gap-3">

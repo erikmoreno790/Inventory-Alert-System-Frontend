@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import api from "../api";
+import AlertMessage from "../components/AlertMessage";
 
 const QuotationsHistoryPage = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [quotations, setQuotations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [alert, setAlert] = useState({ type: "", message: "", show: false });
   const [filters, setFilters] = useState({
     nombre_cliente: "",
     placa: "",
@@ -94,11 +95,23 @@ const QuotationsHistoryPage = () => {
     if (!window.confirm("¿Seguro que deseas eliminar esta cotización?")) return;
     try {
       await api.delete(`/cotizaciones/${id}`);
+      setAlert({
+        type: "success",
+        message: "Cotización eliminada exitosamente",
+        show: true,
+      });
       // Recargar la página actual con los filtros aplicados
       fetchQuotations(currentPage, filters);
     } catch (err) {
       console.error("Error eliminando cotización:", err);
-      setError("Error al eliminar la cotización. Por favor, intenta de nuevo.");
+      const errorMsg =
+        err.response?.data?.error || "Error al eliminar la cotización";
+      setError(errorMsg);
+      setAlert({
+        type: "error",
+        message: errorMsg,
+        show: true,
+      });
     }
   };
 
@@ -172,16 +185,14 @@ const QuotationsHistoryPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div
-        className={`flex-1 transition-all duration-300 
-    ${sidebarOpen ? "ml-64" : "ml-0"} md:ml-64`}
-      >
-        <main className="p-6 max-w-6xl mx-auto">
+    <div className="flex min-h-screen bg-gray-50">
+      <Sidebar />
+
+      <div className="flex-1 md:ml-64">
+        <main className="p-6 max-w-7xl mx-auto">
           {/* Encabezado */}
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-800 mb-6">
+            <h1 className="text-3xl font-bold text-gray-800">
               Historial de Cotizaciones
             </h1>
             <div className="text-sm text-gray-600">
@@ -439,6 +450,13 @@ const QuotationsHistoryPage = () => {
           )}
         </main>
       </div>
+      {alert.show && (
+        <AlertMessage
+          type={alert.type}
+          message={alert.message}
+          onClose={() => setAlert({ ...alert, show: false })}
+        />
+      )}
     </div>
   );
 };

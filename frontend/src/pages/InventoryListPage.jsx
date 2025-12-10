@@ -8,7 +8,6 @@ const InventoryListPage = () => {
   const [inventario, setInventario] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [sidebarOpen] = useState(true);
   const navigate = useNavigate();
 
   // 🔹 Listas para filtros desplegables
@@ -195,21 +194,18 @@ const InventoryListPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
 
-      <div
-        className={`flex-1 transition-all duration-300 
-    ${sidebarOpen ? "ml-64" : "ml-0"} md:ml-64`}
-      >
-        <main>
-          <div className="p-6">
+      <div className="flex-1 md:ml-64">
+        <main className="p-6 max-w-7xl mx-auto">
+          <div className="mb-6">
             <div className="flex justify-between items-center mb-4">
               <div>
-                <h1 className="text-3xl font-bold text-gray-800 mb-6">
+                <h1 className="text-3xl font-bold text-gray-800 mb-2">
                   Inventario de Repuestos
                 </h1>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-sm text-gray-600">
                   <span className="font-semibold">Total: {totalItems}</span>{" "}
                   repuestos
                   {hasActiveFilters && (

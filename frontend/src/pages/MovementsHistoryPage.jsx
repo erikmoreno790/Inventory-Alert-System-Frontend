@@ -18,7 +18,6 @@ const MovementsHistory = () => {
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
   // 🔹 Paginación del servidor
@@ -35,10 +34,6 @@ const MovementsHistory = () => {
     fechaInicio: "",
     fechaFin: "",
   });
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
 
   // 🔹 Cargar categorías al iniciar
   useEffect(() => {
@@ -172,71 +167,13 @@ const MovementsHistory = () => {
   };
 
   // 🔹 Loading State
-  if (loading) {
-    return (
-      <div className="flex min-h-screen bg-gray-50">
-        <Sidebar />
-        <div
-          className={`flex-1 transition-all duration-300 ${
-            sidebarOpen ? "ml-64" : "ml-0"
-          } md:ml-64`}
-        >
-          <main className="p-6 max-w-7xl mx-auto">
-            <div className="flex justify-center items-center min-h-[60vh]">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-lg text-gray-600">Cargando movimientos...</p>
-              </div>
-            </div>
-          </main>
-        </div>
-      </div>
-    );
-  }
-
-  // 🔹 Error State
-  if (error) {
-    return (
-      <div className="flex min-h-screen bg-gray-50">
-        <Sidebar />
-        <div
-          className={`flex-1 transition-all duration-300 ${
-            sidebarOpen ? "ml-64" : "ml-0"
-          } md:ml-64`}
-        >
-          <TopNavbar onToggleSidebar={toggleSidebar} />
-          <main className="p-6 max-w-7xl mx-auto">
-            <div className="flex justify-center items-center min-h-[60vh]">
-              <div className="text-center bg-white p-8 rounded-xl shadow-lg max-w-md">
-                <AlertCircle size={48} className="text-red-500 mx-auto mb-4" />
-                <p className="text-lg font-semibold text-gray-800 mb-2">
-                  {error}
-                </p>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
-                >
-                  Reintentar
-                </button>
-              </div>
-            </div>
-          </main>
-        </div>
-      </div>
-    );
-  }
-
   // 🔹 Loading State
   if (loading) {
     return (
       <div className="flex min-h-screen bg-gray-50">
         <Sidebar />
-        <div
-          className={`flex-1 transition-all duration-300 ${
-            sidebarOpen ? "ml-64" : "ml-0"
-          } md:ml-64`}
-        >
-          <TopNavbar onToggleSidebar={toggleSidebar} />
+
+        <div className="flex-1 md:ml-64">
           <main className="p-6 max-w-7xl mx-auto">
             <div className="flex justify-center items-center min-h-[60vh]">
               <div className="text-center">
@@ -255,12 +192,8 @@ const MovementsHistory = () => {
     return (
       <div className="flex min-h-screen bg-gray-50">
         <Sidebar />
-        <div
-          className={`flex-1 transition-all duration-300 ${
-            sidebarOpen ? "ml-64" : "ml-0"
-          } md:ml-64`}
-        >
-          <TopNavbar onToggleSidebar={toggleSidebar} />
+
+        <div className="flex-1 md:ml-64">
           <main className="p-6 max-w-7xl mx-auto">
             <div className="flex justify-center items-center min-h-[60vh]">
               <div className="text-center bg-white p-8 rounded-xl shadow-lg max-w-md">
@@ -285,11 +218,8 @@ const MovementsHistory = () => {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
-      <div
-        className={`flex-1 transition-all duration-300 ${
-          sidebarOpen ? "ml-64" : "ml-0"
-        } md:ml-64`}
-      >
+
+      <div className="flex-1 md:ml-64">
         <main className="p-6 max-w-7xl mx-auto">
           {/* 🔹 Header */}
           <div className="mb-6">

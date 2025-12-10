@@ -18,27 +18,6 @@ import Sidebar from "../components/Sidebar";
 import api from "../api";
 import { toast } from "react-toastify";
 
-// Componente auxiliar para las tarjetas de información
-const InfoCard = ({ title, value, colorClass = "text-gray-700" }) => (
-  <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 flex items-center justify-between transition-transform hover:shadow-lg">
-    <div className="flex flex-col">
-      <p className="text-sm font-medium text-gray-500">{title}</p>
-      <span className={`text-2xl font-bold mt-1 ${colorClass}`}>{value}</span>
-    </div>
-    <Icon size={32} className={`opacity-70 ${colorClass}`} />
-  </div>
-);
-
-// Componente para fila de detalle
-const DetailRow = ({ label, value }) => (
-  <div className="flex items-start gap-3 py-2">
-    <div className="flex-1">
-      <strong className="text-gray-600 text-sm">{label}:</strong>
-      <p className="text-gray-800 mt-0.5">{value || "N/A"}</p>
-    </div>
-  </div>
-);
-
 const MovementDetailPage = () => {
   const { id, tipo } = useParams();
   const navigate = useNavigate();
@@ -193,10 +172,11 @@ const MovementDetailPage = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-800">
+    <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
+
       <div className="flex-1 md:ml-64">
-        <main className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto">
+        <main className="p-6 max-w-7xl mx-auto">
           {/* Breadcrumb */}
           <button
             onClick={() => navigate("/inventario/movimientos")}
@@ -247,137 +227,187 @@ const MovementDetailPage = () => {
             </div>
           </div>
 
-          <hr className="border-gray-200" />
-
-          {/* Tarjetas de Información Clave */}
-          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <InfoCard
-              icon={Package2}
-              title="Cantidad"
-              value={movimiento.cantidad}
-              colorClass={
-                movimiento.tipo_movimiento === "Entrada"
-                  ? "text-green-600"
-                  : "text-red-600"
-              }
-            />
-            <InfoCard
-              icon={FileBarChart}
-              title="Categoría"
-              value={movimiento.categoria}
-              colorClass="text-blue-600"
-            />
-            <InfoCard
-              icon={Calendar}
-              title="Fecha"
-              value={new Date(movimiento.fecha).toLocaleDateString()}
-              colorClass="text-purple-600"
-            />
-            <InfoCard
-              icon={User}
-              title="Usuario"
-              value={movimiento.usuario}
-              colorClass="text-indigo-600"
-            />
-          </section>
-
           {/* Detalles del Movimiento */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
             {/* Información General */}
-            <section className="bg-white rounded-xl shadow-md border border-gray-100 p-6">
-              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2 text-gray-800 border-b pb-3">
-                <FileText size={20} className="text-orange-600" />
+            <section className="bg-white rounded-xl shadow-md border border-gray-100 p-6 hover:shadow-xl transition-shadow">
+              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2 text-gray-800 border-b border-gray-200 pb-3">
+                <FileText size={22} className="text-orange-600" />
                 Información General
               </h2>
-              <div className="space-y-4">
-                <DetailRow
-                  icon={Package2}
-                  label="Repuesto"
-                  value={movimiento.repuesto}
-                  iconColor="text-blue-500"
-                />
-                <DetailRow
-                  icon={FileBarChart}
-                  label="Categoría"
-                  value={movimiento.categoria}
-                  iconColor="text-purple-500"
-                />
-                <DetailRow
-                  icon={Hash}
-                  label="Referencia"
-                  value={movimiento.referencia}
-                  iconColor="text-gray-500"
-                />
-                <DetailRow
-                  icon={FileText}
-                  label="Motivo"
-                  value={movimiento.subtipo}
-                  iconColor="text-orange-500"
-                />
-                <DetailRow
-                  icon={User}
-                  label="Contraparte (Origen/Destino)"
-                  value={movimiento.contraparte}
-                  iconColor="text-teal-500"
-                />
-                <DetailRow
-                  icon={FileText}
-                  label="Factura"
-                  value={movimiento.factura}
-                  iconColor="text-green-500"
-                />
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <Hash size={18} className="text-gray-500 shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      ID Movimiento
+                    </p>
+                    <p className="text-gray-800 font-semibold">
+                      {movimiento.id}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <Calendar size={18} className="text-purple-600 shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Fecha y Hora
+                    </p>
+                    <p className="text-gray-800 font-semibold">
+                      {movimiento.fecha}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <User size={18} className="text-indigo-600 shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Usuario
+                    </p>
+                    <p className="text-gray-800 font-semibold">
+                      {movimiento.usuario}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <AlertCircle size={18} className="text-amber-600 shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Motivo
+                    </p>
+                    <p className="text-gray-800 font-semibold">
+                      {movimiento.subtipo}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <Package2
+                    size={18}
+                    className={
+                      movimiento.tipo_movimiento === "Entrada"
+                        ? "text-green-600 shrink-0"
+                        : "text-red-600 shrink-0"
+                    }
+                  />
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Cantidad
+                    </p>
+                    <p
+                      className={`font-bold text-lg ${
+                        movimiento.tipo_movimiento === "Entrada"
+                          ? "text-green-700"
+                          : "text-red-700"
+                      }`}
+                    >
+                      {movimiento.cantidad}
+                    </p>
+                  </div>
+                </div>
+                {movimiento.factura && movimiento.factura !== "Sin factura" && (
+                  <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors">
+                    <FileText size={18} className="text-blue-600 shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-xs font-medium text-blue-600 uppercase tracking-wide">
+                        Factura
+                      </p>
+                      <p className="text-blue-800 font-semibold">
+                        {movimiento.factura}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {movimiento.contraparte && movimiento.contraparte !== "N/A" && (
+                  <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200 hover:bg-green-100 transition-colors">
+                    <UserCircle size={18} className="text-green-600 shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-xs font-medium text-green-600 uppercase tracking-wide">
+                        Proveedor/Contraparte
+                      </p>
+                      <p className="text-green-800 font-semibold">
+                        {movimiento.contraparte}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </section>
 
-            {/* Información de Cotización (si aplica) */}
-            <section className="bg-white rounded-xl shadow-md border border-gray-100 p-6">
-              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2 text-gray-800 border-b pb-3">
-                <FileBarChart size={20} className="text-indigo-600" />
-                Detalles de Cotización
+            {/* Información de Cotización */}
+            <section className="bg-white rounded-xl shadow-md border border-gray-100 p-6 hover:shadow-xl transition-shadow">
+              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2 text-gray-800 border-b border-gray-200 pb-3">
+                <FileBarChart size={22} className="text-indigo-600" />
+                Información de Cotización
               </h2>
-              {movimiento.cotizacion_id ||
-              movimiento.cliente ||
+              {movimiento.cliente ||
               movimiento.vehiculo ||
-              movimiento.placa ? (
-                <div className="space-y-4">
+              movimiento.placa ||
+              movimiento.cotizacion_id ? (
+                <div className="space-y-3">
                   {movimiento.cotizacion_id && (
-                    <DetailRow
-                      icon={Hash}
-                      label="# Cotización"
-                      value={movimiento.cotizacion_id}
-                      iconColor="text-indigo-500"
-                    />
+                    <div className="flex items-center gap-3 p-3 bg-indigo-50 rounded-lg border border-indigo-200 hover:bg-indigo-100 transition-colors">
+                      <Hash size={18} className="text-indigo-600 shrink-0" />
+                      <div className="flex-1">
+                        <p className="text-xs font-medium text-indigo-600 uppercase tracking-wide">
+                          ID Cotización
+                        </p>
+                        <p className="text-indigo-800 font-semibold">
+                          {movimiento.cotizacion_id}
+                        </p>
+                      </div>
+                    </div>
                   )}
                   {movimiento.cliente && (
-                    <DetailRow
-                      icon={UserCircle}
-                      label="Cliente"
-                      value={movimiento.cliente}
-                      iconColor="text-blue-500"
-                    />
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <UserCircle
+                        size={18}
+                        className="text-blue-600 shrink-0"
+                      />
+                      <div className="flex-1">
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                          Cliente
+                        </p>
+                        <p className="text-gray-800 font-semibold">
+                          {movimiento.cliente}
+                        </p>
+                      </div>
+                    </div>
                   )}
                   {movimiento.vehiculo && (
-                    <DetailRow
-                      icon={Car}
-                      label="Vehículo"
-                      value={movimiento.vehiculo}
-                      iconColor="text-green-500"
-                    />
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <Car size={18} className="text-green-600 shrink-0" />
+                      <div className="flex-1">
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                          Vehículo
+                        </p>
+                        <p className="text-gray-800 font-semibold">
+                          {movimiento.vehiculo}
+                        </p>
+                      </div>
+                    </div>
                   )}
                   {movimiento.placa && (
-                    <DetailRow
-                      icon={Hash}
-                      label="Placa"
-                      value={movimiento.placa}
-                      iconColor="text-orange-500"
-                    />
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <Hash size={18} className="text-purple-600 shrink-0" />
+                      <div className="flex-1">
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                          Placa
+                        </p>
+                        <p className="text-gray-800 font-mono font-semibold uppercase">
+                          {movimiento.placa}
+                        </p>
+                      </div>
+                    </div>
                   )}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-8 text-gray-400">
-                  <AlertCircle size={48} className="mb-3 opacity-50" />
-                  <p className="text-sm">
+                <div className="flex flex-col items-center justify-center py-12 text-gray-400 bg-gray-50 rounded-lg">
+                  <AlertCircle size={56} className="mb-4 opacity-40" />
+                  <p className="text-sm font-medium">
                     No hay información de cotización asociada
+                  </p>
+                  <p className="text-xs mt-1 text-gray-400">
+                    Este movimiento no está vinculado a ninguna cotización
                   </p>
                 </div>
               )}
@@ -387,14 +417,16 @@ const MovementDetailPage = () => {
           {/* Observaciones */}
           {movimiento.observacion &&
             movimiento.observacion !== "Sin observaciones" && (
-              <section className="bg-white rounded-xl shadow-md border border-gray-100 p-6">
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-800 border-b pb-3">
-                  <FileText size={20} className="text-gray-600" />
+              <section className="bg-linear-to-br from-amber-50 to-orange-50 rounded-xl shadow-md border border-amber-200 p-6 mt-6 hover:shadow-xl transition-shadow">
+                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-800 border-b border-amber-300 pb-3">
+                  <FileText size={22} className="text-amber-600" />
                   Observaciones
                 </h2>
-                <p className="text-gray-700 leading-relaxed">
-                  {movimiento.observacion}
-                </p>
+                <div className="bg-white p-4 rounded-lg border border-amber-200">
+                  <p className="text-gray-700 leading-relaxed italic">
+                    "{movimiento.observacion}"
+                  </p>
+                </div>
               </section>
             )}
         </main>

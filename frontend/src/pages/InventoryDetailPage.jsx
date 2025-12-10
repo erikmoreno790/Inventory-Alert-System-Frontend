@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import api from "../api";
+import AlertMessage from "../components/AlertMessage";
 
 // Componente auxiliar para las Tarjetas de Información Clave
 const InfoCard = ({
@@ -63,7 +64,7 @@ const RepuestoDetailPage = () => {
   // const [alertas, setAlertas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [sidebarOpen] = useState(false);
+  const [alert, setAlert] = useState({ type: "", message: "", show: false });
 
   useEffect(() => {
     // Prevenir carga si se está eliminando
@@ -112,13 +113,24 @@ const RepuestoDetailPage = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // Usar window.location para forzar recarga completa y evitar problemas
-      window.location.href = "/inventario";
+      setAlert({
+        type: "success",
+        message: "Repuesto eliminado exitosamente",
+        show: true,
+      });
+
+      setTimeout(() => {
+        navigate("/inventario");
+      }, 1500);
     } catch (error) {
       setIsDeleting(false);
       const errorMsg =
         error.response?.data?.error || "Error al eliminar el repuesto";
-      alert(`❌ ${errorMsg}`);
+      setAlert({
+        type: "error",
+        message: errorMsg,
+        show: true,
+      });
       console.error(error);
     }
   };
@@ -153,14 +165,11 @@ const RepuestoDetailPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-800">
+    <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
-      <div
-        className={`flex-1 transition-all duration-300 ${
-          sidebarOpen ? "ml-64" : "ml-0"
-        } md:ml-64`}
-      >
-        <main className="p-4 md:p-8 space-y-8">
+
+      <div className="flex-1 md:ml-64">
+        <main className="p-6 max-w-7xl mx-auto">
           {/* Header y Acciones Principales */}
           <div className="space-y-4">
             <button
@@ -373,6 +382,13 @@ const RepuestoDetailPage = () => {
           */}
         </main>
       </div>
+      {alert.show && (
+        <AlertMessage
+          type={alert.type}
+          message={alert.message}
+          onClose={() => setAlert({ ...alert, show: false })}
+        />
+      )}
     </div>
   );
 };

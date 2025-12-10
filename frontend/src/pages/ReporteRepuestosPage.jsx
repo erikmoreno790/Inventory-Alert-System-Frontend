@@ -6,7 +6,6 @@ const token = localStorage.getItem("token");
 const config = { headers: { Authorization: `Bearer ${token}` } };
 
 const ReporteRepuestosPage = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFin, setFechaFin] = useState("");
   const [reporte, setReporte] = useState([]);
@@ -49,14 +48,12 @@ const ReporteRepuestosPage = () => {
   );
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+    <div className="flex min-h-screen bg-gray-50">
+      <Sidebar />
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col">
-        <main className="flex-1 p-6 overflow-y-auto">
-          <h1 className="text-2xl font-bold mb-4">
+      <div className="flex-1 md:ml-64">
+        <main className="p-6 max-w-7xl mx-auto">
+          <h1 className="text-3xl font-bold text-gray-800 mb-6">
             📊 Reporte de Repuestos Usados
           </h1>
 

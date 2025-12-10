@@ -62,7 +62,6 @@ const QuotationDetailsPage = () => {
   const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [updating, setUpdating] = useState(false);
-  const [sidebarOpen] = useState(true);
 
   // 🔹 Obtener detalles de la cotización
   useEffect(() => {
@@ -186,11 +185,8 @@ const QuotationDetailsPage = () => {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
-      <div
-        className={`flex-1 transition-all duration-300 ${
-          sidebarOpen ? "ml-64" : "ml-0"
-        } md:ml-64`}
-      >
+
+      <div className="flex-1 md:ml-64">
         <main className="p-6 max-w-7xl mx-auto">
           {/* 🔹 Encabezado con breadcrumb y acciones */}
           <div className="mb-6">

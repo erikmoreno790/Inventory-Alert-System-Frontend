@@ -4,6 +4,7 @@ import Sidebar from "../components/Sidebar";
 import api from "../api";
 import { BrowserMultiFormatReader } from "@zxing/library";
 import { Scan, QrCode, Save, ArrowLeft, Camera, CameraOff } from "lucide-react";
+import AlertMessage from "../components/AlertMessage";
 
 const InventoryFormPage = () => {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ const InventoryFormPage = () => {
   const [scanning, setScanning] = useState(false);
   const [mostrarInputCategoria, setMostrarInputCategoria] = useState(false);
   const [nuevaCategoria, setNuevaCategoria] = useState("");
-  const [sidebarOpen] = useState(true);
+  const [alert, setAlert] = useState({ type: "", message: "", show: false });
 
   // Refs críticos
   const videoRef = useRef(null);
@@ -210,20 +211,35 @@ const InventoryFormPage = () => {
 
       if (id) {
         await api.put(`/repuestos/${id}`, dataToSend, config);
+        setAlert({
+          type: "success",
+          message: "Repuesto actualizado exitosamente",
+          show: true,
+        });
       } else {
         await api.post("/repuestos", dataToSend, config);
+        setAlert({
+          type: "success",
+          message: "Repuesto creado exitosamente",
+          show: true,
+        });
       }
 
-      navigate("/inventario", {
-        state: { message: "Repuesto guardado con éxito" },
-      });
+      setTimeout(() => {
+        navigate("/inventario");
+      }, 1500);
     } catch (err) {
       const msg = err.response?.data?.error || "Error al guardar";
-      setError(
+      const errorMessage =
         msg.includes("Duplicate") || msg.includes("único")
           ? "Ya existe un repuesto con ese código de barras"
-          : msg
-      );
+          : msg;
+      setError(errorMessage);
+      setAlert({
+        type: "error",
+        message: errorMessage,
+        show: true,
+      });
     } finally {
       setLoading(false);
     }
@@ -233,11 +249,7 @@ const InventoryFormPage = () => {
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
 
-      <div
-        className={`flex-1 transition-all duration-300 ${
-          sidebarOpen ? "ml-64" : "ml-0"
-        } md:ml-64`}
-      >
+      <div className="flex-1 md:ml-64">
         <main className="p-6 max-w-7xl mx-auto">
           <div className="mb-6 flex justify-between items-center">
             <h1 className="text-3xl font-bold text-gray-800">
@@ -533,6 +545,13 @@ const InventoryFormPage = () => {
           </form>
         </main>
       </div>
+      {alert.show && (
+        <AlertMessage
+          type={alert.type}
+          message={alert.message}
+          onClose={() => setAlert({ ...alert, show: false })}
+        />
+      )}
     </div>
   );
 };

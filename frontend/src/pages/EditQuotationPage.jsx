@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -344,475 +345,456 @@ const EditarCotizacionPage = () => {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
-      <div
-        className={`flex-1 transition-all duration-300 ${
-          sidebarOpen ? "ml-64" : "ml-0"
-        } md:ml-64`}
-      >
-        <main>
-          <div className="p-6 max-w-4xl mx-auto">
-            {/* 🔹 Encabezado mejorado */}
-            <div className="mb-6">
-              <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                <button
-                  onClick={() => navigate("/historial-cotizaciones")}
-                  className="hover:text-blue-600 transition flex items-center gap-1"
-                >
-                  <ArrowLeft size={16} />
-                  Cotizaciones
-                </button>
-                <span>/</span>
-                <span className="text-gray-800 font-medium">Editar #{id}</span>
-              </div>
 
-              <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold text-gray-800">
-                  Editar Cotización
-                </h1>
-                <button
-                  onClick={handleSubmit}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg shadow-md transition duration-200 flex items-center gap-2"
-                >
-                  <Save size={18} />
-                  Guardar Cambios
-                </button>
-              </div>
+      <div className="flex-1 md:ml-64">
+        <main className="p-6 max-w-7xl mx-auto">
+          {/* 🔹 Encabezado mejorado */}
+          <div className="mb-6">
+            <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
+              <button
+                onClick={() => navigate("/historial-cotizaciones")}
+                className="hover:text-blue-600 transition flex items-center gap-1"
+              >
+                <ArrowLeft size={16} />
+                Cotizaciones
+              </button>
+              <span>/</span>
+              <span className="text-gray-800 font-medium">Editar #{id}</span>
             </div>
 
-            {/* Datos generales - Card moderna */}
-            <div className="bg-white shadow-md rounded-xl p-6 mb-6 border border-gray-100">
-              <h2 className="text-lg font-bold text-gray-800 mb-4 pb-3 border-b border-gray-200">
-                Datos Generales
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Fecha
-                  </label>
-                  <input
-                    type="date"
-                    name="fecha"
-                    value={cotizacion.fecha}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Cliente *
-                  </label>
-                  <input
-                    name="nombre_cliente"
-                    value={cotizacion.nombre_cliente}
-                    onChange={handleChange}
-                    placeholder="Nombre del cliente"
-                    className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    NIT/CC
-                  </label>
-                  <input
-                    name="nit_cc"
-                    value={cotizacion.nit_cc || ""}
-                    onChange={handleChange}
-                    placeholder="NIT o C.C."
-                    className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Teléfono
-                  </label>
-                  <input
-                    name="telefono"
-                    type="text"
-                    maxLength="10"
-                    value={cotizacion.telefono || ""}
-                    onChange={handleTelefonoChange}
-                    placeholder="Teléfono (10 dígitos)"
-                    className={`w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 ${
-                      errorTelefono ? "border-red-500" : "border-gray-300"
-                    }`}
-                  />
-                  {errorTelefono && (
-                    <p className="text-xs text-red-600 mt-1">{errorTelefono}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Placa *
-                  </label>
-                  <input
-                    name="placa"
-                    type="text"
-                    maxLength="6"
-                    value={cotizacion.placa}
-                    onChange={handlePlacaChange}
-                    placeholder="Placa (ABC123)"
-                    className={`w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 ${
-                      errorPlaca ? "border-red-500" : "border-gray-300"
-                    }`}
-                  />
-                  {errorPlaca && (
-                    <p className="text-xs text-red-600 mt-1">{errorPlaca}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Vehículo
-                  </label>
-                  <input
-                    name="vehiculo"
-                    value={cotizacion.vehiculo || ""}
-                    onChange={handleChange}
-                    placeholder="Vehículo"
-                    className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Kilometraje
-                  </label>
-                  <input
-                    name="kilometraje"
-                    type="number"
-                    value={cotizacion.kilometraje || ""}
-                    onChange={handleChange}
-                    placeholder="Kilometraje"
-                    className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Mecánico
-                  </label>
-                  <input
-                    name="nombre_mecanico"
-                    value={cotizacion.nombre_mecanico || ""}
-                    onChange={handleChange}
-                    placeholder="Mecánico"
-                    className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Segundo Mecánico
-                  </label>
-                  <input
-                    name="segundo_mecanico"
-                    value={cotizacion.segundo_mecanico || ""}
-                    onChange={handleChange}
-                    placeholder="Segundo mecánico (opcional)"
-                    className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
-              </div>
+            <div className="flex justify-between items-center">
+              <h1 className="text-3xl font-bold text-gray-800">
+                Editar Cotización
+              </h1>
+              <button
+                onClick={handleSubmit}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg shadow-md transition duration-200 flex items-center gap-2"
+              >
+                <Save size={18} />
+                Guardar Cambios
+              </button>
             </div>
+          </div>
 
-            {/* Observaciones - Card */}
-            <div className="bg-white shadow-md rounded-xl p-6 mb-6 border border-gray-100">
-              <h2 className="text-lg font-bold text-gray-800 mb-4 pb-3 border-b border-gray-200">
-                Observaciones
-              </h2>
-              <textarea
-                name="observaciones"
-                value={cotizacion.observaciones || ""}
-                onChange={handleChange}
-                placeholder="Observaciones adicionales..."
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
-                rows={4}
-              />
-            </div>
-
-            {/* 🔹 Imágenes existentes - Card moderna */}
-            <div className="bg-white shadow-md rounded-xl p-6 mb-6 border border-gray-100">
-              <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-200">
-                <ImageIcon size={20} className="text-pink-600" />
-                <h2 className="text-lg font-bold text-gray-800">
-                  Imágenes Asociadas ({cotizacion.imagenes?.length || 0})
-                </h2>
-              </div>
-              {cotizacion.imagenes && cotizacion.imagenes.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                  {cotizacion.imagenes.map((img, idx) => (
-                    <div
-                      key={idx}
-                      className="relative group border-2 border-gray-200 rounded-lg overflow-hidden hover:border-red-500 transition-all shadow-sm hover:shadow-md"
-                    >
-                      <img
-                        src={img.url}
-                        alt={`Imagen ${idx + 1}`}
-                        className="w-full h-32 object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
-                        <button
-                          onClick={() => handleDeleteImage(img.url)}
-                          className="opacity-0 group-hover:opacity-100 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition transform hover:scale-110"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 text-center py-4">
-                  No hay imágenes para esta cotización
-                </p>
-              )}
-            </div>
-
-            {/* 🔹 Subir nuevas imágenes - Card moderna */}
-            <div className="bg-white shadow-md rounded-xl p-6 mb-6 border border-gray-100">
-              <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-200">
-                <Upload size={20} className="text-blue-600" />
-                <h2 className="text-lg font-bold text-gray-800">
-                  Agregar Nuevas Imágenes
-                </h2>
-              </div>
-
-              <div className="flex items-center justify-center w-full mb-4">
-                <label
-                  htmlFor="file-upload-edit"
-                  className="flex flex-col items-center justify-center w-full border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition"
-                >
-                  <div className="flex flex-col items-center justify-center py-6">
-                    <Upload className="w-10 h-10 text-gray-400 mb-2" />
-                    <p className="text-sm text-gray-600">
-                      Haz clic o arrastra imágenes aquí
-                    </p>
-                  </div>
-                  <input
-                    id="file-upload-edit"
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="hidden"
-                  />
+          {/* Datos generales - Card moderna */}
+          <div className="bg-white shadow-md rounded-xl p-6 mb-6 border border-gray-100">
+            <h2 className="text-lg font-bold text-gray-800 mb-4 pb-3 border-b border-gray-200">
+              Datos Generales
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Fecha
                 </label>
+                <input
+                  type="date"
+                  name="fecha"
+                  value={cotizacion.fecha}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
               </div>
-
-              {newImages.length > 0 && (
-                <>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-4">
-                    {Array.from(newImages).map((file, idx) => (
-                      <div
-                        key={idx}
-                        className="relative rounded-xl overflow-hidden border border-gray-200 shadow-sm"
-                      >
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt={`preview-${idx}`}
-                          className="w-full h-32 object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeNewImage(idx)}
-                          className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 shadow-lg transition"
-                        >
-                          ✕
-                        </button>
-                        <p className="text-xs text-gray-600 p-1 truncate bg-white bg-opacity-90">
-                          {file.name}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    onClick={handleUploadImages}
-                    disabled={uploading}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {uploading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        Subiendo...
-                      </>
-                    ) : (
-                      <>
-                        <Upload size={18} />
-                        Subir {newImages.length} imagen
-                        {newImages.length > 1 ? "es" : ""}
-                      </>
-                    )}
-                  </button>
-                </>
-              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Cliente *
+                </label>
+                <input
+                  name="nombre_cliente"
+                  value={cotizacion.nombre_cliente}
+                  onChange={handleChange}
+                  placeholder="Nombre del cliente"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  NIT/CC
+                </label>
+                <input
+                  name="nit_cc"
+                  value={cotizacion.nit_cc || ""}
+                  onChange={handleChange}
+                  placeholder="NIT o C.C."
+                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Teléfono
+                </label>
+                <input
+                  name="telefono"
+                  type="text"
+                  maxLength="10"
+                  value={cotizacion.telefono || ""}
+                  onChange={handleTelefonoChange}
+                  placeholder="Teléfono (10 dígitos)"
+                  className={`w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 ${
+                    errorTelefono ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+                {errorTelefono && (
+                  <p className="text-xs text-red-600 mt-1">{errorTelefono}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Placa *
+                </label>
+                <input
+                  name="placa"
+                  type="text"
+                  maxLength="6"
+                  value={cotizacion.placa}
+                  onChange={handlePlacaChange}
+                  placeholder="Placa (ABC123)"
+                  className={`w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 ${
+                    errorPlaca ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+                {errorPlaca && (
+                  <p className="text-xs text-red-600 mt-1">{errorPlaca}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Vehículo
+                </label>
+                <input
+                  name="vehiculo"
+                  value={cotizacion.vehiculo || ""}
+                  onChange={handleChange}
+                  placeholder="Vehículo"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Kilometraje
+                </label>
+                <input
+                  name="kilometraje"
+                  type="number"
+                  value={cotizacion.kilometraje || ""}
+                  onChange={handleChange}
+                  placeholder="Kilometraje"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Mecánico
+                </label>
+                <input
+                  name="nombre_mecanico"
+                  value={cotizacion.nombre_mecanico || ""}
+                  onChange={handleChange}
+                  placeholder="Mecánico"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Segundo Mecánico
+                </label>
+                <input
+                  name="segundo_mecanico"
+                  value={cotizacion.segundo_mecanico || ""}
+                  onChange={handleChange}
+                  placeholder="Segundo mecánico (opcional)"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
             </div>
+          </div>
 
-            {/* Items - Diseño moderno con cards */}
-            <div className="bg-white shadow-md rounded-xl p-6 mb-6 border border-gray-100">
-              <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-200">
-                <h2 className="text-lg font-bold text-gray-800">
-                  Ítems de la Cotización ({items.length})
-                </h2>
-                <button
-                  type="button"
-                  onClick={addItem}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md transition duration-200 flex items-center gap-2"
-                >
-                  <span className="text-xl">+</span>
-                  Agregar Ítem
-                </button>
-              </div>
+          {/* Observaciones - Card */}
+          <div className="bg-white shadow-md rounded-xl p-6 mb-6 border border-gray-100">
+            <h2 className="text-lg font-bold text-gray-800 mb-4 pb-3 border-b border-gray-200">
+              Observaciones
+            </h2>
+            <textarea
+              name="observaciones"
+              value={cotizacion.observaciones || ""}
+              onChange={handleChange}
+              placeholder="Observaciones adicionales..."
+              className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
+              rows={4}
+            />
+          </div>
 
-              {/* Cards de Items */}
-              <div className="space-y-4">
-                {items.map((item, idx) => (
+          {/* 🔹 Imágenes existentes - Card moderna */}
+          <div className="bg-white shadow-md rounded-xl p-6 mb-6 border border-gray-100">
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-200">
+              <ImageIcon size={20} className="text-pink-600" />
+              <h2 className="text-lg font-bold text-gray-800">
+                Imágenes Asociadas ({cotizacion.imagenes?.length || 0})
+              </h2>
+            </div>
+            {cotizacion.imagenes && cotizacion.imagenes.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {cotizacion.imagenes.map((img, idx) => (
                   <div
                     key={idx}
-                    className="bg-gray-50 border-2 border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow"
+                    className="relative group border-2 border-gray-200 rounded-lg overflow-hidden hover:border-red-500 transition-all shadow-sm hover:shadow-md"
                   >
-                    {/* Header del Item */}
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-semibold text-gray-700">
-                        Ítem #{idx + 1}
-                      </h3>
+                    <img
+                      src={img.url}
+                      alt={`Imagen ${idx + 1}`}
+                      className="w-full h-32 object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
                       <button
-                        type="button"
-                        onClick={() => removeItem(idx)}
-                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg transition duration-200 flex items-center gap-1"
+                        onClick={() => handleDeleteImage(img.url)}
+                        className="opacity-0 group-hover:opacity-100 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition transform hover:scale-110"
                       >
                         <Trash2 size={16} />
-                        Eliminar
                       </button>
-                    </div>
-
-                    {/* Grid de Campos */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      {/* Descripción */}
-                      <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Descripción *
-                        </label>
-                        <input
-                          value={item.descripcion}
-                          onChange={(e) =>
-                            handleItemChange(idx, "descripcion", e.target.value)
-                          }
-                          className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                          placeholder="Descripción del producto/servicio"
-                        />
-                      </div>
-
-                      {/* Cantidad */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Cantidad *
-                        </label>
-                        <input
-                          type="number"
-                          min="1"
-                          value={item.cantidad}
-                          onChange={(e) =>
-                            handleItemChange(idx, "cantidad", e.target.value)
-                          }
-                          className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        />
-                      </div>
-
-                      {/* Precio Unitario */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Precio Unitario *
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          value={item.precio_unitario}
-                          onChange={(e) =>
-                            handleItemChange(
-                              idx,
-                              "precio_unitario",
-                              e.target.value
-                            )
-                          }
-                          className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                          placeholder="$0"
-                        />
-                      </div>
-
-                      {/* Subtotal - Solo lectura */}
-                      <div className="md:col-span-2 lg:col-span-1">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Subtotal
-                        </label>
-                        <div className="w-full border border-gray-200 rounded-lg p-2.5 bg-gray-100 text-gray-700 font-semibold">
-                          {item.sub_total.toLocaleString("es-CO", {
-                            style: "currency",
-                            currency: "COP",
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 0,
-                          })}
-                        </div>
-                      </div>
                     </div>
                   </div>
                 ))}
               </div>
+            ) : (
+              <p className="text-gray-500 text-center py-4">
+                No hay imágenes para esta cotización
+              </p>
+            )}
+          </div>
+
+          {/* 🔹 Subir nuevas imágenes - Card moderna */}
+          <div className="bg-white shadow-md rounded-xl p-6 mb-6 border border-gray-100">
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-200">
+              <Upload size={20} className="text-blue-600" />
+              <h2 className="text-lg font-bold text-gray-800">
+                Agregar Nuevas Imágenes
+              </h2>
             </div>
 
-            {/* Totales - Diseño moderno */}
-            <div className="bg-linear-to-br from-blue-50 to-indigo-50 shadow-md rounded-xl p-6 border border-blue-100">
-              <h2 className="text-lg font-bold text-gray-800 mb-4">
-                Resumen de Totales
+            <div className="flex items-center justify-center w-full mb-4">
+              <label
+                htmlFor="file-upload-edit"
+                className="flex flex-col items-center justify-center w-full border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition"
+              >
+                <div className="flex flex-col items-center justify-center py-6">
+                  <Upload className="w-10 h-10 text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-600">
+                    Haz clic o arrastra imágenes aquí
+                  </p>
+                </div>
+                <input
+                  id="file-upload-edit"
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+              </label>
+            </div>
+
+            {newImages.length > 0 && (
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-4">
+                  {Array.from(newImages).map((file, idx) => (
+                    <div
+                      key={idx}
+                      className="relative rounded-xl overflow-hidden border border-gray-200 shadow-sm"
+                    >
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={`preview-${idx}`}
+                        className="w-full h-32 object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeNewImage(idx)}
+                        className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 shadow-lg transition"
+                      >
+                        ✕
+                      </button>
+                      <p className="text-xs text-gray-600 p-1 truncate bg-white bg-opacity-90">
+                        {file.name}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={handleUploadImages}
+                  disabled={uploading}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {uploading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Subiendo...
+                    </>
+                  ) : (
+                    <>
+                      <Upload size={18} />
+                      Subir {newImages.length} imagen
+                      {newImages.length > 1 ? "es" : ""}
+                    </>
+                  )}
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Items - Diseño moderno con cards */}
+          <div className="bg-white shadow-md rounded-xl p-6 mb-6 border border-gray-100">
+            <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-200">
+              <h2 className="text-lg font-bold text-gray-800">
+                Ítems de la Cotización ({items.length})
               </h2>
-              <div className="flex justify-end">
-                <div className="w-full md:w-96 space-y-3">
-                  <div className="flex justify-between items-center py-2 border-b border-blue-200">
-                    <span className="font-medium text-gray-700">Subtotal:</span>
-                    <span className="text-lg font-semibold text-gray-800">
-                      {subtotal.toLocaleString("es-CO", {
-                        style: "currency",
-                        currency: "COP",
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0,
-                      })}
-                    </span>
+              <button
+                type="button"
+                onClick={addItem}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md transition duration-200 flex items-center gap-2"
+              >
+                <span className="text-xl">+</span>
+                Agregar Ítem
+              </button>
+            </div>
+
+            {/* Cards de Items */}
+            <div className="space-y-4">
+              {items.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="bg-gray-50 border-2 border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow"
+                >
+                  {/* Header del Item */}
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-700">
+                      Ítem #{idx + 1}
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={() => removeItem(idx)}
+                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg transition duration-200 flex items-center gap-1"
+                    >
+                      <Trash2 size={16} />
+                      Eliminar
+                    </button>
                   </div>
 
-                  {/* Campo editable para descuento */}
-                  <div className="flex justify-between items-center py-2 border-b border-blue-200">
-                    <label className="font-medium text-gray-700">
-                      Descuento (%):
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      name="porcentaje_descuento"
-                      value={cotizacion.porcentaje_descuento}
-                      onChange={handleChange}
-                      className="border border-gray-300 rounded-lg p-2 w-20 text-right focus:ring-2 focus:ring-indigo-500"
-                    />
-                  </div>
+                  {/* Grid de Campos */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* Descripción */}
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Descripción *
+                      </label>
+                      <input
+                        value={item.descripcion}
+                        onChange={(e) =>
+                          handleItemChange(idx, "descripcion", e.target.value)
+                        }
+                        className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="Descripción del producto/servicio"
+                      />
+                    </div>
 
-                  {descuento > 0 && (
-                    <div className="flex justify-between items-center py-2 border-b border-blue-200">
-                      <span className="font-medium text-gray-700">
-                        Descuento aplicado:
-                      </span>
-                      <span className="text-lg font-semibold text-red-600">
-                        -{" "}
-                        {descuento.toLocaleString("es-CO", {
+                    {/* Cantidad */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Cantidad *
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={item.cantidad}
+                        onChange={(e) =>
+                          handleItemChange(idx, "cantidad", e.target.value)
+                        }
+                        className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      />
+                    </div>
+
+                    {/* Precio Unitario */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Precio Unitario *
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={item.precio_unitario}
+                        onChange={(e) =>
+                          handleItemChange(
+                            idx,
+                            "precio_unitario",
+                            e.target.value
+                          )
+                        }
+                        className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="$0"
+                      />
+                    </div>
+
+                    {/* Subtotal - Solo lectura */}
+                    <div className="md:col-span-2 lg:col-span-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Subtotal
+                      </label>
+                      <div className="w-full border border-gray-200 rounded-lg p-2.5 bg-gray-100 text-gray-700 font-semibold">
+                        {item.sub_total.toLocaleString("es-CO", {
                           style: "currency",
                           currency: "COP",
                           minimumFractionDigits: 0,
                           maximumFractionDigits: 0,
                         })}
-                      </span>
+                      </div>
                     </div>
-                  )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-                  <div className="flex justify-between items-center py-3 bg-white rounded-lg px-4 shadow-sm">
-                    <span className="text-lg font-bold text-gray-800">
-                      TOTAL:
+          {/* Totales - Diseño moderno */}
+          <div className="bg-linear-to-br from-blue-50 to-indigo-50 shadow-md rounded-xl p-6 border border-blue-100">
+            <h2 className="text-lg font-bold text-gray-800 mb-4">
+              Resumen de Totales
+            </h2>
+            <div className="flex justify-end">
+              <div className="w-full md:w-96 space-y-3">
+                <div className="flex justify-between items-center py-2 border-b border-blue-200">
+                  <span className="font-medium text-gray-700">Subtotal:</span>
+                  <span className="text-lg font-semibold text-gray-800">
+                    {subtotal.toLocaleString("es-CO", {
+                      style: "currency",
+                      currency: "COP",
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    })}
+                  </span>
+                </div>
+
+                {/* Campo editable para descuento */}
+                <div className="flex justify-between items-center py-2 border-b border-blue-200">
+                  <label className="font-medium text-gray-700">
+                    Descuento (%):
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    name="porcentaje_descuento"
+                    value={cotizacion.porcentaje_descuento}
+                    onChange={handleChange}
+                    className="border border-gray-300 rounded-lg p-2 w-20 text-right focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+
+                {descuento > 0 && (
+                  <div className="flex justify-between items-center py-2 border-b border-blue-200">
+                    <span className="font-medium text-gray-700">
+                      Descuento aplicado:
                     </span>
-                    <span className="text-2xl font-bold text-green-600">
-                      {total.toLocaleString("es-CO", {
+                    <span className="text-lg font-semibold text-red-600">
+                      -{" "}
+                      {descuento.toLocaleString("es-CO", {
                         style: "currency",
                         currency: "COP",
                         minimumFractionDigits: 0,
@@ -820,6 +802,20 @@ const EditarCotizacionPage = () => {
                       })}
                     </span>
                   </div>
+                )}
+
+                <div className="flex justify-between items-center py-3 bg-white rounded-lg px-4 shadow-sm">
+                  <span className="text-lg font-bold text-gray-800">
+                    TOTAL:
+                  </span>
+                  <span className="text-2xl font-bold text-green-600">
+                    {total.toLocaleString("es-CO", {
+                      style: "currency",
+                      currency: "COP",
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    })}
+                  </span>
                 </div>
               </div>
             </div>
