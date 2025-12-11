@@ -5,6 +5,32 @@ import { Search } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 
 const InventoryListPage = () => {
+  // 🔹 Recuperar filtros guardados de sessionStorage
+  const getSavedFilters = () => {
+    try {
+      const saved = sessionStorage.getItem("inventoryFilters");
+      return saved
+        ? JSON.parse(saved)
+        : {
+            categoria: "",
+            marca: "",
+            nombre: "",
+            referencia: "",
+            page: 1,
+          };
+    } catch {
+      return {
+        categoria: "",
+        marca: "",
+        nombre: "",
+        referencia: "",
+        page: 1,
+      };
+    }
+  };
+
+  const savedFilters = getSavedFilters();
+
   const [inventario, setInventario] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,17 +40,39 @@ const InventoryListPage = () => {
   const [categorias, setCategorias] = useState([]);
   const [marcas, setMarcas] = useState([]);
 
-  // 🔹 Filtros
-  const [filtroCategoria, setFiltroCategoria] = useState("");
-  const [filtroMarca, setFiltroMarca] = useState("");
-  const [filtroNombre, setFiltroNombre] = useState("");
-  const [filtroReferencia, setFiltroReferencia] = useState("");
+  // 🔹 Filtros - inicializados con valores guardados
+  const [filtroCategoria, setFiltroCategoria] = useState(
+    savedFilters.categoria
+  );
+  const [filtroMarca, setFiltroMarca] = useState(savedFilters.marca);
+  const [filtroNombre, setFiltroNombre] = useState(savedFilters.nombre);
+  const [filtroReferencia, setFiltroReferencia] = useState(
+    savedFilters.referencia
+  );
 
-  // 🔹 Paginación del servidor
-  const [currentPage, setCurrentPage] = useState(1);
+  // 🔹 Paginación del servidor - inicializada con página guardada
+  const [currentPage, setCurrentPage] = useState(savedFilters.page);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const itemsPerPage = 50;
+
+  // 🔹 Guardar filtros en sessionStorage cada vez que cambien
+  useEffect(() => {
+    const filters = {
+      categoria: filtroCategoria,
+      marca: filtroMarca,
+      nombre: filtroNombre,
+      referencia: filtroReferencia,
+      page: currentPage,
+    };
+    sessionStorage.setItem("inventoryFilters", JSON.stringify(filters));
+  }, [
+    filtroCategoria,
+    filtroMarca,
+    filtroNombre,
+    filtroReferencia,
+    currentPage,
+  ]);
 
   // 🔹 Cargar categorías y marcas al iniciar
   useEffect(() => {
@@ -191,6 +239,8 @@ const InventoryListPage = () => {
     setFiltroNombre("");
     setFiltroReferencia("");
     setCurrentPage(1);
+    // Limpiar también de sessionStorage
+    sessionStorage.removeItem("inventoryFilters");
   };
 
   return (
@@ -224,6 +274,20 @@ const InventoryListPage = () => {
                   <button
                     onClick={limpiarFiltros}
                     className="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400 transition"
+                  >
+                    Limpiar Filtros
+                  </button>
+                )}
+              </div>
+            </div>
+            {/* --- Filtros --- */}
+            <div className="bg-white p-4 rounded-lg shadow mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-gray-800">Filtros</h2>
+                {hasActiveFilters && (
+                  <button
+                    onClick={limpiarFiltros}
+                    className="px-3 py-1.5 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition text-sm font-medium"
                   >
                     Limpiar Filtros
                   </button>

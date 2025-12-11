@@ -33,6 +33,7 @@ const EditRepuestoPage = () => {
     precio_unitario_costo: "",
     precio_unitario_venta: "",
     codigo_barras: "",
+    nueva_cantidad: "",
   });
 
   // Inicializar el lector ZXing UNA SOLA VEZ
@@ -79,6 +80,7 @@ const EditRepuestoPage = () => {
           precio_unitario_costo: res.data.precio_unitario_costo || "",
           precio_unitario_venta: res.data.precio_unitario_venta || "",
           codigo_barras: res.data.codigo_barras || "",
+          nueva_cantidad: res.data.stock || "",
         });
       } catch (err) {
         console.error("Error cargando repuesto:", err);
@@ -190,7 +192,6 @@ const EditRepuestoPage = () => {
 
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-
       // Preparar datos asegurando valores numéricos válidos
       const dataToSend = {
         ...form,
@@ -200,6 +201,9 @@ const EditRepuestoPage = () => {
         precio_unitario_venta: form.precio_unitario_venta
           ? parseFloat(form.precio_unitario_venta)
           : 0,
+        nueva_cantidad: form.nueva_cantidad
+          ? parseInt(form.nueva_cantidad)
+          : undefined,
       };
 
       await api.put(`/repuestos/${id}`, dataToSend, config);
@@ -474,6 +478,27 @@ const EditRepuestoPage = () => {
                   min="0"
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
                 />
+              </div>
+
+              {/* Cantidad en Stock */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Cantidad en Stock *
+                </label>
+                <input
+                  type="number"
+                  name="nueva_cantidad"
+                  value={form.nueva_cantidad}
+                  onChange={handleChange}
+                  required
+                  step="1"
+                  min="0"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Los cambios se registrarán automáticamente como "Ajuste
+                  posterior"
+                </p>
               </div>
             </div>
 

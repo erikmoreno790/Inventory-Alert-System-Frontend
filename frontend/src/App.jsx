@@ -6,6 +6,8 @@ import InventoryListPage from "./pages/InventoryListPage";
 import InventoryForm from "./pages/InventoryFormPage";
 import InventoryDetailPage from "./pages/InventoryDetailPage";
 import EditItemPage from "./pages/EditItemPage";
+import InventoryEntryPage from "./pages/InventoryEntryPage";
+import InventoryExitPage from "./pages/InventoryExitPage";
 import MovementsHistoryPage from "./pages/MovementsHistoryPage";
 import MovementDetailPage from "./pages/MovementDetailPage";
 import AlertsPage from "./pages/AlertsHistoryPage";
@@ -74,6 +76,22 @@ function App() {
           element={
             <PrivateRoute>
               <EditItemPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/inventario/entradas/:id"
+          element={
+            <PrivateRoute>
+              <InventoryEntryPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/inventario/salidas/:id"
+          element={
+            <PrivateRoute>
+              <InventoryExitPage />
             </PrivateRoute>
           }
         />
