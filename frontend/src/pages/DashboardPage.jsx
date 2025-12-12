@@ -18,6 +18,7 @@ import {
 import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import api from "../api";
+import { formatDateTimeLocal } from "../utils/dateUtils";
 
 const DashboardPage = () => {
   const [totalCotizaciones, setTotalCotizaciones] = useState(0);
@@ -375,12 +376,7 @@ const DashboardPage = () => {
                               Cantidad: {mov.cantidad} • {mov.motivo}
                             </p>
                             <p className="text-xs text-gray-400 mt-1">
-                              {new Date(mov.fecha).toLocaleDateString("es-ES", {
-                                day: "2-digit",
-                                month: "short",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
+                              {formatDateTimeLocal(mov.fecha)}
                             </p>
                           </div>
                         </Link>

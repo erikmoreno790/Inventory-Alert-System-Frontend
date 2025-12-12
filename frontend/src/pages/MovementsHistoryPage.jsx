@@ -11,6 +11,7 @@ import {
 import Sidebar from "../components/Sidebar";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
+import { formatDateLocal } from "../utils/dateUtils";
 
 const MovementsHistory = () => {
   const token = localStorage.getItem("token");
@@ -383,7 +384,7 @@ const MovementsHistory = () => {
                       }`}
                     >
                       <td className="px-6 py-4 text-sm text-gray-700">
-                        {new Date(m.fecha).toLocaleDateString()}
+                        {formatDateLocal(m.fecha)}
                       </td>
                       <td className="px-6 py-4">
                         <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium border border-blue-200">

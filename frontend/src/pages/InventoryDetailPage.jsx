@@ -18,6 +18,7 @@ import {
 import Sidebar from "../components/Sidebar";
 import api from "../api";
 import AlertMessage from "../components/AlertMessage";
+import { formatDateLocal } from "../utils/dateUtils";
 
 // Componente auxiliar para las Tarjetas de Información Clave
 const InfoCard = ({
@@ -316,7 +317,7 @@ const RepuestoDetailPage = () => {
                           className="hover:bg-gray-50 transition-colors"
                         >
                           <td className="px-4 py-2">
-                            {new Date(mov.fecha).toLocaleDateString()}
+                            {formatDateLocal(mov.fecha)}
                           </td>
                           <td className="px-4 py-2">
                             <span

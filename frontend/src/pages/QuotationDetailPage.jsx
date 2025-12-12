@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import api from "../api";
+import { formatDateLocal } from "../utils/dateUtils";
 
 // Componente auxiliar para las Tarjetas de Información
 const InfoCard = ({
@@ -263,11 +264,7 @@ const QuotationDetailsPage = () => {
             <InfoCard
               icon={Calendar}
               title="Fecha"
-              value={new Date(quotation.fecha).toLocaleDateString("es-CO", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })}
+              value={formatDateLocal(quotation.fecha)}
               colorClass="text-blue-600"
             />
             <InfoCard

@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
-import { format } from "date-fns";
 import {
   AlertCircle,
   Clock,
@@ -19,6 +18,7 @@ import {
 import Sidebar from "../components/Sidebar";
 import api from "../api";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { formatDateTimeLocal } from "../utils/dateUtils";
 
 const AlertsPage = () => {
   const [alertas, setAlertas] = useState([]);
@@ -534,7 +534,7 @@ const AlertsPage = () => {
                     </div>
 
                     <div className="text-xs text-gray-400">
-                      {format(new Date(alerta.fecha), "dd/MM/yyyy HH:mm")}
+                      {formatDateTimeLocal(alerta.fecha)}
                     </div>
                   </div>
                   <div className="flex gap-2 ml-4">
