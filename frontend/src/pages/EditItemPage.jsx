@@ -5,6 +5,7 @@ import api from "../api";
 import { BrowserMultiFormatReader } from "@zxing/library";
 import { Scan, QrCode, Save, ArrowLeft, Camera, CameraOff } from "lucide-react";
 import AlertMessage from "../components/AlertMessage";
+import { getTodayLocal, toInputDateFormat } from "../utils/dateUtils";
 
 const EditRepuestoPage = () => {
   const { id } = useParams();
@@ -33,6 +34,7 @@ const EditRepuestoPage = () => {
     precio_unitario_costo: "",
     precio_unitario_venta: "",
     codigo_barras: "",
+    fecha: getTodayLocal(),
     nueva_cantidad: "",
   });
 
@@ -80,6 +82,9 @@ const EditRepuestoPage = () => {
           precio_unitario_costo: res.data.precio_unitario_costo || "",
           precio_unitario_venta: res.data.precio_unitario_venta || "",
           codigo_barras: res.data.codigo_barras || "",
+          fecha: res.data.fecha
+            ? toInputDateFormat(res.data.fecha)
+            : getTodayLocal(),
           nueva_cantidad: res.data.stock || "",
         });
       } catch (err) {
@@ -325,6 +330,21 @@ const EditRepuestoPage = () => {
                 onChange={handleChange}
                 placeholder="1234567890123"
                 className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm font-mono focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+              />
+            </div>
+
+            {/* Campo Fecha */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Fecha *
+              </label>
+              <input
+                type="date"
+                name="fecha"
+                value={form.fecha}
+                onChange={handleChange}
+                required
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
               />
             </div>
 

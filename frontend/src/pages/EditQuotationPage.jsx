@@ -12,6 +12,7 @@ import {
 import Sidebar from "../components/Sidebar";
 import api from "../api";
 import AlertMessage from "../components/AlertMessage";
+import { getTodayLocal, toInputDateFormat } from "../utils/dateUtils";
 
 const EditarCotizacionPage = () => {
   const navigate = useNavigate();
@@ -45,14 +46,7 @@ const EditarCotizacionPage = () => {
   });
 
   useEffect(() => {
-    const today = new Date();
-    const localDate = new Date(
-      today.getTime() - today.getTimezoneOffset() * 60000
-    )
-      .toISOString()
-      .split("T")[0];
-
-    setCotizacion((prev) => ({ ...prev, fecha: localDate }));
+    setCotizacion((prev) => ({ ...prev, fecha: getTodayLocal() }));
   }, []);
 
   // 🔹 Traer cotización existente
