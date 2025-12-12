@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import api from "../api";
 import html2pdf from "html2pdf.js";
 import logo from "../assets/logo.png";
+import { formatDateLocal } from "../utils/dateUtils";
 
 const QuotationPDFView = () => {
   const navigate = useNavigate();
@@ -170,14 +171,7 @@ const QuotationPDFView = () => {
               </p>
               <p>
                 <strong>Fecha:</strong>{" "}
-                {quotation.fecha
-                  ? new Date(quotation.fecha).toLocaleDateString("es-ES", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })
-                  : ""}
+                {quotation.fecha ? formatDateLocal(quotation.fecha) : ""}
               </p>
             </div>
           </div>

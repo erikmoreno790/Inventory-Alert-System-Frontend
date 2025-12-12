@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import api from "../api";
 import AlertMessage from "../components/AlertMessage";
+import { formatDateLocal } from "../utils/dateUtils";
 
 const QuotationsHistoryPage = () => {
   const [quotations, setQuotations] = useState([]);
@@ -315,11 +316,7 @@ const QuotationsHistoryPage = () => {
                           {q.placa}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-700">
-                          {new Date(q.fecha).toLocaleString("es-CO", {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                          })}
+                          {formatDateLocal(q.fecha)}
                         </td>
                         <td className="px-6 py-4">
                           <span

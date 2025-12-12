@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import api from "../api";
 import AlertMessage from "../components/AlertMessage";
+import { getTodayLocal } from "../utils/dateUtils";
+import RepuestoSearchModal from "../components/RepuestoSearchModal";
+import QuotationItemsSidebar from "../components/QuotationItemsSidebar";
 
 const NuevaCotizacionPage = () => {
   const navigate = useNavigate();
@@ -11,9 +14,7 @@ const NuevaCotizacionPage = () => {
   const token = localStorage.getItem("token");
 
   const initialCotizacion = {
-    fecha: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
-      .toISOString()
-      .split("T")[0], // Formato YYYY-MM-DD (local)
+    fecha: getTodayLocal(),
     nombre_cliente: "",
     nit_cc: "",
     telefono: "",
@@ -85,6 +86,8 @@ const NuevaCotizacionPage = () => {
     "Mazda CX-9",
     "Mazda BT-50",
     "Mazda B2000",
+    "Mazda 626",
+    "Mazda Allegro",
     "Mitsubishi L200",
     "Nissan X-Trail",
     "Nissan Qashqai",
@@ -137,6 +140,13 @@ const NuevaCotizacionPage = () => {
   // Estados para validación
   const [errorTelefono, setErrorTelefono] = useState("");
   const [errorPlaca, setErrorPlaca] = useState("");
+
+  // Estados para el modal de búsqueda de repuestos
+  const [modalRepuestoOpen, setModalRepuestoOpen] = useState(false);
+  const [currentItemIndex, setCurrentItemIndex] = useState(null);
+
+  // Estado para el sidebar de ítems (móvil)
+  const [itemsSidebarOpen, setItemsSidebarOpen] = useState(false);
 
   // 🔹 Al montar, intentar cargar borrador desde localStorage
   useEffect(() => {
@@ -449,6 +459,8 @@ const NuevaCotizacionPage = () => {
         },
       ],
     });
+    // Abrir sidebar automáticamente en móviles
+    setItemsSidebarOpen(true);
   };
 
   // 🔹 Eliminar ítem
@@ -457,6 +469,30 @@ const NuevaCotizacionPage = () => {
       ...cotizacion,
       items: cotizacion.items.filter((_, i) => i !== index),
     });
+  };
+
+  // 🔹 Abrir modal de búsqueda de repuestos
+  const openRepuestoModal = (itemIndex) => {
+    setCurrentItemIndex(itemIndex);
+    setModalRepuestoOpen(true);
+  };
+
+  // 🔹 Manejar selección de repuesto desde el modal
+  const handleRepuestoSelect = (repuesto) => {
+    if (currentItemIndex !== null) {
+      const newItems = [...cotizacion.items];
+      const item = newItems[currentItemIndex];
+
+      item.repuesto_id = repuesto.repuesto_id;
+      item.referencia = repuesto.referencia;
+      item.descripcion = `${repuesto.categoria} - ${repuesto.nombre}`;
+      item.stock_disponible = repuesto.stock;
+      item.precio_unitario = repuesto.precio_unitario_venta || 0;
+
+      setCotizacion({ ...cotizacion, items: newItems });
+    }
+    setModalRepuestoOpen(false);
+    setCurrentItemIndex(null);
   };
 
   // 🔹 Manejar selección de imágenes
@@ -919,15 +955,6 @@ const NuevaCotizacionPage = () => {
                   {items.length}
                 </span>
               </div>
-              <button
-                type="button"
-                onClick={addItem}
-                className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 lg:px-4 lg:py-2 rounded-lg shadow-md transition duration-200 flex items-center gap-2 text-sm lg:text-base"
-              >
-                <span className="text-xl">+</span>
-                <span className="hidden sm:inline">Agregar Ítem</span>
-                <span className="sm:hidden">Ítem</span>
-              </button>
             </div>
 
             {/* Cards de Items con scroll independiente en móviles/tablets */}
@@ -958,8 +985,6 @@ const NuevaCotizacionPage = () => {
                 </div>
               ) : (
                 items.map((item, idx) => {
-                  const repuestosCategoria =
-                    repuestosPorCategoria[item.categoria] || [];
                   const stockInsuficiente =
                     item.stock_disponible !== null &&
                     item.cantidad > item.stock_disponible;
@@ -1038,37 +1063,34 @@ const NuevaCotizacionPage = () => {
                           </div>
                         )}
 
-                        {/* Referencia (solo inventario con categoría) */}
+                        {/* Buscar Repuesto (solo inventario con categoría) */}
                         {item.tipo_fuente === "inventario" &&
                           item.categoria && (
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Repuesto *
+                                Buscar Repuesto *
                               </label>
-                              <select
-                                value={item.repuesto_id || ""}
-                                onChange={(e) =>
-                                  handleItemChange(
-                                    idx,
-                                    "repuesto_id",
-                                    e.target.value
-                                  )
-                                }
-                                className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                              <button
+                                type="button"
+                                onClick={() => openRepuestoModal(idx)}
+                                className="w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 font-medium"
+                                title="Buscar repuesto"
                               >
-                                <option value="">
-                                  Seleccionar repuesto...
-                                </option>
-                                {repuestosCategoria.map((rep) => (
-                                  <option
-                                    key={rep.repuesto_id}
-                                    value={rep.repuesto_id}
-                                  >
-                                    {rep.referencia} - {rep.nombre} (Stock:{" "}
-                                    {rep.stock})
-                                  </option>
-                                ))}
-                              </select>
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                  />
+                                </svg>
+                                <span>Buscar Repuesto</span>
+                              </button>
                             </div>
                           )}
 
@@ -1170,6 +1192,18 @@ const NuevaCotizacionPage = () => {
                   );
                 })
               )}
+            </div>
+
+            {/* Botón Agregar Ítem - Ahora al final */}
+            <div className="mt-4 flex justify-center">
+              <button
+                type="button"
+                onClick={addItem}
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 lg:px-8 lg:py-3 rounded-lg shadow-md transition duration-200 flex items-center gap-2 text-base lg:text-lg font-medium"
+              >
+                <span className="text-xl">+</span>
+                <span>Agregar Ítem</span>
+              </button>
             </div>
           </div>
 
@@ -1420,6 +1454,34 @@ const NuevaCotizacionPage = () => {
             </button>
           </div>
         </main>
+
+        {/* Botón flotante para abrir sidebar de ítems (solo móviles) */}
+        <button
+          onClick={() => setItemsSidebarOpen(true)}
+          className="fixed bottom-6 right-6 lg:hidden bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 z-30"
+          title="Ver ítems de cotización"
+        >
+          <div className="relative">
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+              />
+            </svg>
+            {items.length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {items.length}
+              </span>
+            )}
+          </div>
+        </button>
       </div>
       {alert.show && (
         <AlertMessage
@@ -1428,6 +1490,33 @@ const NuevaCotizacionPage = () => {
           onClose={() => setAlert({ ...alert, show: false })}
         />
       )}
+
+      {/* Modal de búsqueda de repuestos */}
+      {currentItemIndex !== null && (
+        <RepuestoSearchModal
+          isOpen={modalRepuestoOpen}
+          onClose={() => {
+            setModalRepuestoOpen(false);
+            setCurrentItemIndex(null);
+          }}
+          repuestos={
+            repuestosPorCategoria[
+              cotizacion.items[currentItemIndex]?.categoria
+            ] || []
+          }
+          onSelect={handleRepuestoSelect}
+        />
+      )}
+
+      {/* Sidebar de ítems (solo móviles) */}
+      <QuotationItemsSidebar
+        isOpen={itemsSidebarOpen}
+        onClose={() => setItemsSidebarOpen(false)}
+        items={items}
+        subtotal={subtotal}
+        descuento={descuento}
+        total={total}
+      />
     </div>
   );
 };
