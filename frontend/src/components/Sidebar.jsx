@@ -16,6 +16,8 @@ import {
   AlertTriangle,
   Search,
   Camera,
+  UserCircle,
+  Calendar,
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -63,6 +65,8 @@ const Sidebar = () => {
       label: "Configurar Alertas",
       icon: <AlertTriangle size={18} />,
     },
+    { to: "/clientes", label: "Clientes", icon: <UserCircle size={18} /> },
+    { to: "/recordatorios", label: "Recordatorios", icon: <Calendar size={18} /> },
     { to: "/usuarios", label: "Usuarios", icon: <Users size={18} /> },
     {
       to: "/configuracion",
