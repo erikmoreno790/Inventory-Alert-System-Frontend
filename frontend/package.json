@@ -15,7 +15,6 @@
     "@zxing/library": "^0.21.3",
     "axios": "^1.11.0",
     "date-fns": "^4.1.0",
-    "html2pdf.js": "^0.12.0",
     "lucide-react": "^0.535.0",
     "motion": "^12.23.12",
     "quagga": "^0.6.16",
@@ -24,6 +23,7 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.7.1",
     "react-toastify": "^11.0.5",
+    "socket.io-client": "^4.8.3",
     "tailwind-scrollbar-hide": "^4.0.0",
     "tailwindcss": "^4.1.11"
   },

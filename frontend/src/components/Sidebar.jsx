@@ -10,6 +10,8 @@ import {
   Bell,
   Settings,
   LogOut,
+  MessageCircle,
+  Send,
   FileText,
   Wrench,
   Users,
@@ -63,6 +65,16 @@ const Sidebar = () => {
       label: "Configurar Alertas",
       icon: <AlertTriangle size={18} />,
     },
+    {
+  to: "/recordatorios",
+  label: "Recordatorios WhatsApp",
+  icon: <MessageCircle size={18} />,
+},
+{
+  to: "/recordatorios/historial",
+  label: "Historial de Envíos",
+  icon: <Send size={18} />,
+},
     { to: "/usuarios", label: "Usuarios", icon: <Users size={18} /> },
     {
       to: "/configuracion",
@@ -88,7 +100,7 @@ const Sidebar = () => {
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 h-full w-64 bg-linear-to-b from-gray-900 via-gray-800 to-gray-700 text-gray-200 shadow-xl transform transition-transform duration-300 z-40 flex flex-col
+        className={`sidebar-container fixed top-0 left-0 h-full w-64 bg-linear-to-b from-gray-900 via-gray-800 to-gray-700 text-gray-200 shadow-xl transform transition-transform duration-300 z-40 flex flex-col
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
           md:translate-x-0`}
       >
@@ -98,7 +110,7 @@ const Sidebar = () => {
         </div>
 
         {/* Navegación */}
-        <div className="flex-1 overflow-y-auto sidebar-scroll">
+        <div className="flex-1 overflow-y-auto scrollbar-thin">
           <nav className="mt-4 flex flex-col space-y-1">
             {links.map((link) => {
               const active = location.pathname === link.to;

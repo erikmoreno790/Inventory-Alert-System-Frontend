@@ -25,18 +25,28 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 10px;
 }
 
+/* Scrollbar oculto por defecto (transparente) */
 .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #9ca3af;
+    background: transparent;
     border-radius: 10px;
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+/* Scrollbar visible al hacer hover sobre el contenedor */
+.sidebar-container:hover .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #9ca3af;
+}
+
+.sidebar-container:hover .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: #6b7280;
 }
 
 /* Para Firefox */
 .scrollbar-thin {
     scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+}
+
+.sidebar-container:hover .scrollbar-thin {
     scrollbar-color: #9ca3af #f1f1f1;
 }
 

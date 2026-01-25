@@ -1,0 +1,55 @@
+/* Styles for server-generated PDF (used by Puppeteer). Keep selectors specific to avoid affecting app UI */
+body.pdf-document {
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  color: #2D3748;
+  background: #ffffff;
+  margin: 0;
+}
+.header {
+  background: linear-gradient(90deg, #000000ff 0%, #39713fff 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.table-products {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 20px;
+}
+.table-products th {
+  background: #90EE90;
+  color: #2D3748;
+  padding: 10px;
+  border: 1px solid #E2E8F0;
+  text-align: left;
+  font-weight: 600;
+}
+.table-products td {
+  border: 1px solid #E2E8F0;
+  padding: 8px;
+}
+.totals {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+.totals .box {
+  width: 320px;
+}
+.footer {
+  margin-top: 30px;
+  font-size: 12px;
+  color: #4A5568;
+  text-align: center;
+}
+
+/* Print helpers for puppeteer */
+@page { size: A4; margin: 20mm 15mm 20mm 15mm; }
+
+/* Avoid breaking table rows across pages */
+.table-products tr { page-break-inside: avoid; }
