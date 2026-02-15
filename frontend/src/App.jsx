@@ -17,6 +17,7 @@ import QuotationsHistoryPage from "./pages/QuotationsHistoryPage";
 import QuotationDetailPage from "./pages/QuotationDetailPage";
 import EditQuotationPage from "./pages/EditQuotationPage";
 import ReporteRepuestosPage from "./pages/ReporteRepuestosPage";
+import ReportesPage from "./pages/ReportesPage";
 import Profiles from "./pages/Profiles";
 import AlertSettingsPage from "./pages/AlertSettingsPage";
 import PrivateRoute from "./components/PrivateRoute";
@@ -164,6 +165,14 @@ function App() {
           element={
             <PrivateRoute>
               <QuotationsHistoryPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/reportes"
+          element={
+            <PrivateRoute>
+              <ReportesPage />
             </PrivateRoute>
           }
         />

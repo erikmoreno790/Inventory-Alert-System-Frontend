@@ -50,7 +50,7 @@ const Sidebar = () => {
     },
     { to: "/inventario", label: "Buscar Repuesto", icon: <Search size={18} /> },
     {
-      to: "/reportes/repuestos-usados",
+      to: "/reportes",
       label: "Reportes",
       icon: <FileText size={18} />,
     },
