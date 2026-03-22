@@ -8,10 +8,7 @@ import {
   Package,
   ClipboardList,
   Bell,
-  Settings,
   LogOut,
-  MessageCircle,
-  Send,
   FileText,
   Wrench,
   Users,
@@ -65,22 +62,7 @@ const Sidebar = () => {
       label: "Configurar Alertas",
       icon: <AlertTriangle size={18} />,
     },
-    {
-  to: "/recordatorios",
-  label: "Recordatorios WhatsApp",
-  icon: <MessageCircle size={18} />,
-},
-{
-  to: "/recordatorios/historial",
-  label: "Historial de Envíos",
-  icon: <Send size={18} />,
-},
     { to: "/usuarios", label: "Usuarios", icon: <Users size={18} /> },
-    {
-      to: "/configuracion",
-      label: "Configuración",
-      icon: <Settings size={18} />,
-    },
   ];
 
   const handleLogout = () => {

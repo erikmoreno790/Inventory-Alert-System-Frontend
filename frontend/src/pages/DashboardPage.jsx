@@ -129,7 +129,7 @@ const DashboardPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {/* Total Cotizaciones */}
                 <Link
-                  to="/cotizaciones"
+                  to="/historial-cotizaciones"
                   className="bg-white p-6 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-all duration-200 group"
                 >
                   <div className="flex items-center justify-between mb-4">
@@ -279,7 +279,7 @@ const DashboardPage = () => {
                       <span className="font-medium">Nuevo Repuesto</span>
                     </Link>
                     <Link
-                      to="/cotizaciones/nueva"
+                      to="/cotizacion"
                       className="flex items-center gap-3 px-4 py-3 bg-linear-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all shadow-sm hover:shadow-md"
                     >
                       <FileText size={20} />
@@ -346,7 +346,7 @@ const DashboardPage = () => {
                       {ultimosMovimientos.map((mov, idx) => (
                         <Link
                           key={idx}
-                          to={`/movimientos/${mov.movimiento_id}/${mov.tipo}`}
+                          to={`/inventario/movimientos/${mov.movimiento_id}/${mov.tipo}`}
                           className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                         >
                           <div
