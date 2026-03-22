@@ -26,6 +26,9 @@ const NuevaCotizacionPage = () => {
     observaciones: "",
     estatus: "Pendiente",
     porcentaje_descuento: 0,
+    tiempo_trabajo: "1 día",
+    validez_cotizacion: "5 días hábiles",
+    garantia: "90 días",
     items: [
       {
         tipo_fuente: "manual", // "manual" o "inventario"
@@ -865,6 +868,57 @@ const NuevaCotizacionPage = () => {
                   </button>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Condiciones */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tiempo de trabajo</label>
+              <select
+                name="tiempo_trabajo"
+                value={cotizacion.tiempo_trabajo}
+                onChange={handleChange}
+                className="border p-2 w-full rounded"
+              >
+                <option value="1 día">1 día</option>
+                <option value="2 días">2 días</option>
+                <option value="3 días">3 días</option>
+                <option value="4 días">4 días</option>
+                <option value="5 días">5 días</option>
+                <option value="1 semana">1 semana</option>
+                <option value="2 semanas">2 semanas</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Cotización válida</label>
+              <select
+                name="validez_cotizacion"
+                value={cotizacion.validez_cotizacion}
+                onChange={handleChange}
+                className="border p-2 w-full rounded"
+              >
+                <option value="3 días hábiles">3 días hábiles</option>
+                <option value="5 días hábiles">5 días hábiles</option>
+                <option value="8 días hábiles">8 días hábiles</option>
+                <option value="10 días hábiles">10 días hábiles</option>
+                <option value="15 días hábiles">15 días hábiles</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Garantía</label>
+              <select
+                name="garantia"
+                value={cotizacion.garantia}
+                onChange={handleChange}
+                className="border p-2 w-full rounded"
+              >
+                <option value="30 días">30 días</option>
+                <option value="60 días">60 días</option>
+                <option value="90 días">90 días</option>
+                <option value="6 meses">6 meses</option>
+                <option value="1 año">1 año</option>
+              </select>
             </div>
           </div>
 

@@ -41,6 +41,9 @@ const EditarCotizacionPage = () => {
     observaciones: "",
     estatus: "Pendiente",
     porcentaje_descuento: 0,
+    tiempo_trabajo: "1 día",
+    validez_cotizacion: "5 días hábiles",
+    garantia: "90 días",
     items: [{ descripcion: "", cantidad: 1, precio_unitario: 0, sub_total: 0 }],
     imagenes: [],
   });
@@ -61,6 +64,17 @@ const EditarCotizacionPage = () => {
           sub_total: item.cantidad * item.precio_unitario,
         }));
         setCotizacion({ ...data, items, imagenes: data.imagenes || [] });
+
+        // Bloquear edición de cotizaciones aprobadas
+        if (data.estatus === "Aprobada") {
+          setAlert({
+            type: "error",
+            message: "No se puede editar una cotización aprobada",
+            show: true,
+          });
+          setTimeout(() => navigate(`/cotizacion/${id}`), 1500);
+          return;
+        }
       } catch (err) {
         console.error("Error cargando cotización:", err);
         const errorMsg =
@@ -498,6 +512,62 @@ const EditarCotizacionPage = () => {
                   placeholder="Segundo mecánico (opcional)"
                   className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
+              </div>
+            </div>
+          </div>
+
+          {/* Observaciones - Card */}
+          <div className="bg-white shadow-md rounded-xl p-6 mb-6 border border-gray-100">
+            <h2 className="text-lg font-bold text-gray-800 mb-4 pb-3 border-b border-gray-200">
+              Condiciones
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tiempo de trabajo</label>
+                <select
+                  name="tiempo_trabajo"
+                  value={cotizacion.tiempo_trabajo || "1 día"}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="1 día">1 día</option>
+                  <option value="2 días">2 días</option>
+                  <option value="3 días">3 días</option>
+                  <option value="4 días">4 días</option>
+                  <option value="5 días">5 días</option>
+                  <option value="1 semana">1 semana</option>
+                  <option value="2 semanas">2 semanas</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Cotización válida</label>
+                <select
+                  name="validez_cotizacion"
+                  value={cotizacion.validez_cotizacion || "5 días hábiles"}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="3 días hábiles">3 días hábiles</option>
+                  <option value="5 días hábiles">5 días hábiles</option>
+                  <option value="8 días hábiles">8 días hábiles</option>
+                  <option value="10 días hábiles">10 días hábiles</option>
+                  <option value="15 días hábiles">15 días hábiles</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Garantía</label>
+                <select
+                  name="garantia"
+                  value={cotizacion.garantia || "90 días"}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="30 días">30 días</option>
+                  <option value="60 días">60 días</option>
+                  <option value="90 días">90 días</option>
+                  <option value="6 meses">6 meses</option>
+                  <option value="1 año">1 año</option>
+                </select>
               </div>
             </div>
           </div>

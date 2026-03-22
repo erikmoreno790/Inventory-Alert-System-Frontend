@@ -345,6 +345,30 @@ const QuotationPDFView = () => {
               </div>
             )}
 
+            {/* Condiciones */}
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 mb-8 border border-gray-200">
+              <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Condiciones
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                  <p className="text-sm text-gray-500 font-medium mb-1">Tiempo de Trabajo</p>
+                  <p className="text-lg font-bold text-gray-900">{quotation.tiempo_trabajo || '1 día'}</p>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                  <p className="text-sm text-gray-500 font-medium mb-1">Cotización Válida</p>
+                  <p className="text-lg font-bold text-gray-900">{quotation.validez_cotizacion || '5 días hábiles'}</p>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                  <p className="text-sm text-gray-500 font-medium mb-1">Garantía</p>
+                  <p className="text-lg font-bold text-gray-900">{quotation.garantia || '90 días'}</p>
+                </div>
+              </div>
+            </div>
+
             {/* Signature Section */}
             <div className="border-t border-gray-300 pt-8 mt-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
