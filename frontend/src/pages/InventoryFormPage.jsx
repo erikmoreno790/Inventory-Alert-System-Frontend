@@ -34,6 +34,7 @@ const InventoryFormPage = () => {
     precio_unitario_costo: "",
     precio_unitario_venta: "",
     codigo_barras: "",
+    stock_minimo: 5,
     fecha: getTodayLocal(),
     // Campos solo para creación inicial
     cantidad_inicial: 1,
@@ -84,6 +85,7 @@ const InventoryFormPage = () => {
           precio_unitario_costo: res.data.precio_unitario_costo || "",
           precio_unitario_venta: res.data.precio_unitario_venta || "",
           codigo_barras: res.data.codigo_barras || "",
+          stock_minimo: res.data.stock_minimo ?? 5,
           fecha: res.data.fecha
             ? toInputDateFormat(res.data.fecha)
             : getTodayLocal(),
@@ -209,6 +211,9 @@ const InventoryFormPage = () => {
         precio_unitario_venta: form.precio_unitario_venta
           ? parseFloat(form.precio_unitario_venta)
           : 0,
+        stock_minimo: form.stock_minimo
+          ? parseInt(form.stock_minimo)
+          : 5,
         cantidad_inicial: form.cantidad_inicial
           ? parseInt(form.cantidad_inicial)
           : 1,
@@ -507,6 +512,25 @@ const InventoryFormPage = () => {
                   min="0"
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
                 />
+              </div>
+
+              {/* Stock Mínimo */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Stock Mínimo
+                </label>
+                <input
+                  type="number"
+                  name="stock_minimo"
+                  value={form.stock_minimo}
+                  onChange={handleChange}
+                  min="0"
+                  step="1"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Se generará alerta cuando el stock baje de este valor
+                </p>
               </div>
 
               {/* Cantidad inicial (solo para nuevo) */}

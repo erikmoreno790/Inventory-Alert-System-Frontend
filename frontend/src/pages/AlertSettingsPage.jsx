@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bell, Info, AlertTriangle, CheckCircle } from "lucide-react";
+import { Bell, Info, AlertTriangle, CheckCircle, MessageCircle } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import api from "../api";
 
@@ -39,26 +39,26 @@ const AlertSettingsPage = () => {
     {
       prioridad: "alta",
       titulo: "🔴 ALTA",
-      descripcion: "Stock crítico - Solo 1 unidad disponible",
+      descripcion: "Stock crítico - Por debajo del 25% del stock mínimo",
       color: "bg-orange-50 border-orange-500",
       iconColor: "text-orange-600",
-      condicion: "Stock = 1",
+      condicion: "Stock ≤ 25% del mínimo",
     },
     {
       prioridad: "moderada",
       titulo: "🟡 MODERADA",
-      descripcion: "Stock bajo - Entre 2 y 4 unidades",
+      descripcion: "Stock bajo - Por debajo del stock mínimo configurado",
       color: "bg-yellow-50 border-yellow-500",
       iconColor: "text-yellow-600",
-      condicion: "Stock: 2-4",
+      condicion: "Stock < Mínimo",
     },
     {
       prioridad: "baja",
       titulo: "🟢 BAJA (Auto-elimina)",
-      descripcion: "Stock normalizado - 5 o más unidades",
+      descripcion: "Stock normalizado - Igual o superior al mínimo",
       color: "bg-green-50 border-green-500",
       iconColor: "text-green-600",
-      condicion: "Stock ≥ 5",
+      condicion: "Stock ≥ Mínimo",
     },
   ];
 
@@ -102,9 +102,38 @@ const AlertSettingsPage = () => {
                   </li>
                   <li>
                     ✅ Las alertas se eliminan automáticamente cuando el stock
-                    alcanza 5 o más unidades
+                    alcanza el mínimo configurado por producto
                   </li>
                   <li>✅ Solo existe una alerta activa por repuesto</li>
+                  <li>
+                    ✅ El umbral de stock mínimo es configurable por cada producto
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Notificaciones WhatsApp */}
+          <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded-lg">
+            <div className="flex items-start gap-3">
+              <MessageCircle className="text-green-600 shrink-0 mt-1" size={24} />
+              <div>
+                <h3 className="font-semibold text-green-900 mb-2">
+                  Notificaciones WhatsApp
+                </h3>
+                <ul className="text-sm text-green-800 space-y-1">
+                  <li>
+                    📩 Se envía una notificación automática por WhatsApp cuando un
+                    producto cae por debajo de su stock mínimo
+                  </li>
+                  <li>
+                    🔔 Solo se envía una vez por producto hasta que se reponga
+                    el stock
+                  </li>
+                  <li>
+                    ⚙️ La configuración de destinatarios y activación se
+                    realiza por variables de entorno en el servidor
+                  </li>
                 </ul>
               </div>
             </div>
@@ -250,7 +279,14 @@ const AlertSettingsPage = () => {
                 <span className="text-purple-600 font-bold">•</span>
                 <span>
                   Las alertas se eliminan automáticamente cuando el stock
-                  alcanza 5 o más unidades.
+                  alcanza el mínimo configurado para cada producto.
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-purple-600 font-bold">•</span>
+                <span>
+                  Puedes configurar el <strong>stock mínimo</strong> de cada producto
+                  desde su formulario de creación o edición.
                 </span>
               </li>
             </ul>

@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   Bell,
   Boxes,
@@ -13,23 +12,21 @@ import {
   ArrowUpCircle,
   ArrowDownCircle,
   Calendar,
-  Users,
+  RefreshCw,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import api from "../api";
+import useDashboard from "../hooks/useDashboard";
 import { formatDateTimeLocal } from "../utils/dateUtils";
+import {
+  TIPO_MOVIMIENTO,
+  PRIORIDAD,
+  STOCK_BAJO_UMBRAL,
+} from "../utils/apiFields";
 
 const DashboardPage = () => {
-  const [totalCotizaciones, setTotalCotizaciones] = useState(0);
-  const [cantidadRepuestos, setCantidadRepuestos] = useState(0);
-  const [estadisticas, setEstadisticas] = useState([]);
-  const [ultimosRepuestos, setUltimosRepuestos] = useState([]);
-  const [ultimosMovimientos, setUltimosMovimientos] = useState([]);
-  const [stockBajo, setStockBajo] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading, refresh } = useDashboard();
 
-  const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   // Función para obtener saludo según la hora
@@ -40,59 +37,13 @@ const DashboardPage = () => {
     return "Buenas noches";
   };
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const config = {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        };
-
-        const [
-          cotizacionesRes,
-          repuestosRes,
-          estadisticasRes,
-          ultimosRepuestosRes,
-          movimientosRes,
-        ] = await Promise.all([
-          api.get("/cotizaciones/approved/count", config),
-          api.get("/repuestos/total-cantidad", config),
-          api.get("/alerts/estadisticas", config),
-          api.get("/repuestos/ultimos-agregados?limit=5", config),
-          api.get("/repuestos/movimientos?page=1&limit=5", config),
-        ]);
-
-        // Extraer datos correctamente según el formato de respuesta
-        const totalCotizacionesAprobadas = cotizacionesRes.data.count || 0;
-        const cantidadRepuestosTotales = repuestosRes.data.total;
-        const estadisticasAlertas = estadisticasRes.data;
-        const ultimosRep = ultimosRepuestosRes.data;
-        const movimientos = movimientosRes.data.data || movimientosRes.data;
-
-        // Calcular repuestos con stock bajo (menos de 5)
-        const stockBajoCount =
-          estadisticasAlertas.find((s) => s.prioridad === "urgente")
-            ?.no_leidas || 0;
-
-        setTotalCotizaciones(totalCotizacionesAprobadas);
-        setCantidadRepuestos(cantidadRepuestosTotales);
-        setEstadisticas(estadisticasAlertas);
-        setUltimosRepuestos(ultimosRep);
-        setUltimosMovimientos(movimientos);
-        setStockBajo(stockBajoCount);
-      } catch (error) {
-        console.error(
-          "Error al cargar datos del dashboard:",
-          error.response?.data || error.message || error
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboardData();
-  }, [token]);
+  const totalCotizaciones = data?.totalCotizaciones ?? 0;
+  const cantidadRepuestos = data?.totalRepuestos ?? 0;
+  const estadisticas = data?.estadisticas ?? [];
+  const ultimosRepuestos = data?.ultimosRepuestos ?? [];
+  const ultimosMovimientos = data?.ultimosMovimientos ?? [];
+  const stockBajo = data?.stockBajo ?? 0;
+  const totalAlertasNoLeidas = data?.totalAlertasNoLeidas ?? 0;
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -100,7 +51,7 @@ const DashboardPage = () => {
 
       <div className="flex-1 md:ml-64">
         <main className="p-6 max-w-7xl mx-auto">
-          {loading ? (
+          {isLoading ? (
             <div className="flex justify-center items-center min-h-[60vh]">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
@@ -110,19 +61,28 @@ const DashboardPage = () => {
           ) : (
             <>
               {/* Header con Saludo */}
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                  {getSaludo()}, {user.nombre || "Usuario"}
-                </h1>
-                <p className="text-gray-600 flex items-center gap-2">
-                  <Calendar size={16} />
-                  {new Date().toLocaleDateString("es-ES", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </p>
+              <div className="mb-8 flex items-start justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                    {getSaludo()}, {user.nombre || "Usuario"}
+                  </h1>
+                  <p className="text-gray-600 flex items-center gap-2">
+                    <Calendar size={16} />
+                    {new Date().toLocaleDateString("es-ES", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </p>
+                </div>
+                <button
+                  onClick={() => refresh()}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors"
+                >
+                  <RefreshCw size={16} />
+                  Actualizar
+                </button>
               </div>
 
               {/* KPIs Principales */}
@@ -199,10 +159,7 @@ const DashboardPage = () => {
                     Alertas No Leídas
                   </p>
                   <p className="text-3xl font-bold text-gray-800">
-                    {estadisticas.reduce(
-                      (sum, stat) => sum + parseInt(stat.no_leidas || 0),
-                      0
-                    )}
+                    {totalAlertasNoLeidas}
                   </p>
                 </Link>
               </div>
@@ -312,15 +269,32 @@ const DashboardPage = () => {
                           to={`/inventario/${repuesto.repuesto_id}`}
                           className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                         >
-                          <div className="flex-1">
-                            <p className="font-medium text-gray-800">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-gray-800 truncate">
                               {repuesto.nombre}
                             </p>
                             <p className="text-sm text-gray-500">
-                              {repuesto.categoria} • Stock: {repuesto.stock}
+                              {repuesto.categoria} • Stock:{" "}
+                              <span
+                                className={
+                                  repuesto.stock <= STOCK_BAJO_UMBRAL
+                                    ? "text-red-600 font-semibold"
+                                    : ""
+                                }
+                              >
+                                {repuesto.stock}
+                              </span>
+                              {repuesto.stock <= STOCK_BAJO_UMBRAL && (
+                                <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
+                                  Bajo
+                                </span>
+                              )}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-0.5">
+                              {formatDateTimeLocal(repuesto.fecha_actualizacion)}
                             </p>
                           </div>
-                          <div className="text-right">
+                          <div className="text-right ml-3 shrink-0">
                             <p className="text-sm font-medium text-indigo-600">
                               {repuesto.referencia || "—"}
                             </p>
@@ -346,17 +320,17 @@ const DashboardPage = () => {
                       {ultimosMovimientos.map((mov, idx) => (
                         <Link
                           key={idx}
-                          to={`/inventario/movimientos/${mov.movimiento_id}/${mov.tipo}`}
+                          to={`/inventario/movimientos/${mov.movimiento_id}/${mov.tipo_movimiento}`}
                           className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                         >
                           <div
                             className={`p-2 rounded-lg ${
-                              mov.tipo === "Entrada"
+                              mov.tipo_movimiento === "Entrada"
                                 ? "bg-green-100"
                                 : "bg-red-100"
                             }`}
                           >
-                            {mov.tipo === "Entrada" ? (
+                            {mov.tipo_movimiento === "Entrada" ? (
                               <ArrowDownCircle
                                 className="text-green-600"
                                 size={20}
@@ -370,10 +344,10 @@ const DashboardPage = () => {
                           </div>
                           <div className="flex-1">
                             <p className="font-medium text-gray-800">
-                              {mov.tipo} - {mov.nombre_repuesto}
+                              {mov.tipo_movimiento} - {mov.repuesto}
                             </p>
                             <p className="text-sm text-gray-500">
-                              Cantidad: {mov.cantidad} • {mov.motivo}
+                              Cantidad: {mov.cantidad} • {mov.subtipo}
                             </p>
                             <p className="text-xs text-gray-400 mt-1">
                               {formatDateTimeLocal(mov.fecha)}

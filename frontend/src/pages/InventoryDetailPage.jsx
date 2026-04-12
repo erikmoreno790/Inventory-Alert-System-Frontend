@@ -149,12 +149,13 @@ const RepuestoDetailPage = () => {
       </div>
     );
 
-  // Lógica para el color del stock
+  // Lógica para el color del stock basada en stock_minimo
+  const stockMinimo = producto.stock_minimo || 5;
   const stockColorClass =
-    producto.stock < 5 // Asumiendo un umbral de 5 para stock bajo
+    producto.stock === 0
       ? "text-red-600"
-      : producto.stock < 20
-      ? "text-yellow-600"
+      : producto.stock < stockMinimo
+      ? "text-orange-600"
       : "text-green-600";
 
   // Formato para el precio
@@ -232,12 +233,18 @@ const RepuestoDetailPage = () => {
           <hr className="border-gray-200" />
 
           {/* Tarjetas de Información Clave (Métricas) */}
-          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
             <InfoCard
               icon={AlertTriangle}
               title="Stock Actual"
               value={producto.stock}
               colorClass={stockColorClass}
+            />
+            <InfoCard
+              icon={Package2}
+              title="Stock Mínimo"
+              value={stockMinimo}
+              colorClass="text-amber-600"
             />
             <InfoCard
               icon={Layers}
