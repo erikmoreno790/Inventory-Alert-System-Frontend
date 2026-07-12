@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // QuotationsHistoryPage.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import api from "../api";
@@ -8,24 +8,53 @@ import AlertMessage from "../components/AlertMessage";
 import { formatDateLocal } from "../utils/dateUtils";
 
 const QuotationsHistoryPage = () => {
-  const [quotations, setQuotations] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const STORAGE_KEY = "quotationsHistoryState";
+
+  const getSavedState = () => {
+    try {
+      const saved = sessionStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const savedState = getSavedState();
+
+  const [quotations, setQuotations] = useState(savedState?.quotations || []);
+  const [loading, setLoading] = useState(savedState ? false : true);
   const [error, setError] = useState(null);
   const [alert, setAlert] = useState({ type: "", message: "", show: false });
-  const [filters, setFilters] = useState({
-    nombre_cliente: "",
-    placa: "",
-    estatus: "",
-    fecha: "",
-  });
+  const [filters, setFilters] = useState(
+    savedState?.filters || {
+      nombre_cliente: "",
+      placa: "",
+      estatus: "",
+      fecha: "",
+    }
+  );
 
   // 🔹 Paginación del servidor
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
+  const [currentPage, setCurrentPage] = useState(savedState?.currentPage || 1);
+  const [totalPages, setTotalPages] = useState(savedState?.totalPages || 1);
+  const [totalItems, setTotalItems] = useState(savedState?.totalItems || 0);
   const itemsPerPage = 50; // Items por página desde el backend
 
   const navigate = useNavigate();
+  const hasRestoredState = useRef(Boolean(savedState));
+
+  useEffect(() => {
+    sessionStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        filters,
+        currentPage,
+        quotations,
+        totalPages,
+        totalItems,
+      })
+    );
+  }, [filters, currentPage, quotations, totalPages, totalItems]);
 
   // 🔹 Cargar cotizaciones con paginación del servidor y filtros
   const fetchQuotations = async (page = 1, appliedFilters = filters) => {
@@ -74,11 +103,21 @@ const QuotationsHistoryPage = () => {
 
   // 🔹 Cargar cotizaciones cuando cambia la página
   useEffect(() => {
+    if (hasRestoredState.current) {
+      hasRestoredState.current = false;
+      return;
+    }
+
     fetchQuotations(currentPage, filters);
   }, [currentPage]);
 
   // 🔹 Aplicar filtros: resetear a página 1 y recargar
   useEffect(() => {
+    if (hasRestoredState.current) {
+      hasRestoredState.current = false;
+      return;
+    }
+
     // Debounce para evitar demasiadas peticiones mientras el usuario escribe
     const timeoutId = setTimeout(() => {
       if (currentPage === 1) {
