@@ -28,11 +28,20 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Error de red o timeout
+    // Petición cancelada a propósito (p. ej. el usuario siguió escribiendo en un filtro)
+    if (axios.isCancel(error)) {
+      return Promise.reject(error);
+    }
+
+    // Error de red o timeout (la petición nunca obtuvo respuesta del servidor)
     if (!error.response) {
-      console.error('Error de red o servidor no disponible:', error.message);
+      const isTimeout = error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT';
+      console.error('Error de red o servidor no disponible:', error.code, error.message);
       return Promise.reject({
-        message: 'No se pudo conectar con el servidor. Verifica tu conexión.',
+        type: isTimeout ? 'timeout' : 'network',
+        message: isTimeout
+          ? 'El servidor tardó demasiado en responder.'
+          : 'No se pudo conectar con el servidor. Verifica tu conexión.',
         originalError: error
       });
     }

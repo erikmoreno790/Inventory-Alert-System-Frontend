@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import axios from "axios";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
@@ -98,6 +99,41 @@ const InventoryListPage = () => {
     fetchMarcas();
   }, []);
 
+  // 🔹 Control de peticiones: permite cancelar búsquedas viejas al seguir escribiendo
+  const abortControllerRef = useRef(null);
+
+  // Cancelar cualquier petición pendiente al salir de la página
+  useEffect(() => {
+    return () => abortControllerRef.current?.abort();
+  }, []);
+
+  // 🔹 Traduce el error de la petición en un mensaje claro para el usuario
+  const getErrorMessage = (error) => {
+    if (error?.type === "network") {
+      return "No hay conexión con el servidor. Revisa tu conexión a internet e intenta de nuevo.";
+    }
+    if (error?.type === "timeout") {
+      return "El servidor tardó demasiado en responder. Intenta de nuevo en unos segundos.";
+    }
+    const status = error?.response?.status;
+    if (status === 429) {
+      return "Demasiadas búsquedas seguidas. Espera un momento e intenta de nuevo.";
+    }
+    if (status >= 500) {
+      return `Error del servidor (${status}) al cargar el inventario. Intenta de nuevo.`;
+    }
+    return "Error al cargar el inventario. Por favor, intenta de nuevo.";
+  };
+
+  // Errores temporales que vale la pena reintentar automáticamente
+  const isRetryable = (error) =>
+    error?.type === "network" ||
+    error?.type === "timeout" ||
+    [502, 503, 504].includes(error?.response?.status);
+
+  const RETRY_DELAY_MS = 2000;
+  const MAX_RETRIES = 1;
+
   // 🔹 Cargar inventario con paginación y filtros del servidor
   const fetchInventario = async (
     page = 1,
@@ -108,40 +144,78 @@ const InventoryListPage = () => {
       referencia: filtroReferencia,
     }
   ) => {
+    // Cancelar la búsqueda anterior si todavía está en curso
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setLoading(true);
     setError(null);
-    try {
-      // Construir parámetros con filtros
-      const params = {
-        page: page,
-        limit: itemsPerPage,
-      };
 
-      // Agregar filtros solo si tienen valor
-      if (filters.categoria) params.categoria = filters.categoria;
-      if (filters.marca) params.marca = filters.marca;
-      if (filters.nombre) params.nombre = filters.nombre;
-      if (filters.referencia) params.referencia = filters.referencia;
+    // Construir parámetros con filtros
+    const params = {
+      page: page,
+      limit: itemsPerPage,
+    };
 
-      const response = await api.get("/repuestos", { params });
+    // Agregar filtros solo si tienen valor
+    if (filters.categoria) params.categoria = filters.categoria;
+    if (filters.marca) params.marca = filters.marca;
+    if (filters.nombre) params.nombre = filters.nombre;
+    if (filters.referencia) params.referencia = filters.referencia;
 
-      // El backend devuelve { data, pagination }
-      const inventarioData = response.data?.data || [];
-      const pagination = response.data?.pagination || {};
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const response = await api.get("/repuestos", {
+          params,
+          signal: controller.signal,
+        });
 
-      setInventario(inventarioData);
-      setTotalPages(pagination.totalPages || 1);
-      setTotalItems(pagination.total || 0);
-      setCurrentPage(page);
-    } catch (error) {
-      console.error(
-        "Error al obtener los productos:",
-        error.response?.data || error.message
-      );
-      setError("Error al cargar el inventario. Por favor, intenta de nuevo.");
-    } finally {
-      setLoading(false);
+        // El backend devuelve { data, pagination }
+        const inventarioData = response.data?.data || [];
+        const pagination = response.data?.pagination || {};
+
+        setInventario(inventarioData);
+        setTotalPages(pagination.totalPages || 1);
+        setTotalItems(pagination.total || 0);
+        setCurrentPage(page);
+        setLoading(false);
+        return;
+      } catch (error) {
+        // Búsqueda reemplazada por una más reciente: no mostrar nada
+        if (axios.isCancel(error) || controller.signal.aborted) return;
+
+        console.error(
+          `Error al obtener los productos (intento ${attempt + 1}):`,
+          error.response?.data || error.message
+        );
+
+        // Reintentar una vez si el fallo parece temporal (red, timeout, 502-504)
+        if (attempt < MAX_RETRIES && isRetryable(error)) {
+          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+          if (controller.signal.aborted) return;
+          continue;
+        }
+
+        // No dejar en pantalla resultados viejos que no corresponden al filtro
+        setInventario([]);
+        setTotalPages(1);
+        setTotalItems(0);
+        setError(getErrorMessage(error));
+        setLoading(false);
+        return;
+      }
     }
+  };
+
+  // 🔹 Reintentar manualmente con los filtros y la página actuales
+  const reintentarCarga = () => {
+    fetchInventario(currentPage, {
+      categoria: filtroCategoria,
+      marca: filtroMarca,
+      nombre: filtroNombre,
+      referencia: filtroReferencia,
+    });
   };
 
   // 🔹 Cargar inventario cuando cambia la página
@@ -297,8 +371,14 @@ const InventoryListPage = () => {
 
             {/* Mensaje de error */}
             {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                {error}
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <span>{error}</span>
+                <button
+                  onClick={reintentarCarga}
+                  className="px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition text-sm font-medium self-start sm:self-auto"
+                >
+                  Reintentar
+                </button>
               </div>
             )}
 
@@ -513,13 +593,15 @@ const InventoryListPage = () => {
                                 />
                               </svg>
                               <p className="text-gray-500 text-lg font-medium">
-                                {hasActiveFilters
+                                {error
+                                  ? "No se pudo cargar el inventario."
+                                  : hasActiveFilters
                                   ? "No se encontraron repuestos con los filtros aplicados."
                                   : inventario.length === 0
                                   ? "No hay repuestos registrados."
                                   : "No se encontraron repuestos."}
                               </p>
-                              {hasActiveFilters && (
+                              {!error && hasActiveFilters && (
                                 <button
                                   onClick={limpiarFiltros}
                                   className="mt-4 text-blue-600 hover:text-blue-800 font-medium"
